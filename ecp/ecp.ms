@@ -147,21 +147,21 @@ of identifiers can be encoded using a single byte.
   Standby                       Standby                 129
   Restart                       Restart                 130
   Shutdown                      Shutdown                131
-  Server Status Notify          ServerStatusNotify      132
+  Managment Status Notify       MgmtStsNotify           132
   Negative Acknowledge          MgmtNack                133
 
-  Cluster Request               ClusterRqst             160
-  Cluster Reply                 ClusterRply             161
+  Cluster Request               ClstRqst                160
+  Cluster Reply                 ClstRply                161
   Join Request                  JoinRqst                162
   Join Reply                    JoinRply                163
-  Subscription Database Request SubDBRqst               164
-  Subscription Database Reply   SubDBRply               165
-  Subscription Add              FedSubAdd               166
-  Subscription Modify           FedSubMod               167
-  Subscription Delete           FedSubDel               168
-  Cluster Notify                ClusterNotify           169
-  Cluster Redirect              ClusterRedirect         170
-  Client Disconnect Notify      ClientDisconnNotify     171
+
+
+  Cluster Subscription Add      ClstSubAdd              166
+  Cluster Subscription Modify   ClstSubMod              167
+  Cluster Subscription Delete   ClstSubDel              168
+  Cluster Notify                ClstNotify              169
+  Cluster Redirect              ClstRedir               170
+  Client Disconnect Notify      CliDisconnNotify        171
   Leave                         Leave                   172
   ----------------------------------------------------------------
 .fi
@@ -188,24 +188,24 @@ multicast) describing their new state and containing the XID of the
 causal request.  If a server forwarded the request, it MUST also
 return the reply to the connected management client.
 
-m4_heading(3, ServerStatusNotify)
+m4_heading(3, Management Status Notify)
 
 Describe the status of a server.  Sent in response to a (successful)
 request to change a server's status.
 
 m4_pre(
-struct ServerStatusNotify {
+struct MgmtStsNotify {
   id32 xid;
   id32 server_id;
   id32 status;
 };)m4_dnl
 
-m4_heading(3, Nack)
+m4_heading(3, Management Nack)
 
 Return an error result to a requested operation.
 
 m4_pre(
-struct Nack {
+struct MgmtNack {
   id32 xid;
   id32 error_code;
   string default_template;
@@ -285,7 +285,7 @@ The server uses this packet, multicast to the cluster discovery
 address, to find the cluster management address.
 
 m4_pre(
-struct ClusterRqst {
+struct ClstRqst {
   int8 ver_major;
   int8 ver_minor;
   id32 xid;  
@@ -301,7 +301,7 @@ A unicast response from the cluster to an enquiring server.  Includes
 the cluster's preferred address for further interaction.
 
 m4_pre(
-struct ClusterRply {
+struct ClstRply {
   id32 xid;
   string address;
 };)m4_dnl
@@ -368,7 +368,7 @@ of clients to be disconnected from their current server and
 (optionally) redirected elsewhere.
 
 m4_pre(
-struct ClusterRedirect {
+struct ClstRedir {
   id64 client_ids[];
   string address[];
 };)m4_dnl
@@ -383,10 +383,10 @@ packet).  If multiple address values are provided, a server SHOULD
 share the redirection specification across the provided addresses
 approximately evenly using a pseudo-random selection method.
 
-m4_heading(3, ClusterNotify)
+m4_heading(3, Cluster Notify)
 
 m4_pre(
-struct ClusterNotify {
+struct ClstNotify {
   id32 server_id;
   id32 client_id;
   NameValue attributes[];
@@ -394,10 +394,10 @@ struct ClusterNotify {
   Keys nfn_keys;
 };)m4_dnl
 
-m4_heading(3, FedSubAdd)
+m4_heading(3, Cluster Subscription Add)
 
 m4_pre(
-struct FedSubAdd {
+struct ClstSubAdd {
   id32 client_id;
   id64 sub_id;
   SubAST expr;
@@ -405,10 +405,10 @@ struct FedSubAdd {
   Keys sub_keys;
 };)m4_dnl
   
-m4_heading(3, FedSubMod)
+m4_heading(3, Cluster Subscription Modify)
 
 m4_pre(
-struct FedSubMod {
+struct ClstSubMod {
   id64 sub_id;
   SubAST expr;
   boolean accept_insecure;
@@ -416,10 +416,10 @@ struct FedSubMod {
   Keys del_sub_keys;
 };)m4_dnl
   
-m4_heading(3, FedSubDel)
+m4_heading(3, Cluster Subscription Delete)
 
 m4_pre(
-struct FedSubDel {
+struct ClstSubDel {
   id64 sub_id;
 };)m4_dnl
 
@@ -429,7 +429,7 @@ When a client disconnects from a server, the server MUST notify the
 cluster.
 
 m4_pre(
-struct ClientDisconnNotify {
+struct CliDisconnNotify {
   id32 server_id;
   id32 client_id;
 };)m4_dnl
