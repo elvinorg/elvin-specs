@@ -2,7 +2,7 @@ m4_dnl  -*- nroff -*-
 m4_dnl
 m4_dnl  this is the basic implementation details
 m4_dnl
-.KS
+
 m4_heading(1, SUBSCRIPTION LANGUAGE)
 
 Consumer clients register subscription expressions with a server to
@@ -30,10 +30,10 @@ similar to that of false with the notable exception that the negation
 of bottom (! bottom) is still bottom.
 
 It should be emphasized that:
-.IP - 2
+.QP
 There is neither an explicit boolean type nor are there boolean
 constants for true or false.
-.IP - 2
+.QP
 Whereas some programming languages, such as C and C++, provide an
 implicit conversion from numeric values to truth values (zero means
 false, nonzero means true), the Elvin subscription language requires
@@ -65,12 +65,12 @@ operators are
 !    Logical NOT (unary)
 .DE
 Logical NOT has highest precedence, followed by AND, XOR and then OR.
-.KS
+
 m4_heading(3, Literal Syntax)
 .LP
 A subscription expression may include literal values for most of the
 message data types.  These types are
-
+.KS
 Integer Numbers
 m4_dnl ***FIXME*** we lose our indent here  ***
 .IP int32 10
@@ -145,7 +145,7 @@ m4_heading(3, General predicates)
 .LP
 The subscription language defines a number of predicates that return
 boolean values.
-.KE
+
 Any predicate may be applied to any attribute name. If the named attribute
 does not exist in the current notification, or exists but has an
 inappropriate type for the predicate, the predicate returns bottom.

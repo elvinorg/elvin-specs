@@ -5,7 +5,6 @@ m4_dnl  components and their basic relationships.
 m4_dnl
 m4_heading(1, ARCHITECTURE)
 
-.LP
 describe the basic concepts of notification, subscription, evaluation
 of subscriptions, delivery. 
 
