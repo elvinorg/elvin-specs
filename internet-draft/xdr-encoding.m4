@@ -32,17 +32,25 @@ identified by the pkt_id enumeration below:
 
 m4_pre(
 `enum {
-    UNotify        = 1,    Nack           = 2,
-    ConnRqst       = 3,    ConnRply       = 4,
-    DisconnRqst    = 5,    DisconnRply    = 6,
-    Disconn        = 7,    SecRqst        = 8,
-    SecRply        = 9,    NotifyEmit     = 10,
-    NotifyDeliver  = 11,   SubAddRqst     = 12,
-    SubModRqst     = 13,   SubDelRqst     = 14,
-    SubRply        = 15,   QnchAddRqst    = 16,
-    QnchModRqst    = 17,   QnchDelRqst    = 18,
-    QnchRply       = 19,   QnchAddNotify  = 20,
-    QnchModNotify  = 21,   QnchDelNotify  = 22
+    SvrRqst        = 16,
+    SvrAdvt        = 17,
+    SvrAdvtClose   = 18,
+
+    UNotify        = 32,
+
+    Nack           = 48,   ConnRqst       = 49,
+    ConnRply       = 50,   DisconnRqst    = 51,
+    DisconnRply    = 52,   Disconn        = 53,
+    SecRqst        = 54,   SecRply        = 55,
+    NotifyEmit     = 56,   NotifyDeliver  = 57,
+    SubAddRqst     = 58,   SubModRqst     = 59,
+    SubDelRqst     = 60,   SubRply        = 61,
+    DropWarn       = 62
+
+    QnchAddRqst    = 64,   QnchModRqst    = 65,
+    QnchDelRqst    = 66,   QnchRply       = 67,
+    SubAddNotify   = 68,   SubModNotify   = 69,
+    SubDelNotify   = 70
 } pkt_id;')
 
 In XDR, enumerations are marshalled as 32 bit integral values.  For
