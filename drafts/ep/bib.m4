@@ -5,6 +5,26 @@ m4_dnl
 .bp
 m4_heading(1, REFERENCES)
 
+.IP [ERDP] 12
+Arnold, D., Boot, J., Phelps, T., Segall, B.,
+"Elvin Router Discovery Protocol",
+Work in progress
+
+.IP [ERCP] 12
+Arnold, D., Boot, J., Phelps, T.,
+"Elvin Router Clustering Protocol",
+Work in progress
+
+.IP [ERFP] 12
+Arnold, D., Lister, I.,
+"Elvin Router Federation Protocol",
+Work in progress
+
+.IP [RLM] 12
+Arnold, D., Boot, J.,
+"Reliable Local Multicast"
+Work in progress
+
 .IP [RFC1832] 12
 Srinivasan, R.,
 "XDR: External Data Representation Standard",
