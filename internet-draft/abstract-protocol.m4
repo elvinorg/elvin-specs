@@ -514,7 +514,6 @@ Sent by client to the Elvin server.
 
 m4_pre(
 struct Notif{
-   int32     xid;
    NameValue attributes[];
    opaque    raw_keys[];
 };)m4_dnl
@@ -526,7 +525,6 @@ Sent by the Elvin server to a client.
 
 m4_pre(
 struct NotifDel{
-   int32     xid;
    int64     matching_ids_secure[];
    int64     matching_ids_insecure[];
    NameValue attributes[];
