@@ -3,7 +3,7 @@ m4_dnl
 m4_dnl              Elvin URI Scheme specification
 m4_dnl
 m4_dnl File:        $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/elvin-url/main.m4,v $
-m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.6 $
+m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.7 $
 m4_dnl Copyright:   (C) 2001, David Arnold.
 m4_dnl
 m4_dnl This specification may be reproduced or transmitted in any form or by
@@ -27,7 +27,7 @@ m4_dnl     University of Queensland
 m4_dnl     St Lucia, 4072
 m4_dnl     Tel: +61 7 3365 4310
 m4_dnl     Fax: +61 7 3365 4311
-m4_dnl     Email: elvin@@dstc.edu.au
+m4_dnl     Email: elvin@dstc.com
 m4_dnl 
 m4_dnl Elvin is a trademark of DSTC Pty Ltd.  All other trademarks and
 m4_dnl registered marks belong to their respective owners.
@@ -75,7 +75,7 @@ Expires: aa bbb cccc                                           B. Segall
 .ce
 Elvin URI Scheme
 .ce
-draft-arnold-elvin-uri-prelim-00.txt
+draft-arnold-elvin-uri-prelim-01.txt
 
 m4_heading(1, Status of this Memo)
 
@@ -505,7 +505,7 @@ Australia
 
 Phone:  +617 3365 4310
 Fax:    +617 3365 4311
-Email:  elvin@dstc.edu.au
+Email:  elvin@dstc.com
 .fi
 .KE
 .bp
@@ -537,7 +537,7 @@ the specification) to the address below:
     St Lucia, 4072
     Tel: +61 7 3365 4310
     Fax: +61 7 3365 4311
-    Email: elvin@@dstc.edu.au
+    Email: elvin@dstc.com
 .fi
 
 Elvin is a trademark of DSTC Pty Ltd.  All other trademarks and
