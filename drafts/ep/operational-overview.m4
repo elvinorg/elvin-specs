@@ -158,9 +158,7 @@ client to reconnect to an alternative server.
 
 .KS
   +-------------+                  +---------+
-  |  Producer   |                  |         |  
-  |     or      | <----Disconn---- |  Server |
-  |  Consumer   |                  |         |        DISCONNECTION 
+  |   Client    | <----Disconn---- |  Server |        DISCONNECTION 
   +-------------+                  +---------+
 .KE
 
