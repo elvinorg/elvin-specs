@@ -8,8 +8,9 @@ The protocol consists of several phases: normal operation,
 synchronisation, loss-of-packet, loss-of-member and loss-of-sequencer.
 Each of these is described in turn.
 
-All packets in the protocol share a common header, which is extended
-by some packet types to hold additional data.
+All packets in the protocol share a common header prefix, which is
+extended by some packet types to hold additional header elements.
+The header is also followed by a payload segment in some packets.
 
 m4_pre(`
  0                   1                   2                 3
@@ -24,7 +25,7 @@ m4_pre(`
 ')m4_dnl
 
 The version field is 3 bits, and for the protocol specified in this
-document, MUST be set to 1.  A value of 7 is reserved for future
+document, MUST be set to 1.  A value of 0 is reserved for future
 expansion of the version field.
 
 The type field is 5 bits, and identifies the contents of the packet.
@@ -45,25 +46,9 @@ m4_pre(`
   Reset               |  11  |  RESET        |  S -> M*
   New Sequencer       |  12  |  NSEQ         |  S -> M*')m4_dnl
 
-The flags field is 8 bits.  They are defined as
-m4_pre(`
-  Bit |  Meaning
- -----+--------------------------
-   0  |  Client buffer space LSB
-   1  |  Client buffer space MSB
-   2  |  ACK buffer space LSB
-   3  |  ACK buffer space MSB
-   4  |  Reserved
-   5  |  Reserved
-   6  |  Reserved
-   7  |  Reserved')m4_dnl
-
-These flags are used on packets from members to the sequencer as part
-of the congestion avoidance mechanism.  There are two quantities
-specified: the amount of buffer space used for unacknowledged packets,
-and the amount used by packets yet to be retrieved by the client
-application.  Both quantities are a scalar measure of the space in
-use.
+The flags field is 8 bits.  The interpretation of the flags field
+is different for each packet type, and is defined with the packet
+format.
 
 The incarnation field is used to prevent members isolated by a network
 partition, or otherwise separated from the group for a period of time,
