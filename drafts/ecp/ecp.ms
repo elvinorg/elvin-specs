@@ -259,6 +259,7 @@ subscription database of the cluster.
 m4_pre(
 struct ClstJoinRply {
   id32 xid;
+  string master_name;
   id16 server_id;
   id16 servers[];
   struct {
