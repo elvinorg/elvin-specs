@@ -446,7 +446,7 @@ m4_pre(
 struct QnchAddRqst {
   int32   xid;
   string  names[];
-  boolean accept_insecure;
+  boolean deliver_insecure;
   opaque  raw_keys[];
 };)m4_dnl
 
@@ -461,7 +461,7 @@ struct QnchModRqst {
   int64   quench_id;
   string  names_add[];
   string  names_del[];
-  boolean accept_insecure;
+  boolean deliver_insecure;
   opaque  add_raw_keys[];
   opaque  del_raw_keys[];
 };)m4_dnl
