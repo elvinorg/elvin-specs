@@ -116,35 +116,33 @@ of identifiers can be encoded using a single byte.
 .KS
 .nf 
   ----------------------------------------------------------------
-  Packet Type                   Abbreviation         Identifier
+  Packet Type                     Abbreviation         Identifier
   ----------------------------------------------------------------
-  WAF Request                   WAFRqst                 192
-  WAF Reply                     WAFRply                 192
-  WAF Modify                    WAFMod                  193
-  WAF Notify			WAFNotify		194
+  Federation Connection Request   FedConnRqst             192
+  Federation Connection Reply     FedConnRply             192
+  Federation Subscription Modify  FedModify               193
+  Federation Notify               FedNotify               194
 
-  Disconnect Request            DisconnRqst             xxx
-  Disconnect                    Disconn                 xxx
-  Acknowledge                   Ack                     xxx
-  Negative Acknowledge          Nack                    xxx
+  Disconnect                      Disconn                  53
+  Acknowledge                     Ack                      65
+  Negative Acknowledge            Nack                     48
   
   ----------------------------------------------------------------
 .fi
 .KE
 
 
-m4_heading(3, WAF Request)
+m4_heading(3, Federation Connection Request)
 
 A server, configured with filters and addressing information for a
 remote server, initiates a connection using this request.
 
 m4_pre(
-struct WAFRqst {
-  uint8 major_version;
-  uint8 minor_version;
+struct FedConnRqst {
   id32 xid;  
+  uint32 major_version;
+  uint32 minor_version;
   string server_domain;
-  SubAST pull_filter;
 };)m4_dnl
 
 The server_domain parameter is a unqiue UTF-8 string identifying the
@@ -154,70 +152,61 @@ that it MUST be globally unique for a single server, or for all
 servers in a cluster.  It is RECOMMENDED that this name be based on
 the DNS domain name or IP address of the server's host machine(s).
 
-The pull_filter is a compiled Elvin subscription expression describing
-the traffic requested by clients of the local server.  This expression
-MAY be simplified to minimise updates caused by minor changes to the
-local subscription base.
+m4_heading(3, Federation Connection Reply)
 
-m4_heading(3, WAF Reply)
-
-A server, having received a WAFRqst, responds with either a Nack (if
-the request was unsuccessful) or a WAFRply.
+A server, having received a FedConnRqst, responds with either a Nack (if
+the request was unsuccessful) or a FedConnRply (if the request was
+successful).
 
 m4_pre(
-struct WAFRply {
-  uint8 major_version;
-  uint8 minor_version;
+struct FedConnRply {
   id32 xid;
   string server_domain;
-  SubAST pull_filter;
 };)m4_dnl
 
-The local server has already authenticated the remote server sending
-the reply, and MUST accept the requested pull_filter.  If it is unable
-to do so, it MUST send a Disconn and terminate the transport-layer
-connection.
+m4_heading(3, Federation Subscription Modify)
 
-m4_heading(3, WAF Modify)
-
-Either of the linked servers may modify their registered pull_filter
-at any time during the life of the connection.  
+Each of the linked servers may optionally provide a compiled Elvin
+subscription expression, known as the pull_filter, describing the
+traffic requested by clients of the local server. Either of the linked
+servers may request a modification of their registered pull_filter at
+any time during the life of the connection, by sending a FedModify.
 
 m4_pre(
-struct WAFMod {
+struct FedModify {
   id32 xid;
   SubAST pull_filter;
 };)m4_dnl
+
+The pull_filter MAY be simplified to minimise updates caused by minor
+changes to the local subscription base.
 
 The receiving server MUST process the request, and return either an
 Ack or a Nack, depending on the validity of the SubAST.
 
 
-m4_heading(3, WAF Notify)
+m4_heading(3, Federation Notify)
 
-Notification traffic is sent between the servers using the WAFNotify
+Notification traffic is sent between the servers using the FedNotify
 packet.  
 
 m4_pre(
-struct WAFNotify {
+struct FedNotify {
   NameValue attributes[];
   boolean deliver_insecure;
   Keys keys;
-  NameValue routing;
+  string routing[];
 };)m4_dnl
 
-The routing hashtable consists of the unique signatures of domains
+The routing list consists of the unique signatures of domains
 that have previously seen this packet.  For those servers with
-multiple WAF links, packets MUST NOT be forwarded through links whose
+multiple federation links, packets MUST NOT be forwarded through links whose
 registered signature is already present in the routing hash.
 
-Before forwarding a WAFNotify, a server MUST insert its own signature
-intot he routing hash to prevent it being delivered again.  However,
-if a notification is received where the routing hash contains the
+Before forwarding a FedNotify, a server MUST insert its own signature
+into the routing list to prevent it being delivered again.  However,
+if a notification is received where the routing list contains the
 signature of the receiving server, it MUST be silently dropped.
-
-For this version of the protocol, the contents of the hashtable
-elements MUST be ignored.
 
 
 
