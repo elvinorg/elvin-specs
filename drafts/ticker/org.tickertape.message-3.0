@@ -7,7 +7,7 @@ ticker-dev@dstc.com
 TIckertape messages provide the user-to-user chat interaction
 component of tickertape.
 %%
-org.tickertape.channel  
+org.tickertape.message  
 int32
 M
 Version of this specification.  Value must be 3000.
@@ -31,12 +31,15 @@ location).
 Timeout
 int32
 M
-Lifetime of the message, in seconds (?).
+Suggested lifetime of the message, in minutes, mostly useful for
+scrolling presentation.  A value of zero indicates that the message
+should be scrolled once only.  A negative value suggests that it not
+be scrolled at all, but displayed only in a threaded or historical
+view.
 %%
 Message-Id
 string
 M
-
 Globally unique identifier for this message.  We recommend the use of
 a UUID (or GUID), optionally hashed (using SHA.1, MD5, etc) to ensure
 anonymity (since the UUID includes the MAC address of the generating
@@ -61,11 +64,6 @@ supplied value into any replies.
 This value must be globally unique.  See Message-Id for
 recommendations.
 %%
-Replacement
-string
-O
-???
-%%
 User-Agent
 string
 O
@@ -86,6 +84,11 @@ of this message.
 
 No constraints are set on the value of this field, but examples might
 include "local", "company_name", etc.
+
+Note that no global interpretation is placed on the values of this
+field.  Its meaning is defined within an administrative boundary, to
+be interpreted at that boundary.  Multiple levels of such
+interpretation are possible.
 %%
 Attachment
 opaque
