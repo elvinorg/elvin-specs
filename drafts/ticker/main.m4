@@ -4,7 +4,7 @@ m4_dnl
 m4_dnl              Tickertape Message Format Specification
 m4_dnl
 m4_dnl File:        $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/ticker/main.m4,v $
-m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.7 $
+m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.8 $
 m4_dnl Copyright:   (C) 2001-2002, David Arnold.
 m4_dnl
 m4_dnl This specification may be reproduced or transmitted in any form or by
@@ -330,16 +330,24 @@ example, base64) as is the usual practice for email.
 T}
 
 Replaces;string;T{
-The Message-Id value of a previous message which should be replaced by
-the contents of this message.  
+In a scrolling user interface, it can be useful to have messages which
+are constantly visible, but whose content is updated over time.  An
+example of such a message might be the current score in a sporting
+event.
 
-In a scrolling user interface, this attribute can be used to update
-the value of a currently visible message.  This is useful for
-displaying a constantly scrolling, changing value, such as a sports
-score, without displaying multiple messages.
+A producer application that wishes to enable such replacement MAY
+include this field in sent messages.  The value MUST be globally
+unique unless the message is intended to replace a previous message;
+see Message-Id for recommendations.
 
-If no currently displayed message's Message-Id matches this value,
-present this message as usual.
+A consumer application that wishes to allow update of currently
+displayed messages should compare the value of an arriving message's
+Replaces field with those of existing messages.  The attributes of the
+arriving message should replace those of any previous message(s) with
+matching values.
+
+If no currently displayed message's Replaces field matches this value,
+the arriving message is presented as usual.
 T}
 _
 .TE
@@ -385,10 +393,11 @@ interpretation of MIME attachments.  This practice introduces an
 additional risk, precluding a manual vetting of the data before
 interpretation.
 .\"
-m4_heading(2, `Replacement')
+m4_heading(2, `Message Replacement')
 
 The use of the 'Replaces' attribute to update a previous message's
-content can be abused by an attacker to rewrite any message.
+content can be abused by an attacker to rewrite any replaceable
+message.
 .\"
 m4_heading(2, `Denial of Service')
 
