@@ -32,10 +32,6 @@ identified by the pkt_id enumeration below:
 
 m4_pre(
 `enum {
-    SvrRqst        = 16,
-    SvrAdvt        = 17,
-    SvrAdvtClose   = 18,
-
     UNotify        = 32,
 
     Nack           = 48,   ConnRqst       = 49,
