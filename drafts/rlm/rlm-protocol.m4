@@ -74,7 +74,7 @@ m4_heading(2, Normal Operation)m4_dnl
 
 Multicast groups are identified by a 16 bit group number.  The lower 8
 bits of this number are used to select one of the 256 IP multicast
-addresses in the range 239.255.123.0/8.  The upper 8 bits of the group
+addresses in the range 239.255.123.0/24.  The upper 8 bits of the group
 number select a UDP port to which the datagrams are sent, starting at
 a base port of 8000.  Group number 0 is reserved, and MUST NOT be
 used.
