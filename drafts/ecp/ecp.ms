@@ -102,7 +102,7 @@ subscription space.
 
 Where an address space has a large number of clients, it can be
 necessary to share the evaluation of their subscriptions over multiple
-host nodes to achieve adequate performance.  This is analagous to a
+host nodes to achieve adequate performance.  This is analogous to a
 web server farm, for example.
 
 Alternatively, where performance is not an issue, it can still be
@@ -139,7 +139,7 @@ forwarded notification, a server performs further evaluation,
 delivering the notification to the subscriptions it matches.
 
 In addition to this basic data traffic, the clustered servers are able
-to be managed from any inidividual server in the cluster.  This
+to be managed from any individual server in the cluster.  This
 management includes both reporting and control functions.  Individual
 servers accept management requests, and where required, forward these
 across the cluster.  Statistical and other reporting information is
@@ -171,14 +171,12 @@ of identifiers can be encoded using a single byte.
   Server Statistics Report      ServerStatsReport	134
 
   Cluster Join Request          ClstJoinRqst            160
-  Clister Join Reply            ClstJoinRply            161
+  Cluster Join Reply            ClstJoinRply            161
   Cluster Terms                 ClstTerms               162
   Cluster Notify                ClstNotify              163
 
   Cluster Redirect              ClstRedir               164
   Cluster Leave                 ClstLeave               165
-
-  
   ----------------------------------------------------------------
 .fi
 .KE
@@ -194,7 +192,7 @@ connections.
 m4_heading(3, Cluster Join Request)
 
 Multicast request to the cluster to join its managed cluster.
-The server and urls fields match the information sent in SvrAdvt
+The server and URLs fields match the information sent in SvrAdvt
 packets by the server, and are used to allow the cluster to take over
 the role of advertising server endpoints to client programs.
 
@@ -205,14 +203,12 @@ struct ClstJoinRqst {
   uint8 version_minor;
   id16 server_id;        /* unique id requested for server */
   string urls[];        /* set of URLs for server */
+  string mgmt_url;
 };)m4_dnl
 
 On initial startup, a server configured to join a cluster MUST join
-the RLM group specified, and then sleep for a random period between 0
-and X seconds.
-
-When the initial timeout expires, the server MUST send its
-ClstJoinRqst.  It MUST then wait X seconds for a response.  During
+the RLM group specified.  The server MUST then send its
+ClstJoinRqst.  It MUST then wait  seconds for a response.  During
 this period it MUST record all observed ClstJoinRqst packets.
 
 If a ClstJoinRply is received during the timeout period, the timer is
@@ -258,22 +254,26 @@ struct ClstJoinRply {
   id16 master_id;          /* id of master node */
   id16 server_id;          /* newly allocated id for the requestor */
   string scope;            /* the scope used for this cluster */
-  id16 servers[];          /* existing servers in cluster */
+  struct {                
+    id16 server_id;
+    string mgmt_url;
+    string offer_urls[];
+  } servers[];
   struct {
     string attr_name;
     SubAST sub_expr;      /* not used at present - set to (int32)0 */
     id16 server_ids[];
-  }  subscriptions[];
+  } subscriptions[];
 };)m4_dnl
 
 m4_heading(2, Leaving the Cluster)
 
-Servers leave a cluster in several defferent circumstances.
+Servers leave a cluster in several different circumstances.
 
 Uncontrolled loss of a server is detected by the underlying reliable
 multicast protocol, and reported to all (remaining) nodes.  Such a
 loss can occur through exit of the server process either through a
-failure or an uncontrolled terminatation (ie. kill -9), a crash of the
+failure or an uncontrolled termination (ie. kill -9), a crash of the
 machine hosting the server process, or a loss of network connectivity.
 
 Upon receiving such a report for the multicast layer, the server
@@ -445,7 +445,44 @@ struct ServerStatsReport {
 
 
 m4_heading(2, Data Packets)
+
+m4_heading(3, Cluster Terms)
+
+When a client changes its subscription at a server in a cluster, the server
+MUST propagate this information to all other servers in the cluster. 
+Subscription information is shared in the cluster by sending Cluster Term
+packets.
+
+m4_pre(
+struct ClstTerms {
+  id16 server_id;
+  string add_names[];
+  string del_names[];
+};)m4_dnl
+
+The server_id field identifies the server sending the information.
+
+The add_names fields lists new attribute names the sending server now
+has an active subscription for.  For example, if a server receives a
+subscription for "temp > 100", then the server sends a ClstTerms
+packet with "temp" in the add_names field.
+
+The del_names field lists attribute names which the sending server no
+longer has any client subscriptions for.
+
+Nodes in the cluster receive a ClstTerms packets, and MUST keep account
+of which attribute names each server in the cluster has subscriptions
+for.
+
 m4_heading(3, Cluster Notify)
+
+Notifications received by each server from clients are forwarded to
+other servers in the cluster as Cluster Notify packets.  When a
+notification is received by as server from a client, as well as
+comparing the notification against the client subscriptions, the
+server compares it to the list of attribute names for each server in
+the cluster.  If the notification matches any servers lists, a
+ClstNotify packet MUST be multicast to other members of the clusters.
 
 m4_pre(
 struct ClstNotify {
@@ -457,19 +494,28 @@ struct ClstNotify {
   Keys nfn_keys;
 };)m4_dnl
 
-.nf
-*** what's the first server_id for ?  the source?
-.fi
+The server_id field indicates the server in the cluster which sent
+the packet and hence received the notifications from a client.
 
-m4_heading(3, Cluster Terms)
+The server_ids list indicates which other servers in the cluster
+have clients which will match the notification.  This is determined by
+the shared attribute names list, maintained by each server.
 
-m4_pre(
-struct ClstTerms {
-  id16 server_id;
-  string add_names[];
-  string del_names[];
-};)m4_dnl
-  
+When a server receives the multicast ClstNotify, if its local
+identifier is not in the server_ids field, it MAY ignore the
+notification and does not need to compare it to local client
+subscriptions.  If the server_ids list does contain the receiving
+server's identifier, the server MUST compare the notification
+for delivery to clients.
+
+The attributes, deliver_insecure and nfn_keys fields are identical
+to the same attributes, deliver_insecure and keys fields in the
+original notification sent by the client.  The additional conn_keys
+field contains any session keys the client may have registered for its
+connection which are implicitly added to each notification sent by
+the client.  Note that these key lists are NOT transformed before
+being multicast to other servers in the cluster.
+
 .KS
 .ti 0
 .NH 1
@@ -507,7 +553,7 @@ Copyright (C) The Internet Society (_yr_).  All Rights Reserved.
 
 This document and translations of it may be copied and furnished to
 others, and derivative works that comment on or otherwise explain it
-or assist in its implmentation may be prepared, copied, published and
+or assist in its implementation may be prepared, copied, published and
 distributed, in whole or in part, without restriction of any kind,
 provided that the above copyright notice and this paragraph are
 included on all such copies and derivative works.  However, this
