@@ -4,8 +4,8 @@ m4_dnl
 m4_dnl              Tickertape Message Format Specification
 m4_dnl
 m4_dnl File:        $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/ticker/main.m4,v $
-m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.15 $
-m4_dnl Copyright:   (C) 2001-2004, David Arnold.
+m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.16 $
+m4_dnl Copyright:   (C) 2001-2004, tickertape.org.
 m4_dnl
 m4_dnl This specification may be reproduced or transmitted in any form or by
 m4_dnl any means, electronic or mechanical, including photocopying,
@@ -243,6 +243,16 @@ glob-style wildcard matching.
 
 Further details of the protocol and subscription language are
 available in [ELVIN].
+
+m4_heading(2, `Access Control')
+
+Elvin supports the use of keys to control visibility of both messages
+and subscriptions.  This specification does not mandate the use of a
+particular key scheme, or a method of applying the general Elvin
+access control facilities to Tickertape Chat messages.
+
+It is likely that a companion document, or a future revision of this
+document, will describe such a method.
 
 
 m4_heading(1, Message Specification)
@@ -583,12 +593,12 @@ identifiers.
 
 A consumer application that wishes to allow update of currently
 displayed messages should compare the value of an arriving message's
-Replaces field with those of existing messages.  The attributes of the
-arriving message should replace those of any previous message(s) with
-matching Replaces value(s).
+Replacement-Id field with those of existing messages.  The attributes
+of the arriving message should replace those of any previous
+message(s) with matching Replacement-Id value(s).
 
-If no currently displayed message's Replaces field matches this value,
-the arriving message is presented as usual.
+If no currently displayed message's Replacement-Id field matches this
+value, the arriving message is presented as usual.
 
 .KS
 .TS
@@ -597,23 +607,119 @@ lb lb lb
 l l lw(42).
 Name;Type;Description
 _
-Replaces;string;T{
+Replacement-Id;string;T{
 An identifier, either unique to this message, or matching a previous
-message's Replaces value.
+message's Replacement-Id value.
 T}
 _
 .TE
 .KE
 
-m4_heading(1, `Access Control')
+m4_heading(1, `Client Behaviour')
 
-Elvin supports the use of keys to control visibility of both messages
-and subscriptions [ELVIN].  This specification does not mandate the
-use of a particular key scheme, or a method of applying the general
-Elvin access control facilities to Tickertape Chat messages.
+This section describes the behaviour required of a Tickertape user
+agent.
 
-It is likely that a companion document, or a future revision of this
-document, will describe such a method.
+m4_heading(2, `Sending Messages')
+
+A Tickertape user agent MAY support composition of messages.  
+
+A minimal message MUST have a unique identifier (Message-Id), a
+destination group (Group), some content (Message), and a source
+identifier (From).
+
+If the user agent also supports message reception, and the Group of
+the message to be sent is not one to which the user agent is
+subscribed, it MAY include a Thread-Id attribute in the message and
+alter its subscriptions to match any messages with that Thread-Id
+value.
+
+User agents MAY include additional attributes in a Tickertape message.
+In addition to the optional attributes described above, user agents
+commonly include attributes from earlier versions of the Tickertape
+protocol for compatibility with older clients.
+
+A Tickertape message is sent as an Elvin message (also called a
+notification).  Messages SHOULD be sent with the Elvin
+\fIdeliver_insecure\fP option set.  This flag MAY be unset when using
+Elvin keys to control visibility of messages, but such usage is
+outside the scope of this specification.
+
+m4_heading(2, `Subscribing')
+
+A Tickertape user agent MAY support reception and presentation of
+messages.
+
+Such user agents use the Elvin subscription facility to request
+delivery of messages matching their configuration.  Many user agents
+support the modification of this configuration at run time.
+
+Elvin subscribers, such as a Tickertape receiving user agent, select
+messages for delivery by subscription predicates evaluated over the
+message content.  When subscribing for Tickertape messages, the user
+agent implementation should be robust in its handling of messasges
+that are not compliant with this specification.
+
+It is RECOMMENDED that user agents subscribe only to messages
+containing all the required attributes to eliminate other messages
+with only some attributes in common with this specification.  A user
+agent MAY choose to implement heuristics that allow presentation of
+messages lacking one or more attribute, for example, the From
+attribute.
+
+User agents also SHOULD be implemented to handle attributes with
+non-standard data types, for example, a 64 bit integer value rather
+than a 32 bit value.
+
+m4_heading(3, `Groups')
+
+A receiving Tickertape user agent SHOULD support selection of messages
+by Group, MAY support selection by Thread-Id, and MAY support a more
+general selection mechanism by matching other parts of the message
+content.
+
+The user agent would normally maintain a configured list of group
+names requested by the user.  Subscription to a Group SHOULD use the
+Elvin case folding and compatibility decomposition features to ensure
+that differences in case or representation of characters do not
+prevent message exchange.
+
+For example, a subscription to the Group called "Chat", could use a
+clause with the following syntax
+
+fold-case(decompose-compat(Group)) == fold-case(decompose-compat("Chat"))
+
+m4_heading(3, `Threads')
+
+A receiving user agent MAY support extra-group threads, using the
+Thread-Id attribute.
+
+If supported, the user agent maintains a list of threads to which it
+is currently subscribed.  Messages sent to an extra-group thread have
+a Thread-Id attribute identifying their thread.  The user agent
+subscribes to these threads by matching Thread-Id values.
+
+For example, to subscribe to a thread with a Thread-Id value of
+"9fe65cdd7347b6d8e2487bded08648b9a63c9b33", a user agent coud use a
+clause with the following syntax
+
+Thread-Id == "9fe65cdd7347b6d8e2487bded08648b9a63c9b33"
+
+m4_heading(2, `Replying')
+
+The concept of replying to a previous message is fundamental to
+Tickertape usage.  User agents designed for interactive reception and
+composition SHOULD support replying to received messages.  A reply is
+a new message, composed with reference to a single, identified,
+previously-received message called the referent.
+
+The newly composed message MUST be initialised with its Group value
+copied verbatim from the referent, its In-Reply-To value copied
+verbatim from the Message-Id attribute of the referent and a new,
+unique Message-Id.
+
+If the referent has a Thread-Id, the reply MUST also have a Thread-Id,
+with its value copied verbatim from the referent.
 .\"
 .\"
 m4_heading(1, `Security Considerations')
@@ -648,9 +754,9 @@ interpretation.
 .\"
 m4_heading(2, `Message Replacement')
 
-The use of the 'Replaces' attribute to update a previous message's
-content can be abused by an attacker to rewrite any replaceable
-message.
+The use of the 'Replacement-Id' attribute to update a previous
+message's content can be abused by an attacker to rewrite any
+replaceable message.
 .\"
 m4_heading(2, `Denial of Service')
 
@@ -811,9 +917,7 @@ Martin Wanicki
 .bp
 m4_heading(1, `Full Copyright Statement')
 
-Copyright (C) 2003-yyyy by tickertape.org.
-.br
-Copyright (C) 2001-2003 DSTC Pty Ltd.
+Copyright (C) 2001-yyyy by tickertape.org.
 .br
 All Rights Reserved.
 
