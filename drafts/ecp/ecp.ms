@@ -202,33 +202,44 @@ struct ClstJoinRqst {
   uint8 version_major;
   uint8 version_minor;
   id16 server_id;        /* unique id requested for server */
-  string urls[];        /* set of URLs for server */
+  string urls[];         /* set of URLs for server */
   string mgmt_url;
 };)m4_dnl
 
 On initial startup, a server configured to join a cluster MUST join
-the RLM group specified.  The server MUST then send its
-ClstJoinRqst.  It MUST then wait  seconds for a response.  During
-this period it MUST record all observed ClstJoinRqst packets.
+the RLM group specified.  The server MUST then send its ClstJoinRqst.
+The server should wait for MAX_RTT seconds to see its own request
+packet.  When a server receives its own ClstJoinRqst, it MUST cancel
+its initial timer and SHOULD calculate how long the packet took to
+arrive from the time it was sent, RTT. The server should then start a
+new timer for 4*RTT waiting for a ClstJoinRply response.
 
-If a ClstJoinRply is received during the timeout period, the timer is
+If ClstJoinRqst does not arrive, the RLM group joined is in error and
+the server should abort.
+
+Once a server has seen its own ClstJoinRqst, it MUST record all
+observed packets.
+
+If a ClstJoinRply is received during the 4*RTT period, the timer is
 cancelled, and the server initialises its internal state and enters
 active operation.  The recorded ClstJoinRqst packets are discarded.
 
-If no response is seen within the timeout period, the server declares
-itself the leader.  It multicasts its own ClstJoinRply to announce
-this decision, and then responds to each of the recorded ClstJoinRqst
-packets that it has observed during the timeout with a ClstJoinRply.
+If no response is seen within the timeout period, and the server has
+not seen any ClstJoinRply packets, the server declares itself the
+master.  It multicasts its own ClstJoinRply to announce this decision.
+When this ClstJoinRply is recived back, ther server then responds to
+each of the recorded ClstJoinRqst packets that it has observed during
+the timeout with a ClstJoinRply.
 
-If a server receives a ClstJoinRply from another server after electing
-itself as the leader and sending a reply, but before receiving its own
-ClstJoinRply, it MUST drop the role of leader in favour of the first
-received reply.
+If the server has observed a ClstJoinRply for another server, this
+indicats another server is action as the master and the server MUST
+NOT assume the master role, the server SHOULD resend a ClstJoinRqst
+and start the join process again.
 
 Should a server see multiple ClstJoinRply's in response to its
 request, it MUST ignore the second and subsequent packets.
 
-The leader is responsible for responding to further ClstJoinRqst's and
+The master is responsible for responding to further ClstJoinRqst's and
 also to client server discovery requests on behalf of the cluster.
 
 m4_remark(
@@ -244,7 +255,7 @@ m4_remark(
 
 m4_heading(3, Cluster Join Reply)
 
-Multicast reply from the leader node in a cluster.  Includes the
+Multicast reply from the master node in a cluster.  Includes the
 server's newly allocated unique identifier and the current
 subscription database of the cluster.
 
@@ -333,6 +344,12 @@ specified.
 
 Upon receiving a ServerReport for Shutdown or Restart, a server SHOULD
 remove all state associated with that server.
+
+m4_remark(
+when a master node leaves, it picks a new master and sends a server
+report, mode set to master, and the server id set to the newly
+choosen server.  the server_ids list SHOULD be empty.
+)
 
 m4_heading(2, Additional Management Packets)
 
