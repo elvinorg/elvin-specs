@@ -46,11 +46,21 @@ Establishment of a connection can involve negotiation of the server's
 capabilities, including underlying protocol options, supported limits
 on notification content, and available qualities of service.
 m4_dnl
+m4_heading(3, Protocol Layers)
+m4_dnl
+m4_heading(4, Marshalling)
+m4_dnl
+m4_heading(4, Security)
+m4_dnl
+m4_heading(4, Transport)
+m4_dnl
 m4_heading(2, Security)
 
 Security of Elvin traffic is optional.  If required, the client can
 select a protocol which will provide mutual authentication of the
 server connection, and optional privacy of the channel.  
+m4_dnl
+m4_heading(3, Requirements)
 
 Access control of content-routed traffic is a complex issue.
 Obviously, the router process must have access to the message content
@@ -59,26 +69,15 @@ in order to perform routing decisions, and must therefore be trusted.
 The principle difficulty comes because the server ensures that the
 client does not know the identity of the message's receivers.
 m4_dnl
-m4_heading(3, Authentication)
+m4_heading(3, Client-Server)
 m4_dnl
-m4_heading(3, Access Control)
+m4_heading(4, Authentication)
 m4_dnl
-m4_heading(3, Local Area Clustering)
-
-The capacity of a single Elvin server is limited.  The computation
-required to evaluate subscriptions, the maintenance of connections,
-and the network bandwidth used for delivery all contribute to an upper
-limit on the scalability of a single server.
-
-In addition, a single server is vulnerable to network or host
-failures.  Server clustering provides redundancy in the service
-provision and allows the traffic load to be balanced across multiple
-host machines with consequent sharing of both processing and network
-load.
-
-An Elvin server cluster should provide a "single-system" image to its
-clients.  This requires support for automatic failover, consistent
-ordering of message delivery and transparent connection management.
+m4_heading(4, Privacy and Integrity)
+m4_dnl
+m4_heading(4, Access Control)
+m4_dnl
+m4_heading(3, Message Protection)
 m4_dnl
 m4_heading(2, Messages)
 
@@ -149,12 +148,3 @@ events, building a profile of the notifications emitted.  This profile
 is registered with the server as a quench filter (as for manual
 quenching).  The server's updates of matching subscriptions are used
 to filter notifications within the client library.
-
-m4_heading(2, Security)
-m4_heading(3, Requirements)
-m4_heading(3, Client-Server)
-m4_heading(4, Authentication)
-m4_heading(4, Privacy and Integrity)
-m4_heading(3, Access Control)
-m4_heading(3, Quenching)
-

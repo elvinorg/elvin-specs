@@ -153,6 +153,7 @@ struct UNotify {
     uint8 client_major_version;
     uint8 client_minor_version;
     NameValue attributes[];
+    boolean deliver_insecure;
     Keys keys;
 };)m4_dnl
 
