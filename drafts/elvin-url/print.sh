@@ -1,2 +1,2 @@
 #! /bin/sh
-a2ps -m main.txt --center-title="Elvin URL" -o main.ps
+a2ps -m main.txt --center-title="Elvin URI Scheme"
