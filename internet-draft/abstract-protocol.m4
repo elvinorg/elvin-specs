@@ -242,6 +242,7 @@ defined later in this document.
 
 m4_pre(
 struct ConRqst {
+   int32 xid;
    int32 client_major_version;
    int32 client_minor_version;
    NameValue options[];   
@@ -254,6 +255,7 @@ Specifies the connection option values agreed by the server.
 
 m4_pre(
 struct ConRply {
+   int32 xid;
    NameValue options[];
 };)m4_dnl
 
