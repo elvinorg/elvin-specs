@@ -26,20 +26,33 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/ecp/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.3 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.4 $
 #
 ################################################################
 
 .PHONY: all clean outline
 
+FILENAME := draft-arnold-elvin-cluster
+VERSION := prelim-01
+
 SOURCE_FILES:= $(wildcard *.ms)
+
+PUBLISHED := $(FILENAME)-$(VERSION).txt
 
 DATE := $(shell date +"%B %Y")
 YEAR := $(shell date +"%Y")
 MTH := $(shell date +"%b")
 DAY := $(shell date +"%e")
 
-M4FLAGS := -D__yr="$(YEAR)" -D__date="$(DATE)" -D__m="$(MTH)" -D_d="$(DAY)"
+EXP=$(shell date -d "6 months" "+%d %b %Y")
+
+
+M4FLAGS := \
+	-D__file="$(PUBLISHED)" \
+	-D__yr="$(YEAR)" \
+	-D__date="$(DATE)" \
+	-D__m="$(MTH)" \
+	-D_d="$(DAY)"
 
 all: main.txt
 
@@ -56,6 +69,11 @@ main.tmp: ecp.ms ../macros.m4
 clean:
 	rm -f main.txt main.tmp
 
+publish: $(PUBLISHED)
+
+$(PUBLISHED): main.txt
+	sed -e 's/aa bbb cccc/${EXP}/g' $^ > $@
+
 ################################################################
 
 %.txt : %.tmp
@@ -65,6 +83,3 @@ clean:
 	m4 -D__date="$(DATE)" -P $< > $@
 
 ################################################################
-
-
-

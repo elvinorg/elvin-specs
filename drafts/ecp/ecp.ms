@@ -559,7 +559,8 @@ m4_heading(3, Elvin Router Statistics Report)
 
 In order share the work in a cluster, router nodes share statistical
 information.  Each Elvin router publishes details about is recent load
-based on 
+based on Elvin client activity and the computer hardware the daemon
+process is running on.
 
 m4_pre(
 struct Elvin ServerStatsReport {
@@ -616,7 +617,6 @@ struct Elvin ServerStatsReport {
   } stats[];
 };)m4_dnl
 
-timestamp 
 
 m4_heading(2, Data Packets)
 
@@ -754,11 +754,37 @@ transmitted per packet.
 
 m4_heading(1, Limitations)
 
-managment protocol is weak
+The control provided by the management protocol is not very detailed.??
 
-security of network
+*** distribution of configuration information (eg scope)
 
-distribution of configuration information (eg scope)
+*** Use of multiple RLM groups.
+
+m4_heading(1, `Security Considerations')
+
+The __title is designed for Elvin router nodes operating on a LAN.
+The protocol is designed to allow cluster nodes 
+
+When installing an Elvin cluster, careful consideration should be made
+to the access of the machines from outside the cluster, eg the
+Internet.
+
+Cluster nodes need to able to accept connections from clients on one
+or more ports (2917 is the default IANA Elvin client port).  Individual
+nodes have the same security considerations as standalone routers with
+resoect to client connections.  See [EP] for a detailed consideration
+of Elvin client connections.
+
+If a cluster is federated using [ERFP], then at least one federation port
+MAY need be accessible to external Elvin routers (2916 is the default IANA
+port for Elvin router-router connections.
+
+*** Apart from the above, block all multicast traffic at network edge.
+
+
+m4_heading(1, `IANA Considerations')
+
+There are no IANA considerations for the protocol.
 
 m4_heading(1, References)
 
