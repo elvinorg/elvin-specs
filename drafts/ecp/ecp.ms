@@ -852,11 +852,14 @@ transmitted per packet.
 
 m4_heading(1, Limitations)
 
-The control provided by the management protocol is not very detailed.??
+The protocol provides very limited means for individual routers to
+share there local configuration information.  Currently, the scope
+if the cluster will be the scope of the first Master node.   The scope
+cannot be changed without chutting down all servers within the cluster.
 
-*** distribution of configuration information (eg scope)
-
-*** Use of multiple RLM groups.
+No current scheme is defined to use more than one RLM group to partition
+traffic.  This would be useul to seperate sections of the cluster with
+an IP router so that not every node needs to see every data packet.
 
 m4_remark(
 *** dealing with changes in the set of protocols or their options
@@ -869,15 +872,20 @@ m4_remark(
 *** options.  the current URL-based scheme is bogus, and should go
 *** away ASAP.  at that time, we should revisit this packet format.)
 
-
 m4_heading(1, `Security Considerations')
-
-The __title is designed for Elvin router nodes operating on a LAN.
-The protocol is designed to allow cluster nodes 
 
 When installing an Elvin cluster, careful consideration should be made
 to the access of the machines from outside the cluster, eg the
 Internet.
+
+The __title is designed for Elvin router nodes operating on a LAN.
+The protocol is designed to allow cluster nodes shre information
+via RLM and multicast.  Any traffic not originating from a cluster
+node within the cluster SHOULD be blocked from entering any
+LAN segements that a cluster is running on, all traffic for 
+239.255.123.0/24.  Multicast client traffic for router discovery
+MAY be allowed to enter the LAN and MUST be if clients are to
+find nodes in the cluster dynamically.
 
 Cluster nodes need to able to accept connections from clients on one
 or more ports (2917 is the default IANA Elvin client port).  Individual
@@ -888,9 +896,6 @@ of Elvin client connections.
 If a cluster is federated using [ERFP], then at least one federation port
 MAY need be accessible to external Elvin routers (2916 is the default IANA
 port for Elvin router-router connections.
-
-*** Apart from the above, block all multicast traffic at network edge.
-
 
 m4_heading(1, `IANA Considerations')
 
