@@ -177,13 +177,15 @@ struct ConRply {
 m4_heading(3, Disconnect Request)
 
 Sent by client to the Elvin server.  Requests disconnection.
-
 m4_pre(
 struct DisConRqst {
    int32 sequence_no;    
-}
-)
+})m4_dnl
 
+With the exception of retrying this request, the client library MUST
+NOT send any further messages to the server once this message has been
+sent.
+m4_dnl
 m4_heading(3, Disconnect)
 
 Sent by the Elvin server to a client.  This packet is sent in three
@@ -195,11 +197,10 @@ struct DisCon {
    int32 why;
    int32 sequence_no;
    string args;
-}m4_dnl
-)
+})
+.KS
 where the defined values for "why" are
 
-.KS
 .nf
 -----------------------------------------------------------------
 Why  Definition
@@ -216,6 +217,15 @@ Why  Definition
 .fi
 .KE
 
+This MUST be the last packet sent (by the server) on a connection.
+The underlying (transport) link MUST be closed immediately after this
+packet has been successfully delivered to the client.
+
+The client connection SHOULD NOT be closed without sending this
+packet.  If this client detects that the server connection has been
+closed without receiving a Disconnect packet, it should assume network
+or server failure.
+m4_dnl
 m4_heading(3, Security Request)
 
 m4_heading(3, QoS Request)
