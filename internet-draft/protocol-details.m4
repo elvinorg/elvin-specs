@@ -109,7 +109,7 @@ description of server options.
 
 .KS
 m4_pre(
-  int32 xid
+  uint32 xid
 )m4_dnl
 .na
 Where a request packet is sent by the client (other than NotifyEmit or

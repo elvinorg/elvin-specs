@@ -284,7 +284,7 @@ int32.
 .KE
 .KS
    pkt id        (enum)   packet type for Notif
-   xid           (int32)  transaction number for this packet
+   xid           (uint32) transaction number for this packet
    len n         (int32)  number of name-type-value triples in the 
                           notification. n MUST be greater than zero.
    ntv x         [block]  encoded as a name-type-value triple, 
