@@ -1,6 +1,24 @@
-m4_define(__title, `Elvin Client Protocol')
+m4_define(__title, `Elvin Client Access Protocol')
 m4_include(macros.m4)m4_dnl
-m4_include(head.m4)m4_dnl
+.pl 10.0i
+.po 0
+.ll 7.2i
+.lt 7.2i
+.nr LL 7.2i
+.nr LT 7.2i
+.ds LF Arnold, ed.
+.ds RF PUTFFHERE[Page %]
+.ds CF Expires in 6 months
+.ds LH Internet Draft
+.ds RH __date
+.ds CH Elvin
+.hy 0
+.ad l
+.in 0
+Elvin.Org                                              D. Arnold, Editor
+Preliminary INTERNET-DRAFT                              Mantara Software
+
+Expires: aa bbb cccc                                         _d __m __yr
 
 .ce
 __title
@@ -30,9 +48,11 @@ http://www.ietf.org/shadow.html
 
 m4_heading(1, ABSTRACT)
 
-This document describes the Elvin notification service: its
-architecture, protocols, packet formats, operational semantics,
-programming interfaces and management.
+This document describes a client access protocol for the Elvin
+notification service.  It includes a general overview of the system
+architecture, and defines an access protocol in terms of operational
+semantics, an abstract protocol, and a default concrete implementation
+of the abstract protocol.
 
 m4_dnl .ti 0
 m4_dnl TABLE OF CONTENTS

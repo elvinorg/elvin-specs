@@ -151,10 +151,10 @@ notification packets were dropped.
 
 m4_heading(3, Ending a Session)
 
-At any time after a successful Connection Reply, the server can inform
-the client that it is to be disconnected.  The Disconn packet includes
-an explanation for the disconnection, and optionally, directs the
-client to reconnect to an alternative server.
+At any time after a receiving a Connection Reply, the server can
+inform the client that it is to be disconnected.  The Disconn packet
+includes an explanation for the disconnection, and optionally, directs
+the client to reconnect to an alternative server.
 
 .KS
   +-------------+                  +---------+

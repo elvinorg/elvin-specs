@@ -1,10 +1,24 @@
 m4_heading(1, INTRODUCTION)
 
+Elvin is a content-based publish/subscribe messaging service.  An
+Elvin implementation is comprised of Elvin routers which forward and
+deliver messages after evaluating their contents against a body of
+registered subscriptions.
+
+To facilitate evaluation of subscriptions, Elvin messages are
+collections of named, typed values.  Subscriptions are a logical
+predicate expression which the router evaluates for each received
+message.  Messages are delivered to the subscriber if the result of
+the predicate evaluation is true.
+
+There is no requirement that 
+
+Publishers generate 
 Undirected communication, where the sender is unaware of the identity,
 location or even existence of the receiver, is not currently provided
-by the Internet protocol suite.  This style of messaging, also called
-"publish/subscribe", is typically implemented using a notification
-service.
+by the Internet protocol suite.  This style of messaging, sometimes
+called "publish/subscribe", is typically implemented using a
+notification service.
 
 Notification service clients can be characterised as producers, which
 detect conditions, and emit notifications; and consumers, which

@@ -194,15 +194,17 @@ Receiving a reserved error code SHOULD be handled as a protocol error.
 .nf
 Error Code  |  Meaning / Action                    |  Arguments
 ------------+--------------------------------------+------------
-   0        |  Undefined error opening connection  |  None
+   0        |  No error - Illegal value            |  None
+            |                                      |
    1        |  ConnRqst version mismatch           |  None
    2        |  Authorisation failure               |  None
    3        |  Authentication failure              |  None
    4-  499  |  ( Reserved )                        |  Undefined
  500-  999  |  ( Implementation-specific           |  Undefined
             |    connection establishment error )  |
+            |                                      |
 1000        |  Undefined protocol error. Requires  |  None
-            |     connection abort                 |
+            |  connection abort                    |
 1001        |  Protocol error                      |  None
 1002        |  No such subscription                |  sub_id, id64
 1003        |  No such quench                      |  quench_id, id64
@@ -212,6 +214,7 @@ Error Code  |  Meaning / Action                    |  Arguments
 1006- 1499  |  ( Reserved )                        |  Undefined
 1500- 1999  |  ( Implementation-specific error     |  Undefined
             |    requiring connection abort )      |
+            |                                      |
 2000        |  Undefined error with request        |  None
 2001        |  No such key                         |  None
 2002        |  Key exists                          |  None
@@ -243,6 +246,7 @@ Error Code  |  Meaning / Action                    |  Arguments
 2110- 2499  |  ( Reserved )                        |  Undefined
 2500- 2999  |  ( Implementation-specific           |  Undefined
             |    operation failure )               |
+            |                                      |
 3000-65535  |  ( Reserved )                        |  Undefined   
 .fi
 .KE
