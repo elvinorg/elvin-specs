@@ -3,8 +3,8 @@ m4_dnl
 m4_dnl              Elvin URI Scheme specification
 m4_dnl
 m4_dnl File:        $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/elvin-url/main.m4,v $
-m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.7 $
-m4_dnl Copyright:   (C) 2001, David Arnold.
+m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.8 $
+m4_dnl Copyright:   (C) 2001-2002, David Arnold.
 m4_dnl
 m4_dnl This specification may be reproduced or transmitted in any form or by
 m4_dnl any means, electronic or mechanical, including photocopying,
@@ -75,7 +75,7 @@ Expires: aa bbb cccc                                           B. Segall
 .ce
 Elvin URI Scheme
 .ce
-draft-arnold-elvin-uri-prelim-01.txt
+NAME-VERSION.txt
 
 m4_heading(1, Status of this Memo)
 
@@ -197,8 +197,9 @@ URI, which requires the first character of an opaque URI to be an
 element of ``uric_no_slash''.  For this reason, uses of the Elvin URI
 scheme SHOULD always include the ``version'' component.  However, for
 convenience of human users, all Elvin URI scheme parsers MUST accept
-Elvin URI without the ``version'' component.  m4_dnl m4_heading(3,
-Protocol)
+Elvin URI without the ``version'' component.  m4_dnl 
+
+m4_heading(3, Protocol)
 
 The ``protocol'' specification describes the stack of protocol modules
 required to make a connection to the identified resource.
