@@ -19,17 +19,17 @@ After an Elvin server has been located (see section on SLP) a client
 requests a connection. The server MUST respond with either a
 Connection Reply, a Redirect or a Nack.
 
-*** fixme *** what params in a ConRqst.  how much is done in the ConRqst
+*** fixme *** what params in a ConnRqst.  how much is done in the ConnRqst
 compared to SLP attr's?
 
 If the server accepts the request, it MUST respond with a Connection
 Reply, containing the agreed parameters of the connection.
 
 .KS
-  +-------------+ ---ConRqst--> +---------+
+  +-------------+ ---ConnRqst--> +---------+
   | Producer or |               |  Elvin  |  
   |  Consumer   |               |  Server |    SUCCESSFUL CONNECTION 
-  +-------------+ <---ConRply-- +---------+
+  +-------------+ <---ConnRply-- +---------+
 .KE
 
 If the Elvin server cannot accept the connection itself, but is part
@@ -43,7 +43,7 @@ server?  if not, how long until it may?
 
 
 .KS
-  +-------------+ ---ConRqst--> +---------+
+  +-------------+ ---ConnRqst--> +---------+
   | Producer or |               |  Elvin  |
   |  Consumer   |               |  Server |    REDIRECTED CONNECTION
   +-------------+ <--Redirect-- +---------+
@@ -58,7 +58,7 @@ request.  This should be under the "Failures" at the end of the
 section, but one or two examples here may be used for illustration].
 
 .KS
-  +-------------+ ---ConRqst--> +---------+
+  +-------------+ ---ConnRqst--> +---------+
   | Producer or |               |  Elvin  |
   |  Consumer   |               |  Server |        FAILED CONNECTION
   +-------------+ <----Nack---- +---------+
@@ -167,10 +167,10 @@ Possible values for the type field in a packet are:
   ---------------------------------------------------------------
   Packet Type                   Abbreviation       Packet ID
   ---------------------------------------------------------------
-  Connect Request               ConRqst               0
-  Connect Reply                 ConRply               1
-  Disconnect Request            DisConRqst            2
-  Disconnect	                DisCon                3
+  Connect Request               ConnRqst              0
+  Connect Reply                 ConnRply              1
+  Disconnect Request            DisConnRqst           2
+  Disconnect	                DisConn               3
   Security Request              SecRqst               4
   QoS Request                   QosRqst               5  <removed>
   Subscription Add Request      SubAddRqst            6
@@ -222,17 +222,17 @@ m4_heading(3, Connect Request)
 
 Using the protocol and endpoint information obtained either directly
 or via server discovery, the client establishes a connection to the
-server endpoint.  It MUST then send a ConRqst to establish protocol
+server endpoint.  It MUST then send a ConnRqst to establish protocol
 options to be used for the session.
 
 It is a protocol violation for the client to send anything to the
-server before a ConRqst.  A server connection that has not received a
-ConRqst within five (5) seconds of being opened SHOULD be closed by
+server before a ConnRqst.  A server connection that has not received a
+ConnRqst within five (5) seconds of being opened SHOULD be closed by
 the server.
 
 *** fixme *** do we need to set a hard time limit here?  what is reasonable?
 
-The ConRqst MAY contain requests for various protocol options to be
+The ConnRqst MAY contain requests for various protocol options to be
 used by the connection.  These options are identified using a string
 name.  Some options refer to properties of the server, while others
 MAY be used by the protocol layers.
@@ -241,7 +241,7 @@ Legal option names, their semantics, and allowed range of values are
 defined later in this document.
 
 m4_pre(
-struct ConRqst {
+struct ConnRqst {
    int32 xid;
    int32 client_major_version;
    int32 client_minor_version;
@@ -256,13 +256,13 @@ Sent by the Elvin server to a client.  Confirms a connection request.
 Specifies the connection option values agreed by the server.
 
 m4_pre(
-struct ConRply {
+struct ConnRply {
    int32 xid;
    NameValue options[];
 };)m4_dnl
 
-For each legal option included in the ConRqst, a matching response
-MUST be present in the ConRply.  Where the value returned differs from
+For each legal option included in the ConnRqst, a matching response
+MUST be present in the ConnRply.  Where the value returned differs from
 that requested, the client MUST either use the returned value, or
 request closure of the connection.  Unrecognised options MUST NOT be
 returned by the server.
@@ -277,7 +277,7 @@ m4_heading(3, Disconnect Request)
 Sent by client to the Elvin server.  Requests disconnection.
 
 m4_pre(
-struct DisConRqst {
+struct DisConnRqst {
   int32 xid;
 };)m4_dnl
 
@@ -287,14 +287,14 @@ library MUST NOT send any further messages to the server once this
 message has been sent.  The client library MUST continue to read from
 the server connection until a Disconnect packet is received.
 
-A server receiving a DisConRqst should suspend further evaluation of
+A server receiving a DisConnRqst should suspend further evaluation of
 subscriptions and notification of subscription changes for this
 client.  A Disconnect packet should be appended to the client's output
 buffer, and finally, the output buffer flushed before the connection
 is closed.
 
 It is a protocol violation for a client to close its connection
-without sending a DisConRqst (see protocol violations below).
+without sending a DisConnRqst (see protocol violations below).
 
 m4_dnl 
 m4_heading(3, Disconnect)
@@ -321,7 +321,7 @@ Why  Definition
  0   Reserved.
  1   Server is closing down.  xid MUST be zero.
  2   Server is closing this connection, in response to your 
-     request (DisConRqst) with sequence number matching 
+     request (DisConnRqst) with sequence number matching 
      xid.
  4   Server is closing this connection, and requests that client
      makes new connection to server address in "args".  
