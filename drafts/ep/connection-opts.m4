@@ -13,17 +13,18 @@ support additional, implementation-specific options.
 
 .KS
 .nf
-  Name                        |  Type    |  Min  Default  Max
+  Name                        |  Type    |  Min   Default      Max
   ----------------------------+----------+-------------------------
-  attribute_max               |  int32   |
-  attribute_name_len_max      |  int32   |
-  byte_size_max               |  int32   |
+  attribute_max               |  int32   |    64     256     2**31
+  attribute_name_len_max      |  int32   |    64    2048     2**31
+  byte_size_max               |  int32   |    1K      1M     2**31  
   lang                        |  string  |   (server defined)
-  notif_buffer_drop_policy    |  int32   |      (see below)
-  notif_buffer_min            |  int32   |
-  opaque_len_max              |  int32   |
-  string_len_max              |  int32   |
-  sub_len_max                 |  int32   |
-  sub_max                     |  int32   |
+  notif_buffer_drop_policy    |  string  | { "oldest", "newest",
+                                             "largest", "fail" }
+  notif_buffer_min            |  int32   |    1       1K     2**31
+  opaque_len_max              |  int32   |    1K      1M     2**31
+  string_len_max              |  int32   |    1K      1M     2**31
+  sub_len_max                 |  int32   |    1K      2K     2**31
+  sub_max                     |  int32   |    1K      8K     2**31
 .fi
 .KE
