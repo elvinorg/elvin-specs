@@ -3,7 +3,7 @@ m4_dnl
 m4_dnl              Elvin Router Discovery Protocol
 m4_dnl
 m4_dnl File:        $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/edp/main.m4,v $
-m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.6 $
+m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.7 $
 m4_dnl Copyright:   (C) 2000-2001, DSTC Pty Ltd.
 m4_dnl
 m4_dnl This specification may be reproduced or transmitted in any form or by
@@ -73,7 +73,7 @@ Expires: aa bbb cccc                                           B. Segall
 .ce
 Elvin Router Discovery Protocol
 .ce
-draft-arnold-elvin-discovery-prelim-00.txt
+draft-arnold-elvin-discovery-prelim-01.txt
 
 m4_heading(1, Status of this Memo)
 

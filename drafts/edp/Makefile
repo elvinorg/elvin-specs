@@ -26,7 +26,7 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/edp/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.5 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.6 $
 #
 ################################################################
 
@@ -39,7 +39,7 @@ yyyy=$(shell date +%Y)
 exp=$(shell date -d "6 months" "+%d %b %Y")
 
 FILENAME := draft-arnold-elvin-discovery
-VERSION := prelim-00
+VERSION := prelim-01
 PUBLISHED := $(FILENAME)-$(VERSION).txt
 
 
