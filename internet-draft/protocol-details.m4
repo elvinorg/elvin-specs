@@ -442,6 +442,71 @@ struct SecRply {
     id32 xid;
 };)m4_dnl
 
+m4_heading(3, Drop Warning)
+
+Sent by servers to clients to indicate that notification packets have
+been dropped from this place in the data stream due to congestion in
+the server.  Dropped packets MAY include NotifyDeliver, SubAddNotify,
+SubModNotify, SubDelNotify and ConfConn.
+
+m4_pre(
+struct DropWarn {
+};)m4_dnl
+
+m4_heading(3, Test Connection)
+
+A client's connection to the Elvin server can be inactive for long
+periods.  This is especially the case for subscribers for whom matching
+messages are seldom generated.  Clients MAY implement Test Connection
+and Confirm Connection packets to verify connectivity.
+
+This application-level functionality is an alternative to a protocol
+level connectivity-loss reporting mechanism.  If an Elvin transport
+protocol does not provide support for lost connection detection, this
+mechanism can be used.  In particular, it is defined because of the
+lack of wide support for the TCP_KEEPALIVE socket option used to
+control the interval of inactivity that triggers a keep-alive exchange
+in TCP/IP.
+
+Clients MAY and servers MUST implement support for TestConn.
+
+m4_pre(
+struct TestConn {
+};)m4_dnl
+
+A Test Connection packet MAY be sent by a client to verify that it is
+still connected to the Elvin server after a period where no packets
+have been received from the server.  This period MUST NOT be less than
+30 seconds, MUST be configurable and able to be disabled, and the use
+of TestConn SHOULD be disabled by default.  These restrictions serve
+to limit the load on servers servicing TestConn requests.
+
+If a client sends a TestConn but does not receive any traffic from the
+server within the standard synchronous operation timeout period, it
+can assume that the connection is dead, and MUST close the connection
+as for a protocol error.
+
+m4_heading(3, Confirm Connection)
+
+m4_pre(
+struct ConfConn {
+};)m4_dnl
+
+Clients MAY and servers MUST implement support for ConfConn.  Clients
+SHOULD ignore spurious ConfConn packets. A server MUST NOT send a
+ConfConn on a client connection without having received a TestConn
+from that connection.
+
+A server receiving a TestConn packet MUST queue a ConfConn response if
+there are no other packets waiting for the client to read.  If other
+packets are waiting for the client to service its connection, the
+server MUST NOT send the ConfConn (since the client's reading of the
+other packets will indicate that its connection is active).
+
+Servers MAY drop ConfConn packets queued for delivery to a client.
+The DropWarn packet will serve to indicate to the client that the
+connection is active. 
+
 m4_heading(3, Notification Emit)
 
 Sent by client to the Elvin server.  There are two possible delivery
@@ -553,34 +618,6 @@ m4_pre(
 struct SubRply {
     id32 xid;
     id64 subscription_id;
-};)m4_dnl
-
-m4_heading(3, Drop Warning)
-
-Sent by servers to clients to indicate that notification packets have
-been dropped from this place in the data stream due to congestion in
-the server.  Dropped packets MAY include NotifyDeliver, SubAddNotify,
-SubModNotify, SubDelNotify and ConfConn.
-
-m4_pre(
-struct DropWarn {
-};)m4_dnl
-
-m4_heading(3, Test Connection)
-
-Sent by clients to confirm that the server remains connected.
-
-m4_pre(
-struct TestConn {
-};)m4_dnl
-
-m4_heading(3, Confirm Connection)
-
-Sent by servers to confirm that the client connection remains
-connected.
-
-m4_pre(
-struct ConfConn {
 };)m4_dnl
 
 m4_heading(3, Quench Add Request)
