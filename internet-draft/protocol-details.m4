@@ -31,13 +31,8 @@ struct SubASTNode {
     SubAST[] children;
 };
 
-struct SubASTName {
-    int32 flags;
-    string name;
-};
-
 union SubAST {
-    SubASTName name;
+    string name;
     int32 i32;
     int64 i64;
     real64 r64;
@@ -84,6 +79,14 @@ union SubAST {
     SubASTNode ends_with;
     SubASTNode wildcard;
     SubASTNode regex;
+
+    SubASTNode to_lower;
+    SubASTNode to_upper;
+    SubASTNode primary;
+    SubASTNode secondary;
+    SubASTNode tertiary;
+    SubASTNode decompose;
+    SubASTNode decompose_compat;
 
     SubASTNode exists;
     SubASTNode equals;
