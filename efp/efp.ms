@@ -246,7 +246,7 @@ struct Shutdown {
 
 m4_heading(3, Client Information Request)
 
-Return of client information from the server uses the ClientInfoRqst
+Request of client information from the server uses the ClientInfoRqst
 packet.  It includes a summary of all the server's current clients.
 
 m4_pre(
