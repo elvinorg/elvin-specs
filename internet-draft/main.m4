@@ -17,9 +17,10 @@ m4_include(macros.m4)m4_dnl
 Network Working Group                                          D. Arnold
 Internet Draft                                                   J. Boot
 Category: Standards Track                                      T. Maslen
+                                                               T. Phelps 
                                                                B. Segall
                                                                     DSTC
-                                                            dd mmmm 1999
+                                                            dd mmmm 2000
 
 
 .ce
@@ -39,7 +40,7 @@ status of this protocol.  Distribution of this memo is unlimited.
 Copyright Notice
 
 .in 3
-Copyright (C) The Internet Society (1999).  All Rights Reserved.
+Copyright (C) The Internet Society (2000).  All Rights Reserved.
 
 
 .ti 0
