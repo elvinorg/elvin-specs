@@ -336,8 +336,8 @@ supplied, then at least one must match (deliver_insecure is set).
 
 m4_pre(
 struct NotifyEmit {
-    boolean deliver_insecure;
     NameValue attributes[];
+    boolean deliver_insecure;
     Keys keys;
 };)m4_dnl
 
