@@ -56,6 +56,23 @@ TABLE OF CONTENTS
 
 .bp
 m4_heading(1, INTRODUCTION)
+
+The Elvin protocol provides undirected, content-routed messaging
+between any number of clients connected to a single cluster of
+servers. The Elvin cluster protocol allows these clients to be
+connected to any of a group of cooperating, typically co-located
+servers, by tightly joining these servers into a single logical
+entity.
+
+The purpose of this document is to define a new protocol in the Elvin
+suite that allows loose joining of servers, each potentially located
+anywhere on the Internet, into a federated Elvin service.
+
+This protocol allows for administrative control over each autonomous
+system and its connections to other parts of the Elvin federation,
+including control over what notifications are permitted to travel in
+and out of each server.
+
 m4_heading(1, TERMINOLOGY)
 
 Wide-area federation
@@ -109,9 +126,11 @@ Each packet has two unique identifiers: a string name and a number.
 In a concrete protocol implementation, if packets are identified using
 a number or string, these values SHOULD be used.
 
-The numeric identifiers have been chosen such that they do not overlap
-with the identifiers used for the Elvin client protocol, and both sets
-of identifiers can be encoded using a single byte.
+The numeric identifiers for new kinds of packets have been chosen such
+that they do not overlap with the identifiers used for the Elvin
+client protocol, and both sets of identifiers can be encoded using a
+single byte. Some packets share the same semantics as in the Elvin
+client protocol, so the same identifiers are used.
 
 .KS
 .nf 
@@ -152,6 +171,18 @@ that it MUST be globally unique for each single server or cluster, but
 it MUST be identical for each server within a single cluster.  It is
 RECOMMENDED that this name be based on the DNS domain name or IP address
 of the server's host machine(s).
+
+A server receiving a FedConnRqst MUST check that it is compatible with
+the protocol version specified in the packet. To be compatible, the
+server must be able to use a version of the protocol with the major
+component being equal to the version requested, and the minor
+component being greater than or equal to the version requested. If a
+server cannot meet this requirement it MUST immediately close the
+connection, as for a protocol violation.
+
+The version of the protocol specified in this document has a major
+component of one (1) and a minor component of zero (0). This can be
+represented in text form as 1.0.
 
 m4_heading(3, Federation Connection Reply)
 
@@ -219,6 +250,22 @@ recently positively acknowledged outgoing_filter.
 A server MAY NOT forward a FedNotify to a server that has requested it
 (i.e. a notification that matches the server's most recently positively
 acknowledged outgoing_filter).
+
+
+m4_heading(2, Configuration)
+
+It is beyond the scope of this document to describe how implementations
+may be configured to control the flow of notifications between servers,
+but there are some important points for implementers and administrators
+to consider.
+
+The Elvin federation protocol assumes a that federation links are
+configured to form a spanning tree. This means that for any given pair
+of servers there is only one possible route for any given notification
+to travel from one server to the other.
+
+Future revisions of the protocol may provide for automatic detection
+or configuration.
 
 
 
