@@ -305,30 +305,28 @@ direct the server to reconnect to another server, or to inform that
 client that the server is shutting down.
 
 m4_pre(
-struct DisCon {
+struct DisConn {
   int32  xid;
-  int32  why;
+  int32  reason;
   string args;
 };)m4_dnl
 
 .KS
-where the defined values for "why" are
+where the defined values for "reason" are
 
 .nf
 -----------------------------------------------------------------
-Why  Definition
+Reason  Definition
 -----------------------------------------------------------------
- 0   Reserved.
- 1   Server is closing down.  xid MUST be zero.
- 2   Server is closing this connection, in response to your 
-     request (DisConnRqst) with sequence number matching 
-     xid.
- 3   Server is closing this connection in response to a protocol
-     violation. xid MUST be zero.
- 4   Server is closing this connection, and requests that client
-     makes new connection to server address in "args".  
-     xid MUST be zero.
----------------------------------------------------------------
+  0     Reserved.
+  1     Server is closing down.  xid MUST be zero.
+  2     Server is closing this connection, in response to your 
+        request (DisConnRqst) with sequence number matching 
+        xid.
+  4     Server is closing this connection, and requests that
+		client makes new connection to server address in "args".  
+        xid MUST be zero.
+-----------------------------------------------------------------
 .fi
 .KE
 
