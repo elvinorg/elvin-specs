@@ -29,7 +29,7 @@ struct NameValue {
 
 struct Keys {
     struct KeySetList {
-	int32 list_type;
+	int32 scheme;
 	struct KeySet {
 	    opaque keys[];
 	} key_sets[];
