@@ -4,7 +4,7 @@ m4_dnl
 m4_dnl              Tickertape Message Format Specification
 m4_dnl
 m4_dnl File:        $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/ticker/main.m4,v $
-m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.14 $
+m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.15 $
 m4_dnl Copyright:   (C) 2001-2004, David Arnold.
 m4_dnl
 m4_dnl This specification may be reproduced or transmitted in any form or by
@@ -30,7 +30,7 @@ m4_dnl ########################################################################*
 m4_dnl
 m4_dnl    internal section references
 m4_dnl
-m4_define(CONTACT_DETAILS,`13')m4_dnl
+m4_define(CONTACT_DETAILS,`14')m4_dnl
 m4_define(PROTOCOL_REGISTRY,`11.2')m4_dnl
 m4_define(HISTORICAL_FORMATS,`Appendix B')m4_dnl
 m4_define(EXAMPLE_FORMATS,`Appendix A')m4_dnl
@@ -413,6 +413,10 @@ indicating that the message be shown briefly; and negative values,
 suggesting that it not be shown at all, but displayed only in logs or
 historical views.
 
+Clients SHOULD NOT include a Timeout attribute in messages by default:
+unless the user or generating program has reason to suggest a limited
+validity period for the message, no Timeout need be specified.
+
 .KS
 .TS
 tab(;);
@@ -426,6 +430,23 @@ T}
 _
 .TE
 .KE
+
+Note that this value was changed to use seconds, rather than minutes,
+quite late in the standardisation process.  To minimise the impact of
+this change on deployed applications, the following guidelines are
+provided:
+
+For any message advertising a protocol version of 3001 or greater, the
+value can be assumed to be in seconds.
+
+For messages with earlier versions, or that do not specify a version,
+Timeout values of less than 60 or equal to 1440 MAY be interpreted as
+a number of minutes.
+
+Similarly, implementations MAY generally refrain from sending messages
+with timeout values of less than a minute, and for a timeout of one
+minute, SHOULD use a value of 61.
+
 .\"
 m4_heading(3, `User Agent Identification')
 
