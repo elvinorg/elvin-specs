@@ -10,8 +10,8 @@ addresses.
 
 Clients multicast a request for server URLs; servers respond with a
 list of URLs describing their available endpoints.  Multicast is not
-available for all physical network types, however broadcast MAY be
-used where multicast is unavailable.
+available for all physical network types, however link-layer broadcast
+MAY be used where multicast is unavailable.
 
 This specification describes an abstract discovery protocol, and a
 concrete implementation for IP-based networks (section x.x)
@@ -43,6 +43,7 @@ struct SvrAdvt {
   uint8    major;        /* major version for *this packet* */
   uint8    minor;        /* minor version for *this packet* */
   string   server;       /* unique name for server */
+  uint32   version;      /* version of configuration advertised */
   string   urls[];       /* set of URLs for server (with properties) */
 };)m4_dnl
 
@@ -52,8 +53,14 @@ multiple protocol versions, this MUST be reflected in the endpoint
 URLs, and the SvrAdvt message MUST use the client's protocol version.
 
 The SvrAdvt includes a server name that MUST be globally unique.  It
-is suggested the fully-qualified DNS host name, server process number
-and current time-of-day be used.
+is RECOMMENDED that the fully-qualified DNS host name, server process
+number and starting time-of-day be used to prevent collisions.
+
+The version number distinguishes between advertisements from the same
+server reflecting changes in the available protocols.  As a server's
+configuration is altered (at runtime), the advertisement version
+number MUST be incremented.  This allows clients to discard duplicate
+advertisements.
 
 The set of URLs reflect the endpoints available from the server.  A
 SvrAdvt message SHOULD include all endpoints offered by the server.
@@ -66,10 +73,11 @@ seconds.
 
 Clients MAY maintain a cached list of all endpoint URLs it has seen
 announced.  If available, this list MUST be used to attempt connection
-before sending a SvrRqst.  Cached URLs MUST be replaced by a
-subsequent message from the same server.  Cached URLs for a server not
-replaced after eight (8) observed SvrRqst/SvrAdvt cycles SHOULD be
-removed.
+before sending a SvrRqst.  Cached URLs MUST be replaced by those in a
+subsequent advertisement with higher version number from the same
+server.  URLs cached for a given server SHOULD be flushed after eight
+(8) observed SvrRqst/SvrAdvt cycles that have not included a SvrAdvt
+from that server.
 
 A server shutting down SHOULD send a Server Advertisement Close
 message.

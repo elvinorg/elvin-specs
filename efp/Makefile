@@ -26,11 +26,14 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/efp/Attic/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.1 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.2 $
 #
 ################################################################
 
 .PHONY: all macros outline
+
+SOURCE_FILES:= $(wildcard *.ms)
+
 
 all: main.txt
 
@@ -41,7 +44,7 @@ outline.txt: main.tmp
 
 main.txt: main.tmp
 
-main.tmp: *.ms
+main.tmp: efp.ms
 	m4 -P $< > $@
 
 clean:

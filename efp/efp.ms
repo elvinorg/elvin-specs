@@ -16,8 +16,8 @@ m4_include(macros.m4)
 .in 0
 XXX Working Group                                              D. Arnold
 Internet Draft                                                   J. Boot
-Category: Standards Track                                      T. Maslen
-                                                               T. Phelps 
+Category: Standards Track                                   M. Henderson
+                                                               T. Phelps
                                                                B. Segall
                                                                     DSTC
                                                             dd mmmm _yr_
@@ -89,11 +89,15 @@ m4_heading(1, Basic Operation)
 Elvin servers, in addition to whatever client/server protocols they
 support, use a separate server federation protocol.  This protocol has
 several purposes:
+.IP 1. 3
+management of the server(s)
+.IP 3. 3
+clustering of local servers for scaling or reliability
+.IP 3. 3
+linking servers to form wide-area routing networks
 
-1. management of the server(s)
-2. clustering of local servers for scaling or reliability
-3. linking servers to form wide-area routing networks
 
+m4_heading(2, Server Management)
 
 
 m4_heading(2, Clustering)
@@ -123,7 +127,10 @@ used to link islands of Elvin address spaces together into a single
 routing network.  
 
 
-m4_heading(1, Protocol Overview)
+
+m4_heading(1, ABSTRACT PROTOCOL)
+
+m4_heading(2, Protocol Overview)
 
 An Elvin server is statically configured with an initial state,
 including one or more scope names which it is to provide.  The server
@@ -166,6 +173,122 @@ an IP network.
 
 
 
+m4_heading(2, Packet Types)
+
+
+m4_heading(2, Management Packets)
+
+Remote management of an Elvin server is implemented using a secure
+unicast connection to the server in question.  The management protocol
+provides a number of operations.
+
+m4_heading(3, Go Idle)
+
+A server process operates in two modes: active, or idle.  An idle
+server remains an active Unix process, but it suspends any activity
+via the Elvin client protocol.
+
+This is used to provision servers for periods of greater activity, in
+a hot-standby role for reliability, etc.
+
+The Go Idle message forced a server from active, into idle mode.  Any
+clients currently connected to the server are disconnected and no
+further connections are accepted.
+
+The Go Idle packet MAY include a redirection specification, allowing
+the server to direct connected clients to a specific alternative
+server.
+
+m4_pre(
+struct GoIdle {
+  int32  xid;
+  string server;
+};)m4_dnl
+
+m4_heading(3, Go Active)
+
+An idle server process may be made active by sending this message.
+
+m4_pre(
+struct GoActive {
+  int32 xid;
+};)m4_dnl
+
+m4_heading(3, Restart)
+
+Restart the server with the current configuration.  Used to reclaim
+virtual memory space used by a previously busy server process.
+
+m4_heading(3, Add Scope)
+
+Instructs the server to add the specified scope name to the set it
+offers.  A server may host any number of scopes; if configured with no
+scopes, it is not visible for server discovery.
+
+m4_pre(
+struct AddScope {
+  int32  xid;
+  string name;
+};)m4_dnl
+
+If the specified scope is already offered by the server, a Nack reply
+is generated.
+
+Note that the addition of a scope will require the server to increment
+the advertisement version number for SvrAdvt packets in the client
+protocol.
+
+FIXME: what implications on clustering ????
+
+m4_heading(3, Remove Scope)
+
+Instructs the server to stop offering the specified scope.
+
+m4_pre(
+struct RemoveScope {
+  int32  xid;
+  string name;
+};)m4_dnl
+
+If the specified name is not offered by the server, a Nack reply is
+generated.
+
+Similarly to Add Scope, the removal of a scope from a server requires
+that the advertisement version be incremented.
+
+FIXME: what implications on clustering ????
+
+
+m4_heading(3, Add Protocol)
+m4_heading(3, Remove Protocol)
+m4_heading(3, Drop Client)
+m4_heading(3, Zero Stats)
+
+per subscription:
+
+- notifications/second, average and peak
+- bytes/second, average and peak
+- terms/subscription, average and peak
+- percentage of terms that are exists()
+- percentage of terms that are integer ops
+- percentage of terms that are simple string ops
+- percentage of terms that are regexps
+- average length of string elements in notifications
+- average length of element names in notifications
+
+per server:
+
+- number of producers, average and peak
+- delta producer, average and peak (ie. producer-only
+  connect/disconnects per second)
+- number of consumers, average and peak
+- delta consumer, average and peak (ie. consumer-only
+  connect/disconnects per second)
+- server load average
+- network load ????
+
+
+m4_heading(3, Get Stats)
 
 
 
@@ -182,7 +305,8 @@ Author's Address
 .nf
 David Arnold
 Julian Boot
-Thomas Maslen
+Michael Henderson
+Ted Phelps
 Bill Segall
 
 Distributed Systems Technology Centre
