@@ -3,3 +3,5 @@
 *.txt
 .nfs*
 draft-*.txt
+*.ps
+*.pdf

@@ -4,4 +4,6 @@ main.txt
 outline.txt
 main.ms
 *.ps
+*.eps
+*.pdf
 draft-*.txt

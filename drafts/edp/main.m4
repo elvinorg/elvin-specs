@@ -1,9 +1,10 @@
+m4_dnl -*- nroff -*-
 m4_dnl ########################################################################
 m4_dnl
 m4_dnl              Elvin Router Discovery Protocol
 m4_dnl
 m4_dnl File:        $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/edp/main.m4,v $
-m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.7 $
+m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.8 $
 m4_dnl Copyright:   (C) 2000-2001, DSTC Pty Ltd.
 m4_dnl
 m4_dnl This specification may be reproduced or transmitted in any form or by
@@ -447,7 +448,7 @@ The scope name is the UTF-8 encoded scope name for the router.  The
 scope name MAY be empty (zero length).
 
 The set of URI reflect the endpoints available from the router.  A
-SvrAdvt message SHOULD include all endpoints offered by the router.
+SvrAdvt message SHOULD incl`'ude all endpoints offered by the router.
 Where the limitations of the underlying concrete protocol prevent
 this, the router cannot advertise all its endpoints.  Each SvrAdvt
 MUST contain at least one URI.
