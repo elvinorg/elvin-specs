@@ -157,8 +157,9 @@ of identifiers can be encoded using a single byte.
   Subscription Add              FedSubAdd               166
   Subscription Modify           FedSubMod               167
   Subscription Delete           FedSubDel               168
-  Federated Notify Emit         FedNotifyEmit           169
-  Federated Notify Deliver      FedNotifyDeliver        170
+  Federated Notify Forward      FedNotifyFwd            169
+  Client Redirect               ClientRedirect          170
+
   ----------------------------------------------------------------
 .fi
 .KE
@@ -288,6 +289,8 @@ identifier, and supply its address for further operations.
 
 m4_pre(
 struct ClusterRqst {
+  int8 ver_major;
+  int8 ver_minor;
   id32 xid;  
   string scope;
 };)m4_dnl
