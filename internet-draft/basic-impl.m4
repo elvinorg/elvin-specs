@@ -12,6 +12,14 @@ any quantity value is defined to be represented using a signed, 32 bit
 
 m4_heading(2, Data Types)
 
+*** FIXME *** 
+
+this whole section really describes the representation of datatypes in
+the subscription language, rather than the actual underlying datatypes
+as supported by the evaluation engine and notifications.
+
+*** FIXME ***
+
 Elvin defines a set of simple, platform-independent types for
 communication of notification data.  The types have been chosen to
 enable implementation using a wide range of marshalling standards and

@@ -1,4 +1,4 @@
-m4_include(macros.m4)
+m4_include(macros.m4)m4_dnl
 .pl 10.0i
 .po 0
 .ll 7.2i
@@ -23,7 +23,7 @@ Category: Standards Track                                      T. Maslen
 
 
 .ce
-Elvin \- An Internet Notification System
+Elvin \- Content-Addressed Messaging Protocol
 
 .ti 0
 Status of this Memo

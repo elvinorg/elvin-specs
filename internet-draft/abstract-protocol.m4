@@ -4,7 +4,8 @@ m4_dnl  abstract-protocol
 
 m4_heading(1, ABSTRACT PROTOCOL)
 
-This section describes the operation of the Elvin4 protocol.  
+This section describes the operation of the Elvin4 protocol, without
+describing any particular protocol implementation.
 
 m4_heading(2, Protocol Overview)
 
