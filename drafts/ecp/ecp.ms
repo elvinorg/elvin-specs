@@ -1,4 +1,6 @@
-m4_include(macros.m4)
+m4_include(macros.m4)m4_dnl
+m4_define(__title, `Elvin Server Clustering Protocol')m4_dnl
+m4_define(__abbrev, `ESCP')m4_dnl
 .pl 10.0i
 .po 0
 .ll 7.2i
@@ -9,17 +11,17 @@ m4_include(macros.m4)
 .ds RF PUTFFHERE[Page %]
 .ds CF Expires in 6 months
 .ds LH Internet Draft
-.ds RH _date_
-.ds CH ESCP
+.ds RH __date
+.ds CH __abbrev
 .hy 0
 .ad l
 .in 0
 XXX Working Group                                              D. Arnold
 Internet Draft                                                   J. Boot
-Category: Standards Track                                   dd mmmm _yr_
+Category: Standards Track                                    _d __m __yr
 
 .ce
-Elvin Server Clustering Protocol
+__title
 
 .ti 0
 Status of this Memo
@@ -35,14 +37,14 @@ status of this protocol.  Distribution of this memo is unlimited.
 Copyright Notice
 
 .in 3
-Copyright (C) The Internet Society (_yr_).  All Rights Reserved.
+Copyright (C) The Internet Society (__yr).  All Rights Reserved.
 
 
 .ti 0
 ABSTRACT
 
 .in 3
-This document describes a protocol for federation of Elvin []
+This document describes a protocol for federation of Elvin [ELVIN]
 servers.  It enables exchange of message traffic and load-balancing
 across local clusters.
 
@@ -56,11 +58,20 @@ TABLE OF CONTENTS
 
 .bp
 m4_heading(1, INTRODUCTION)
+
+Elvin is a notification service which provides fast, simple,
+undirected messaging, using content-based selection of delivered
+messages.  It has been show to work on a wide-area scale and is
+designed to complement the existing Internet protocols.
+
+The __title describes the messages and interactions that allow
+multiple Elvin servers to provide a single Elvin service.
+
 m4_heading(1, TERMINOLOGY)
 
 Wide-area federation
 
-Local-area federation
+Local-area federation 
 
 Clustering
 
@@ -72,6 +83,12 @@ Address space
 
 Elvin domain
 
+Elvin cluster
+
+Slave server
+
+Master server
+
 m4_heading(2, Notation Conventions)
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
@@ -79,21 +96,17 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
 document are to be interpreted as described in RFC 2119.
 
 
-m4_heading(1, Basic Operation)
+m4_heading(1, BASIC OPERATION)
 
 Elvin servers, in addition to whatever client/server protocols they
 support, use a separate server federation protocol.  This protocol has
-several purposes:
+two purposes:
 .IP 1. 3
 management of the server(s)
-.IP 3. 3
+.IP 2. 3
 clustering of local servers for scaling or reliability
-.IP 3. 3
-linking servers to form wide-area routing networks
-
 
 m4_heading(2, Server Management)
-
 
 m4_heading(2, Clustering)
 
@@ -115,7 +128,42 @@ implement a single address space; effectively a virtual server
 providing the same service semantics as a single server daemon with
 better performance or reliability.
 
+m4_heading(3, Subscription Sharing)
+
+Muliple servers in a cluster 
+
+term lists per server id
+
+m4_heading(3, Notification Deleiver)
+
+eval against term list.  emit with list of servers in the notification
+
+m4_heading(3, Slave Role)
+
+do the data thing 
+
+everyone shares all state: server url lists, etc
+
+ready to become master if master exits
+
+m4_heading(3, Master Role)
+
+server discovery
+
+join replies
+
+m4_heading(3, Master Failover)
+
+hand off on exit
+
+reelection on abort
+
+m4_heading(3, Load Balancing)
+
+redir clients when ew get unbalanced
+
 m4_heading(1, ABSTRACT PROTOCOL)
+
 m4_heading(2, Protocol Overview)
 
 An Elvin server is statically configured with an initial state.  This
@@ -212,7 +260,7 @@ to 4 and the minor version should be 0.
 
 The server_id value is a unique identifier the server has selected
 to use.  This MUST be set the the RLM member identifier generated
-my the RLM library during its connection process.
+by the RLM protocol during its connection process.
 
 The urls field contains the Elvin URLs the server is configured 
 with and will offer to clients when the server is activated.
@@ -222,14 +270,10 @@ using a standard web browser for administration of the server.
 
 On initial startup, a server configured to join a cluster MUST join
 the RLM group specified.  The server MUST then send its ClstJoinRqst.
-The server should wait for MAX_RTT seconds to see its own request
-packet.  When a server receives its own ClstJoinRqst, it MUST cancel
-its initial timer and SHOULD calculate how long the packet took to
-arrive from the time it was sent, RTT. The server should then start a
-new timer for 4*RTT waiting for a ClstJoinRply response.
-
-If ClstJoinRqst does not arrive, the RLM group joined is in error and
-the server should abort.
+When a server receives its own ClstJoinRqst, it SHOULD calculate how
+long the packet took to arrive from the time it was sent, RTT. The
+server should then start a new timer for 4*RTT waiting for a
+ClstJoinRply response.
 
 Once a server has seen its own ClstJoinRqst, it MUST record all
 observed packets.
@@ -246,8 +290,8 @@ each of the recorded ClstJoinRqst packets that it has observed during
 the timeout with a ClstJoinRply.
 
 If the server has observed a ClstJoinRply for another server, this
-indicats another server is action as the master and the server MUST
-NOT assume the master role, the server SHOULD resend a ClstJoinRqst
+indicates another server is acting as the master and this server MUST
+NOT assume the master role.  The server SHOULD resend a ClstJoinRqst
 and start the join process again.
 
 Should a server see multiple ClstJoinRply's in response to its
@@ -341,7 +385,7 @@ struct Shutdown {
   id16 server_ids[];
 };)m4_dnl
 
-Request the the specified server or servers shutdown.
+Request that the specified server or servers shutdown.
 
 On receiving a Shutdown or Restart request, the server MUST withdraw
 all client protocol offers, send a Disconn (with no redirect) to all
@@ -454,19 +498,29 @@ of clients to be disconnected from their current server and
 
 m4_pre(
 struct ClstRedir {
+  id16 server_ids[];
   id64 client_ids[];
   string address[];
 };)m4_dnl
 
+The server identifiers list the servers in the cluster which this
+redirection is directed at.  Server whos cluster ID is not
+in the list MUST ignore the packet.
+
 The client identifiers are full, 64bit identifiers, containing both a
 server identifier and per-server client identifier.  Multiple clients
 connected to multiple servers can be redirected with a single packet.
+If the client identifiers list is empty, then all clients should be
+disconnected and redirected to an URL in the address list.
 
 The string address list MAY be zero length, in which case the clients
 are disconnected without redirection (using the client Disconn
 packet).  If multiple address values are provided, a server SHOULD
 share the redirection specification across the provided addresses
 approximately evenly using a pseudo-random selection method.
+
+The server SHOULD redirect each client to a randomly selected URL from the
+list.
 
 m4_heading(3, Server Statistics Report)
 
@@ -542,7 +596,7 @@ identifier is not in the server_ids field, it MAY ignore the
 notification and does not need to compare it to local client
 subscriptions.  If the server_ids list does contain the receiving
 server's identifier, the server MUST compare the notification
-for delivery to clients.
+to its subscription table for delivery to clients.
 
 The attributes, deliver_insecure and nfn_keys fields are identical
 to the same attributes, deliver_insecure and keys fields in the
@@ -557,33 +611,37 @@ m4_heading(2, Packet Encoding)
 Elvin cluster packets are encoded using XDR [RFC1832] for each element in the
 packet.  This mapping is as for the standard Elvin client-server XDR encoding.
 
-* do some examples - the whole lot?
+do some examples - the whole lot?
 
 m4_heading(1, LIMITATIONS)
 
-* managment protocol is weak
+managment protocol is weak
 
-* security of network
+security of network
 
-* distribution of configuration information (eg scope)
+distribution of configuration information (eg scope)
 
 m4_heading(1, REFERENCES)
 
-.IP [RFC1832] 12
-Srinivasan, R.,
-"XDR: External Data Representation Standard",
-RFC 1832, August 1995.
+.IP [EDP] 12
+Arnold, D., et al,
+"Elvin Discovery Protocol",
+April 2001.
 
 .IP [ELVIN] 12
 Arnold, D., et al,
 "Elvin - Content-Addressed Messaging Client Protocol",
 April 2001.
 
+.IP [RFC1832] 12
+Srinivasan, R.,
+"XDR: External Data Representation Standard",
+RFC 1832, August 1995.
+
 .IP [RLM] 12
 Arnold, D., Boot, J.,
 "Reliable Local Multicast"
 April 2001.
-
 
 .KS
 .ti 0
@@ -618,7 +676,7 @@ FULL COPYRIGHT STATEMENT
 .ft
 .in 3
 
-Copyright (C) The Internet Society (_yr_).  All Rights Reserved.
+Copyright (C) The Internet Society (__yr).  All Rights Reserved.
 
 This document and translations of it may be copied and furnished to
 others, and derivative works that comment on or otherwise explain it

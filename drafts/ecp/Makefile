@@ -26,7 +26,7 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/ecp/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.2 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.3 $
 #
 ################################################################
 
@@ -34,6 +34,12 @@
 
 SOURCE_FILES:= $(wildcard *.ms)
 
+DATE := $(shell date +"%B %Y")
+YEAR := $(shell date +"%Y")
+MTH := $(shell date +"%b")
+DAY := $(shell date +"%e")
+
+M4FLAGS := -D__yr="$(YEAR)" -D__date="$(DATE)" -D__m="$(MTH)" -D_d="$(DAY)"
 
 all: main.txt
 
@@ -45,7 +51,7 @@ outline.txt: main.tmp
 main.txt: main.tmp
 
 main.tmp: ecp.ms ../macros.m4
-	m4 -I.. -P $< > $@
+	m4 -I.. $(M4FLAGS) -P $< > $@
 
 clean:
 	rm -f main.txt main.tmp
@@ -56,7 +62,7 @@ clean:
 	nroff -ms $< | ./fix.pl | sed 's/_//g'  > $@
 
 %.tmp : %.ms
-	m4 -P $< > $@
+	m4 -D__date="$(DATE)" -P $< > $@
 
 ################################################################
 
