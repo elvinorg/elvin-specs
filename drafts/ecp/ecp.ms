@@ -308,6 +308,7 @@ struct ClstJoinRply {
   struct {
     string attr_name;
     SubAST sub_expr;      /* not used at present - set to (int32)0 */
+    id32 server_ids[];
   }  subscriptions[];
 };)m4_dnl
 
