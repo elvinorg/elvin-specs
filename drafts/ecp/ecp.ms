@@ -308,7 +308,7 @@ struct ClstRply {
 
 m4_heading(3, Cluster Join Request)
 
-Unicast request to the cluster controller to join its managed cluster.
+Multicast request to the cluster to join its managed cluster.
 The server and urls fields match the information sent in SvrAdvt
 packets by the server, and are used to allow the cluster to take over
 the role of advertising server endpoints to client programs.
@@ -320,6 +320,12 @@ struct ClstJoinRqst {
   string urls[];        /* set of URLs for server */
 };)m4_dnl
 
+If a node gets no response after a reasonable timeout (?) then it
+should assume that it is the first node in teh cluster and assume
+the role of "leader".  The leader is responsible for responding to
+further ClstJoinRqst's and also to client discovery requests on
+behalf of the cluster.
+
 .nf
 *** dealing with changes in the set of protocols or their options
 *** offered by a server during its membership of the cluster is an
@@ -330,19 +336,18 @@ struct ClstJoinRqst {
 
 m4_heading(3, Cluster Join Reply)
 
-Unicast reply to a server requesting entry to a cluster.  Includes the
-server's unique identifier and the current subscription database of
-the cluster.
+Multicast reply from the leader node in a cluster.  Includes the
+server's newly allocated unique identifier and the current
+subscription database of the cluster.
 
 m4_pre(
 struct ClstJoinRply {
   id32 xid;
   id32 server_id;
   struct {
-    id64 sub_id;
-    SubAST sub_expr;
-    boolean accept_insecure;
-    Keys keys[];    
+    id64 term_id;
+    string attr_name;
+    SubAST sub_expr;      /* not used at present - set to (int32)0 */
   }  subscriptions[];
 };)m4_dnl
 
