@@ -440,7 +440,7 @@ m4_pre([
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
 | Ver |   Type  |     Flags     |          Incarnation          |
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
-|            Member Id          |            Packet Id          |
+|             Member            |            Fragment           |
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
 |                       Starting Sequence                       |
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
@@ -452,8 +452,9 @@ m4_changequote(`,')m4_dnl
 
 m4_heading(3, `New Sequencer')m4_dnl
 
-The member_id and packet_id should be zero, and the last sequence to
-that of the last message seen.
+The member number should be the member number of the new sequencer.
+The fragment number should be zero, and the last sequence to that of
+the last message seen.
 
 
 
