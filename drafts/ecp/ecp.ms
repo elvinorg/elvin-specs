@@ -186,6 +186,102 @@ of identifiers can be encoded using a single byte.
 .fi
 .KE
 
+m4_heading(2, Joining and Leaving the Cluster)
+
+Servers are staticly configured to use a specified RLM group number
+for cluster management operations.  When configured to become part of
+a cluster, a server must discover other servers already in the
+cluster, and synchronise its state before accepting client
+connections.
+
+m4_heading(3, Cluster Join Request)
+
+Multicast request to the cluster to join its managed cluster.
+The server and urls fields match the information sent in SvrAdvt
+packets by the server, and are used to allow the cluster to take over
+the role of advertising server endpoints to client programs.
+
+m4_pre(
+struct ClstJoinRqst {
+  id32 xid; 
+  string server;        /* unique name for server */
+  string urls[];        /* set of URLs for server */
+};)m4_dnl
+
+On initial startup, a server configured to join a cluster MUST join
+the RLM group specified, and then sleep for a random period between 0
+and X seconds.
+
+When the initial timeout expires, the server MUST send its
+ClstJoinRqst.  It MUST then wait X seconds for a response.  During
+this period it MUST record all observed ClstJoinRqst packets.
+
+If a ClstJoinRply is received during the timeout period, the timer is
+cancelled, and the server initialises its internal state and enters
+active operation.  The recorded ClstJoinRqst packets are discarded.
+
+If no response is seen within the timeout period, the server declares
+itself the leader.  It multicasts its own ClstJoinRply to announce
+this decision, and then responds to each of the recorded ClstJoinRqst
+packets that it has observed during the timeout with a ClstJoinRply.
+
+If a server receives a ClstJoinRply from another server after electing
+itself as the leader and sending a reply, but before receiving its own
+ClstJoinRply, it MUST drop the role of leader in favour of the first
+received reply.
+
+Should a server see multiple ClstJoinRply's in response to its
+request, it MUST ignore the second and subsequent packets.
+
+The leader is responsible for responding to further ClstJoinRqst's and
+also to client server discovery requests on behalf of the cluster.
+
+.nf
+*** dealing with changes in the set of protocols or their options
+*** offered by a server during its membership of the cluster is an
+*** open issue.  do we forbid this?  is it controlled by the cluster
+*** mgmt and so we know anyway?  or do we introduce an update packet?
+*** or something else entirely?
+
+*** this is related to the elvind.conf issue of specifying protocol
+*** options.  the current URL-based scheme is bogus, and should go
+*** away ASAP.  at that time, we should revisit this packet format.
+.fi
+
+m4_heading(3, Cluster Join Reply)
+
+Multicast reply from the leader node in a cluster.  Includes the
+server's newly allocated unique identifier and the current
+subscription database of the cluster.
+
+m4_pre(
+struct ClstJoinRply {
+  id32 xid;
+  id16 server_id;
+  id16 servers[];
+  struct {
+    string attr_name;
+    SubAST sub_expr;      /* not used at present - set to (int32)0 */
+    id16 server_ids[];
+  }  subscriptions[];
+};)m4_dnl
+
+m4_heading(3, Cluster Leave)
+
+Multicast when a server initiates the process of leaving the cluster
+(normally because of a controlled shutdown of the host machine, a
+console interupt, or similar occurance).  
+
+After receiving a Leave, servers should wait for a ServerReport
+specifying a change to \fIshutdown\fR mode before freeing state
+associated with the server.
+
+m4_pre(
+struct ClstLeave {
+  id16 server_id;
+};)m4_dnl
+
+
 m4_heading(2, Management Packets)
 
 Management of an Elvin server is implemented using a secure connection
@@ -303,63 +399,6 @@ struct Shutdown {
   id16 server_ids[];
 };)m4_dnl
 
-m4_heading(3, Cluster Join Request)
-
-Multicast request to the cluster to join its managed cluster.
-The server and urls fields match the information sent in SvrAdvt
-packets by the server, and are used to allow the cluster to take over
-the role of advertising server endpoints to client programs.
-
-m4_pre(
-struct ClstJoinRqst {
-  id32 xid; 
-  string server;        /* unique name for server */
-  string urls[];        /* set of URLs for server */
-};)m4_dnl
-
-If a node gets no response after a reasonable timeout (?) then it
-should assume that it is the first node in the cluster and assume
-the role of "leader".  The leader is responsible for responding to
-further ClstJoinRqst's and also to client discovery requests on
-behalf of the cluster.
-
-.nf
-*** dealing with changes in the set of protocols or their options
-*** offered by a server during its membership of the cluster is an
-*** open issue.  do we forbid this?  is it controlled by the cluster
-*** mgmt and so we know anyway?  or do we introduce an update packet?
-*** or something else entirely?
-.fi
-
-m4_heading(3, Cluster Join Reply)
-
-Multicast reply from the leader node in a cluster.  Includes the
-server's newly allocated unique identifier and the current
-subscription database of the cluster.
-
-m4_pre(
-struct ClstJoinRply {
-  id32 xid;
-  id16 server_id;
-  id16 servers[];
-  struct {
-    string attr_name;
-    SubAST sub_expr;      /* not used at present - set to (int32)0 */
-    id16 server_ids[];
-  }  subscriptions[];
-};)m4_dnl
-
-m4_heading(3, Cluster Leave)
-
-Multicast when a server wishes to leave the cluster.  After receiving
-a Leave, servers should wait for a ServerConfigNotify of mode Shutdown
-before freeing state associated with that server.
-
-m4_pre(
-struct ClstLeave {
-  id16 server_id;
-};)m4_dnl
-
 m4_heading(3, Cluster Redirect)
 
 Multicast to all servers, the Cluster Redirect packet specifies a set
@@ -382,6 +421,19 @@ packet).  If multiple address values are provided, a server SHOULD
 share the redirection specification across the provided addresses
 approximately evenly using a pseudo-random selection method.
 
+m4_heading(3, Server Statistics Report)
+
+m4_pre(
+struct ServerStatsReport {
+  id16 server_id;
+  uint32 timestamp;
+
+  /* lots of data */
+	
+};)m4_dnl
+
+
+m4_heading(2, Data Packets)
 
 m4_heading(3, Cluster Notify)
 
@@ -396,7 +448,7 @@ struct ClstNotify {
 };)m4_dnl
 
 .nf
-*** what's the first server_id for ?
+*** what's the first server_id for ?  the source?
 .fi
 
 m4_heading(3, Cluster Term Add)
