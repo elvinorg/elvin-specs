@@ -529,8 +529,8 @@ Sent by the Elvin server to a client.
 m4_pre(
 struct NotifDel{
    int32     xid;
-   int64     matching_ids[];
-   boolean   insecure[];
+   int64     matching_ids_secure[];
+   int64     matching_ids_insecure[];
    NameValue attributes[];
 };)m4_dnl
 
