@@ -18,7 +18,7 @@ along the top line of packet diagrams indicate byte lengths.
 .fi
 
 
-m4_heading(5, Base Types)
+m4_heading(4, Base Types)
 
 The XDR encoding for Elvin relies on five basic types used to
 construct each packet: int32, int64, real64, opaque.
@@ -77,7 +77,7 @@ eight bytes for the value.
 .fi
 .KE
 
-m4_heading(5, Packet Encodings)
+m4_heading(4, Packet Encodings)
 
 This section describes the layout of each packet sent in the Elvin
 protocol when using XDR encoding.
@@ -98,19 +98,19 @@ of the packet varies and is determined by the packet type.
      |<----8 byte header---->|<--------data------->|
 
                                                       ENCODED PACKET
-m4_heading(6, Connection Request)
+m4_heading(5, Connection Request)
 
-m4_heading(6, Connection Reply)
+m4_heading(5, Connection Reply)
 
-m4_heading(6, Connection Close Request)
+m4_heading(5, Connection Close Request)
 
-m4_heading(6, Security Request)
+m4_heading(5, Security Request)
 
-m4_heading(6, QoS Request)
+m4_heading(5, QoS Request)
 
-m4_heading(6, Management Request)
+m4_heading(5, Management Request)
 
-m4_heading(6, Subscription Add Request)
+m4_heading(5, Subscription Add Request)
 
 .nf
    0      4      8     12      ...
@@ -134,7 +134,7 @@ m4_heading(6, Subscription Add Request)
                         There will be n keys where n >= 0.
 .fi
 
-m4_heading(6, Subscription Modify Request)
+m4_heading(5, Subscription Modify Request)
 
 It is an error to send a SubModRqst with an id not currently held at
 the server.
@@ -174,7 +174,7 @@ the server.
  del key x   (opaque) uninterpreted bytes of a security key   
 .KE
 
-m4_heading(6, Subscription Delete Request)
+m4_heading(5, Subscription Delete Request)
 
 It is an error to send a SubDelRqst with an sub id not currently held
 at the server.
@@ -190,9 +190,9 @@ at the server.
  sub #       (int32)  number identifier for the subscription to 
                         delete.
 .KE
-m4_heading(6, Quench Request)
+m4_heading(5, Quench Request)
 
-m4_heading(6, Notification)
+m4_heading(5, Notification)
 
 An Elvin notification is a list of name-value pairs, where
 the value is one of the five base types of int32, int64, real64,
@@ -255,7 +255,7 @@ int32.
 .KE
 
 
-m4_heading(6, Notification Deliver)
+m4_heading(5, Notification Deliver)
 
   0      4      8     12      ...
  +------+------+------+------+...+------+...+------+...+------+
@@ -280,9 +280,9 @@ m4_heading(6, Notification Deliver)
                         notification matched.
  sid x         (int32)  there MUST be m sub ids where m > 0
 
-m4_heading(6, Quench Deliver)
+m4_heading(5, Quench Deliver)
 
-headng(5, Acknowledgement)
+m4_heading(5, Acknowledgement)
 
                      0      4      8
                     +------+------+
@@ -293,7 +293,7 @@ headng(5, Acknowledgement)
  seq #       (int32)  sequence number of the request this packet
                       is acknowledging
 
-m4_heading(6, Negative Acknowledgement)
+m4_heading(5, Negative Acknowledgement)
 
 .KS
  0     4     8    12      ...

@@ -2,11 +2,11 @@ m4_dnl  abstract-protocol
 m4_dnl
 m4_dnl  -*-nroff-mode-*-
 
-m4_heading(2, Abstract Protocol)
+m4_heading(1, ABSTRACT PROTOCOL)
 
 This section describes the operation of the Elvin4 protocol.  
 
-m4_heading(3, Protocol Overview)
+m4_heading(2, Protocol Overview)
 
 After an Elvin server has been located (see section on SLP) a client
 requests a connection. The server MUST respond with either a
@@ -93,7 +93,7 @@ The next section describes in detail the content of each packet in
 protocol and the requirements of both the server and the client 
 library.
 
-m4_heading(3, Packet Types)
+m4_heading(2, Packet Types)
 
 The protocol specifies a number of packets used in interactions between 
 clients and the server and bewteen federated servers.
@@ -133,13 +133,13 @@ Each encoding is free to use the most suitbale method for distinguishing
 between different packet types.  For the default XDR encoding, an 
 enum is used with values that match the above table.
 
-m4_heading(3, Packet Descriptions)
+m4_heading(2, Packet Descriptions)
 
 This section provides detailed descrptions of each packet used in the
 Elvin protocol. Packets are comprised of the Elvin base types and
 described in a pseudo-C style as structs made up of these types.
 
-m4_heading(4, Connect Request)
+m4_heading(3, Connect Request)
 
 Sent by client to the Elvin server.  Includes protocol version of the client library,
 per-connection security keys, quality of service specifications, etc.
@@ -157,7 +157,7 @@ struct ConRqst {
 *** fixme *** whats the format of protocol_preferences strings? URLs
 perhaps.
 
-m4_heading(4, Connect Reply)
+m4_heading(3, Connect Reply)
 
 Sent by the Elvin server to a client.  Confirms a connection request.
 Includes connection identifier, available QoS, and protocol version
@@ -173,7 +173,7 @@ struct ConRply {
 
 "protocol_used" tells the client
 
-m4_heading(4, Disconnect Request)
+m4_heading(3, Disconnect Request)
 
 Sent by client to the Elvin server.  Requests disconnection.  This message is not acknowledged.
 
@@ -183,13 +183,13 @@ struct DisConRqst {
 }
 )
 
-m4_heading(4, Security Request)
+m4_heading(3, Security Request)
 
-m4_heading(4, QoS Request)
+m4_heading(3, QoS Request)
 
-m4_heading(4, Management Request)
+m4_heading(3, Management Request)
 
-m4_heading(4, Subscription Add Request)
+m4_heading(3, Subscription Add Request)
 
 Sent by client to the Elvin server.  if your are going to get a ack
 back, events may start arriving before the return of the sendSubscribe
@@ -203,7 +203,7 @@ struct SubAddRqst {
 }
 )
 
-m4_heading(4, Subscription Modify Request)
+m4_heading(3, Subscription Modify Request)
 
 Sent by client to the Elvin server.  An Nack will be returned if the
 subscription id is not valid.
@@ -216,7 +216,7 @@ subscription id is not valid.
     opaque del_keys[];
   }
 
-m4_heading(4, Subscription Delete Request)
+m4_heading(3, Subscription Delete Request)
 
 Sent by client to the Elvin server.  An Nack will be returned if the subscription id is not valid.
 
@@ -225,20 +225,20 @@ Sent by client to the Elvin server.  An Nack will be returned if the subscriptio
     int32 subscription_id;
   }
 
-m4_heading(4, Quench Request)
+m4_heading(3, Quench Request)
 
 Sent by client to the Elvin server. 
 
-m4_heading(4, Notification)
+m4_heading(3, Notification)
 
 Sent by client to the Elvin server. 
 
 
-m4_heading(4, Notification Deliver)
+m4_heading(3, Notification Deliver)
 
 Sent by the Elvin server to a client. 
 
-m4_heading(4, Quench Deliver)
+m4_heading(3, Quench Deliver)
 
 Sent by the Elvin server to a client. 
 
@@ -246,15 +246,15 @@ headng(4, Acknowledgement)
 
 Sent by the Elvin server to a client. 
 
-m4_heading(4, Negative Acknowledgement)
+m4_heading(3, Negative Acknowledgement)
 
 Sent by the Elvin server to a client. 
 
-m4_heading(4, Add Link)
-m4_heading(4, Update Link)
-m4_heading(4, Delete Link)
+m4_heading(3, Add Link)
+m4_heading(3, Update Link)
+m4_heading(3, Delete Link)
 
-m4_heading(3, Failures)
+m4_heading(2, Failures)
 
 The different things that generate Nacks. 
 

@@ -26,13 +26,18 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/internet-draft/Attic/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.3 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.4 $
 #
 ################################################################
 
-.PHONY: all macros
+.PHONY: all macros outline
 
 all: main.txt
+
+outline: outline.txt
+
+outline.txt: main.ms
+	awk '/.NH/ {for(i=0;i<$$2;i++)printf("%s","  ");getline;print}' < $< > $@
 
 main.txt: main.ms
 

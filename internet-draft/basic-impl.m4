@@ -1,6 +1,7 @@
 m4_dnl  basic-impl
 m4_dnl
 m4_dnl  this is the basic implementation details
+m4_dnl
 m4_include(macros.m4)m4_dnl
 m4_dnl
 m4_heading(1, IMPLEMENTATION)
@@ -18,6 +19,7 @@ programming languages.  They are
 
 .KS
 Integer Numbers
+m4_dnl ***FIXME*** we lose our indent here  ***
 .IP int32 10
 A 32 bit, signed, 2's complement integer.
 .IP int64 10
@@ -510,4 +512,63 @@ m4_heading(2, Quenching)
 
 description of quenching: problem, what it is, how it works, impact on
 security, impact on federation
+
+Quenching is a facility named for its ability to reduce notification
+traffic by preventing the propagation of unwanted notifications.  It
+has two components: manual and automatic.  Both cases use the server's
+knowledge of consumers subscriptions to prevent producer clients from
+notifying events for which no subscription exists.
+
+m4_heading(3, Manual Quench)
+
+Some types of producer clients must perform significant work to detect
+events.  As an example, consider a file system monitor that reports
+changes to the monitored file system.  Indiviually checking each
+directory and file for modification would not only place significant
+loading on the host processor, but would be unable to detect changes
+within useful time bounds.
+
+Manual quenching provides a mechanism through which the producer can
+specify a filter over the set of subscriptions registered at the
+server, and be informed of changes to the matching set of
+subscriptions.
+
+In this way, to continue our example above, the file and directory
+names that are to be monitored can be isolated from the subscriptions
+registered by consumers, and only those particular files need be
+monitored for changes.
+
+m4_heading(3, Automatic Quench)
+
+Manual quench requires that clients take explicit action to filter the
+registered subscriptions and determine what events to detect and
+notify.
+
+Automatic quench is an extension to the Elvin client library which
+peforms quenching on behalf of the client code.  It monitors notified
+events, building a profile of the notifications emitted.  This profile
+is registered with the server as a quench filter (as for manual
+quenching).  The server's updates of matching subscriptions are used
+to filter notifications within the client library.
+
+m4_heading(2, Security)
+m4_heading(3, Requirements)
+m4_heading(3, Client-Server)
+m4_heading(4, Authentication)
+m4_heading(4, Privacy and Integrity)
+m4_heading(3, Anonymous Access Control)
+m4_heading(3, Quenching)
+
+m4_heading(2, Federation)
+m4_heading(3, Requirements)
+m4_heading(3, Clustering)
+m4_heading(3, Wide Area)
+m4_heading(4, Network Issues)
+m4_heading(4, Security)
+m4_heading(3, Quenching)
+
+
+m4_heading(2, Quality of Service)
+m4_heading(3, Fairness)
+m4_heading(3, Policies)
 
