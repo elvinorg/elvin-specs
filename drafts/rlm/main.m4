@@ -6,20 +6,29 @@ Reliable Local Multicast
 .ce
 __file
 
-.ti 0
-Status of this Memo
+m4_heading(1, Status of this Memo)
 
-.in 3
-This document specifies an Internet standards track protocol for the
-Internet community, and requests discussion and suggestions for
-improvements.  Please refer to the current edition of the "Internet
-Official Protocol Standards" (STD 1) for the standardization state and
-status of this protocol.  Distribution of this memo is unlimited.
+This document is an Internet-Draft and is NOT offered in accordance
+with Section 10 of RFC2026, and the author does not provide the IETF
+with any rights other than to publish as an Internet-Draft.
 
-.ti 0
-ABSTRACT
+Internet-Drafts are working documents of the Internet Engineering Task
+Force (IETF), its areas, and its working groups.  Note that other
+groups may also distribute working documents as Internet-Drafts.
 
-.in 3
+Internet-Drafts are draft documents valid for a maximum of six months
+and may be updated, replaced, or obsoleted by other documents at any
+time.  It is inappropriate to use Internet- Drafts as reference
+material or to cite them other than as "work in progress."
+
+The list of current Internet-Drafts can be accessed at
+http://www.ietf.org/1id-abstracts.html
+
+The list of Internet-Draft Shadow Directories can be accessed at
+http://www.ietf.org/shadow.html
+
+m4_heading(1, ABSTRACT)
+
 This document describes the a reliable local-area multicast protocol.
 
 .bp

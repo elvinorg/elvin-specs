@@ -36,11 +36,9 @@ __file
 
 m4_heading(1, Status of this Memo)
 
-This document specifies an Internet standards track protocol for the
-Internet community, and requests discussion and suggestions for
-improvements.  Please refer to the current edition of the "Internet
-Official Protocol Standards" (STD 1) for the standardization state and
-status of this protocol.  Distribution of this memo is unlimited.
+This document is an Internet-Draft and is NOT offered in accordance
+with Section 10 of RFC2026, and the author does not provide the IETF
+with any rights other than to publish as an Internet-Draft.
 
 Internet-Drafts are working documents of the Internet Engineering Task
 Force (IETF), its areas, and its working groups.  Note that other
@@ -956,11 +954,8 @@ Email:  elvin@dstc.edu.au
 .fi
 .KE
 .bp
-.in 0
-.NH 1
-Full Copyright Statement
-.ft
-.in _default_in
+
+m4_heading(1, Full Copyright Statement)
 
 Copyright (C) 2000-__yr DSTC Pty Ltd, Brisbane, Australia.
 
