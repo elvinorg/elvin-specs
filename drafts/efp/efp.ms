@@ -14,34 +14,40 @@ m4_include(macros.m4)
 .hy 0
 .ad l
 .in 0
-XXX Working Group                                              D. Arnold
-Internet Draft                                                 I. Lister
-Category: Standards Track                                   dd mmmm _yr_
+Elvin Project                                                  D. Arnold
+Preliminary INTERNET-DRAFT                                     I. Lister
+                                                                    DSTC
+Expires: aa bbb cccc                                         dd mmm yyyy
 
 .ce
-Elvin Wide-area Federation Protocol
+Elvin Router Federation Protocol
+.ce
+draft-arnold-elvin-federation-prelim-00.txt
 
-.ti 0
-Status of this Memo
+m4_heading(1, Status of this Memo)
 
-.in 3
-This document specifies an Internet standards track protocol for the
-Internet community, and requests discussion and suggestions for
-improvements.  Please refer to the current edition of the "Internet
-Official Protocol Standards" (STD 1) for the standardization state and
-status of this protocol.  Distribution of this memo is unlimited.
+This document is an Internet-Draft and is NOT offered in accordance
+with Section 10 of RFC2026, and the author does not provide the IETF
+with any rights other than to publish as an Internet-Draft.
 
-.ti 0
-Copyright Notice
+Internet-Drafts are working documents of the Internet Engineering Task
+Force (IETF), its areas, and its working groups.  Note that other
+groups may also distribute working documents as Internet-Drafts.
 
-.in 3
-Copyright (C) The Internet Society (_yr_).  All Rights Reserved.
+Internet-Drafts are draft documents valid for a maximum of six months
+and may be updated, replaced, or obsoleted by other documents at any
+time.  It is inappropriate to use Internet- Drafts as reference
+material or to cite them other than as "work in progress."
+
+The list of current Internet-Drafts can be accessed at
+http://www.ietf.org/1id-abstracts.html
+
+The list of Internet-Draft Shadow Directories can be accessed at
+http://www.ietf.org/shadow.html
 
 
-.ti 0
-ABSTRACT
+m4_heading(1, Abstract)
 
-.in 3
 This document describes a protocol for forwarding message traffic
 between Elvin servers.  It provide administrative filtering of both
 incoming and outgoing traffic.
@@ -49,13 +55,7 @@ incoming and outgoing traffic.
 It has no effect on the protocol used for Elvin client to server
 communications, or between server nodes in an Elvin cluster.
 
-.ti 0
-TABLE OF CONTENTS
-
-(tdb) (probably last ;-)
-
-.bp
-m4_heading(1, INTRODUCTION)
+m4_heading(1, Introduction)
 
 The Elvin protocol provides undirected, content-routed messaging
 between any number of clients connected to a single cluster of
@@ -73,7 +73,7 @@ system and its connections to other parts of the Elvin federation,
 including control over what notifications are permitted to travel in
 and out of each server.
 
-m4_heading(1, TERMINOLOGY)
+m4_heading(1, Terminology)
 
 Wide-area federation
 
@@ -113,7 +113,7 @@ Wide-area federation (in future referred to simply as federation) is
 used to link islands of Elvin address spaces together into a single
 routing network.  
 
-m4_heading(1, ABSTRACT PROTOCOL)
+m4_heading(1, Abstract Protocol)
 
 m4_heading(2, Protocol Overview)
 
