@@ -160,7 +160,7 @@ of identifiers can be encoded using a single byte.
   Subscription Modify           FedSubMod               167
   Subscription Delete           FedSubDel               168
   Cluster Notify                ClusterNotify           169
-  Client Redirect               ClientRedirect          170
+  Cluster Redirect              ClusterRedirect         170
   Client Disconnect Notify      ClientDisconnNotify     171
   ----------------------------------------------------------------
 .fi
