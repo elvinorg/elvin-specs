@@ -26,16 +26,16 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/elvin-url/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.2 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.3 $
 #
 ################################################################
 
 .PHONY: all macros outline
 
 #  create date string
-mmm=$(shell date | cut -b5-7)
-dd=$(shell date | cut -b9-10)
-yyyy=2000
+mmm=$(shell date +%b)
+dd=$(shell date +%d)
+yyyy=$(shell date +%Y)
 
 all: main.txt
 
@@ -46,7 +46,7 @@ outline.txt: main.ms
 
 main.txt: main.ms
 
-main.ms: *.m4
+main.ms: *.m4 Makefile
 	m4 -I.. -P main.m4 > $@
 
 clean:
