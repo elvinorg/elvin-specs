@@ -427,13 +427,14 @@ struct ClstSubDel {
 
 m4_heading(3, Cluster Client Notify)
 
-When a client disconnects from a server, the server MUST notify the
-cluster.
+When a client connects or disconnects from a server, the server MUST
+notify the cluster.
 
 m4_pre(
 struct ClstCliNotify {
   id32 server_id;
   id32 client_id;
+  boolean is_connect;
 };)m4_dnl
   
 
