@@ -1,7 +1,7 @@
 m4_dnl
 m4_dnl macros for easier nroff editting
 m4_dnl
-m4_dnl $Id: macros.m4,v 1.6 2001/12/31 04:51:22 arnold Exp $
+m4_dnl $Id: macros.m4,v 1.7 2002/04/06 04:49:09 arnold Exp $
 m4_dnl
 m4_dnl MACRO FOR THE DEFAULT INDENTATION
 m4_dnl
@@ -12,6 +12,15 @@ m4_dnl
 m4_define(m4_heading, `.in 0
 .NH $1
 $2
+.ft
+.in _default_in ')m4_dnl
+m4_dnl
+m4_dnl UNNUMBERED HEADING
+m4_dnl
+m4_define(em4_unnumbered, `.in 0
+.B 
+$1
+.R
 .ft
 .in _default_in ')m4_dnl
 m4_dnl

@@ -4,8 +4,8 @@ m4_dnl
 m4_dnl              Tickertape Message Format Specification
 m4_dnl
 m4_dnl File:        $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/ticker/main.m4,v $
-m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.3 $
-m4_dnl Copyright:   (C) 2001, David Arnold.
+m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.4 $
+m4_dnl Copyright:   (C) 2001-2002, David Arnold.
 m4_dnl
 m4_dnl This specification may be reproduced or transmitted in any form or by
 m4_dnl any means, electronic or mechanical, including photocopying,
@@ -74,7 +74,7 @@ Expires: aa bbb cccc                                         dd mmm yyyy
 .ce
 Tickertape Chat Protocol
 .ce
-draft-arnold-ticker-chat-v3-00.txt
+draft-arnold-ticker-chat-v3-prelim00.txt
 
 m4_heading(1, Status of this Memo)
 
@@ -100,27 +100,28 @@ http://www.ietf.org/shadow.html
 m4_heading(1, Abstract)
 
 This document describes an Elvin message for`'mat as used by the
-Tickertape family of applications.  It supports group-oriented instant
-messaging and provides a simple, consistent interface for
-presentation of a variety of interactive-time data.
+Tickertape family of applications.  It supports group-oriented,
+inter-person and machine-to-person instant messaging and provides a
+simple, consistent interface for presentation of a variety of
+interactive-time data.
 
 The for`'mat is derived from a series of earlier for`'mats, as
 documented in the appendix.
 
 m4_heading(1, Terminology)
 
-This document referrs Elvin clients, producers, and consumers; client
-libraries and routers.
+This document refers to Elvin clients, producers, and consumers;
+client libraries and routers.
 
 An Elvin router is a daemon process that runs on a single machine.  It
 acts as a distribution mechanism for Elvin messages. A client is a
 program that uses an Elvin router, via a client library for a
 particular programming language.  A client library implements the
-Elvin protocols and manages clients' connections to an Elvin router.
+Elvin protocols and manages one or more connections to Elvin routers.
 
-A sender of an Elvin message is often referred to as a ``producer'',
-and receivers as ``consumers''.  A single program may perform either
-or both roles.
+The sender of an Elvin message is often referred to as a ``producer'',
+and receivers as ``consumers''.  A single client may perform either or
+both roles.
 
 Further details of the Elvin protocol, its entities and their roles is
 available in [EP].
@@ -133,28 +134,28 @@ document are to be interpreted as described in [RFC2119].
 
 m4_heading(1, `Tickertape')
 
-The `Tickertape' application, as the name suggests, originally
+A Tickertape protocol application, as the name suggests, originally
 consisted of a single scrolling li`'ne of text presented as a
 graphical user interface.  The content of the scrolling text was
-composed from messages received via Elvin, selected by the
+composed from messages received via Elvin, and selected by the
 application's subscriptions.
 
 In addition to this scrolling display, facilities to compose and send
 messages and modify the subscriptions were provided.
 
 Alternative styles of presentation have since become available, but
-the name `Tickertape' has remained descriptive of the whole family of
-protocol implementations.
+the name Tickertape has remained descriptive of the whole family of
+protocol clients.
 
 m4_heading(1, Messages)
 
-This document specifies the basic Tickertape ``chat'' message
-for`'mat.  Several other message formats are frequently implemented by
-a Tickertape client, for example those for reception of Usenet-style
+This document specifies the basic Tickertape 'chat' message for`'mat.
+Several other message formats are frequently implemented by a
+Tickertape client, for example those for reception of Usenet-style
 messages and presence notifications.
 
 A Tickertape chat message has three fundamental properties: the
-sending user's name, a specified target group, and a textual message
+sending entity's name, a specified target group, and a textual message
 body.  These basic properties are then augmented to allow message
 ageing, threaded conversations, attachments and other features.
 
@@ -197,20 +198,36 @@ it not be scrolled at all, but displayed only in a threaded or
 historical view.
 T}
 
-Message-Id;string;T{
-Globally unique identifier for this message.  The use of a UUID (or
-GUID), optionally hashed (using SHA.1, MD5, etc) to ensure anonymity
-(since the UUID includes the MAC address of the generating machine) is
-RECOMMENDED.
+Message-Id;opaque;T{
+Globally unique identifier for this message.  The use of a UUID[UUID]
+(or GUID), optionally hashed (using SHA.1, MD5, etc) to ensure
+anonymity (since the UUID includes the MAC address of the generating
+machine) is RECOMMENDED.
 T}
 _
 .TE
 .\"
+Tickertape client applications typically provide the ability to
+subscribe to messages using the 'Group' name, and frequently arbitrary
+subscriptions over the 'From' and 'Message' attributes.
+
+String-valued Elvin attributes use the Unicode character encoding.
+In some cases, a single character may have multiple representations in
+Unicode.  As an example, a base character combined with an accent can
+sometimes have a single code for the combination, or use multiple
+codes to represent the base character plus a combining accent.
+
+The Elvin subscription language provides operations to transform
+strings to canonical representations to ensure that strings using
+different representations of the same characters are correctly
+matched.  Implementors of Tickertape protocol clients should use these
+features to overcome this issue.
+
 m4_heading(2, `Replies and Intra-group Threads')
 
 When sending a message as a reply to a previously received message,
 implementations SHOULD identify that message as a means of supporting
-presentation of threaded conversations.
+presentation of conversations in order.
 .\"
 .TS
 tab(;);
@@ -218,7 +235,7 @@ lb lb lb
 l l lw(42).
 Name;Type;Description
 _
-In-Reply-To;string;T{
+In-Reply-To;opaque;T{
 The Message-Id of a previous message to which this is a reply.
 T}
 _
@@ -229,27 +246,31 @@ m4_heading(2, `Private or Extra-group Threads')
 It is possible to send messages directed to a group for which the
 sender is not subscribed.  This is commonly used when the sender wants
 to initiate a convesation with the user(s) of the channel, but does
-not want to see traffic on that channel from other threads.
+not want to see traffic on that channel from other conversations.
 
 The sender includes a Thread-Id attribute in the initial message, and
 subscribes to all messages with a matching Thread-Id value.
 Responding clients copy the received Thread-Id value into any replies
 made to that message, and thus the responses are visible to the
 original poster.
+
+Thread-Id SHOULD be used in conjunction with the 'In-Reply-To'
+attribute to preserve the ordering of the conversation.
 .\"
+.KS
 .TS
 tab(;);
 lb lb lb
 l l lw(42).
 Name;Type;Description
 _
-Thread-Id;string;T{
+Thread-Id;opaque;T{
 When sending a message to a group to which the sender is not
 subscribed, but wishes to see any replies, this field should be set
 (and the sender's user agent should alter its subscription so as to
 receive any messages with this Thread-Id value).
 
-User agents, receiving a message with a Thread-Id set, should copy the
+User agents, receiving a message with a Thread-Id set, SHOULD copy the
 supplied value into the same-named attribute of any reply messages.
 
 This value must be globally unique.  See Message-Id for
@@ -257,10 +278,11 @@ recommendations.
 T}
 _
 .TE
+.KE
 .\"
 m4_heading(2, `Optional Attributes')
-.\"
-The following attributes may optionally be provided
+
+The following attributes MAY be included
 .\"
 .TS
 tab(;);
@@ -273,8 +295,10 @@ The name and version of the user agent generating this message.
 T}
 
 No-Archive;int32;T{
-If this message should not be archived, this field should be present,
-and the value should be non-zero.
+The sender of a message can request that it not be archived by setting
+this attribute with a non-zero value.  Clients that store received
+messages, for example, to present an archive via a web page, SHOULD
+NOT store messages with this attribute set to a non-zero value.
 T}
 
 Distribution;string;T{
@@ -288,16 +312,31 @@ inc`'lude "local", "company_name", "unclassified", etc.
 Note that no global interpretation is placed on the values of this
 field.  Its meaning is defined within an administrative domain, to be
 interpreted at its administrative boundaries.  Multiple levels of such
-interpretation are possible.  
+interpretation are possible.
+
+Future standardisation of the semantics of this attribute is likely.
 T}
 
 Attachment;opaque;T{
-A MIME-encoded addition to the message.  multiple objects should be
-encoded using the multipart/mixed MIME type.
+A MIME-encoded addition to the message.  Multiple attached objects
+SHOULD be encoded using the multipart/mixed MIME type.
 
 Note that this field is an opaque type, and thus an array of bytes.
-therefore, it is not necessary to encode attachments (using, for
+therefore, it is not necessary to transform attachments (using, for
 example, base64) as is the usual practice for email.
+T}
+
+Replaces;opaque;T{
+The Message-Id value of a previous message which should be replaced by
+the contents of this message.  
+
+In a scrolling user interface, this attribute can be used to update
+the value of a currently visible message.  This is useful for
+displaying a constantly scrolling, changing value, such as a sports
+score, without displaying multiple messages.
+
+If no currently displayed message's Message-Id matches this value,
+present this message as usual.
 T}
 _
 .TE
@@ -329,7 +368,7 @@ message, can be either empty or misleading.
 .\"
 m4_heading(2, `Attachments')
 
-The optional use of the `Attachment' attribute to deliver a
+The optional use of the 'Attachment' attribute to deliver a
 MIME-encoded object allows arbitrary data to be present on the
 receiver's machine.  This data can be interpreted by the client
 program, and this interpretation could involve the execution of
@@ -343,9 +382,14 @@ interpretation of MIME attachments.  This practice introduces an
 additional risk, precluding a manual vetting of the data before
 interpretation.
 .\"
+m4_heading(2, `Replacement')
+
+The use of the 'Replaces' attribute to update a previous message's
+content can be abused by an attacker to rewrite any message.
+.\"
 m4_heading(2, `Denial of Service')
 
-It is possible to attack either an Tickertape individual client, or
+It is possible to attack either an individual Tickertape client, or
 the Elvin routing network, by sending a large number of Tickertape
 messages.  
 
@@ -490,15 +534,112 @@ practice for Elvin applications.
 
 \fBBasic Attributes\fR
 
-.B `Replacement'
+The basic attributes have remained unchanged since the first
+implementation of the Tickertape protocol for Elvin3.  All subsequent
+revisions have expanded on this basic set.
+.\"
+.TS 
+tab(;); 
+lb lb lb
+l l lw(32).  
+Name;Type;Description
+_
+TICKERTAPE;string;T{
+The name of the group to which this message is sent.
+T}
 
-.B `Threads'
+USER;string;T{
+The name of the sender of the message.
+T}
 
+TICKERTEXT;string;T{
+Text to be displayed in the scroller (or similar user interface
+location).
+T}
+
+TIMEOUT;int32;T{
+Suggested lifetime of the message, in minutes, mostly useful for
+scrolling presentation.
+T}
+_
+.TE
+.\"
 .B `Attachments'
 
+The attachment of URLs to Tickertape messages was popularised using a
+form of MIME-style encoding.  Few clients supported MIME types other
+than the informal 'x-elvin/url' type.
+.\"
+.TS 
+tab(;); 
+lb lb lb
+l l lw(32).  
+Name;Type;Description
+_
+MIME_TYPE;string;T{
+The MIME type of the attached data.
+T}
 
+MIME_ARGS;string;T{
+The body of the MIME object.
+T}
 
+MIME_ENCODING;string;T{
+The content transfer encoding of the body of the MIME object.  If not
+supplied, defaults to '8bit'.
+T}
+_
+.TE
+.\"
+.B `Replacement'
 
+Replacement of previous messages was introduced to support sports
+scores and similar situations where a constantly updating value should
+not generate a new presented message for each update.
+.\"
+.TS 
+tab(;); 
+lb lb lb
+l l lw(32).  
+Name;Type;Description
+_
+REPLACEMENT;string;T{
+A string identifier.  Subsequent messages with the same REPLACEMENT
+value should replace this message when presented.
+T}
+_
+.TE
+.\"
+.B `Threads'
+
+The most recent addition to be widely implemented used message
+identifiers to allow a client to present responses to previous
+messages in order.  This reflects the introduction of clients with
+tablular presentation instead of or in addition to a scrolling
+interface.
+.\"
+.TS 
+tab(;); 
+lb lb lb
+l l lw(32).  
+Name;Type;Description
+_
+Message-Id;string;T{
+A string identifier for this message.  Use of a UUID (GUID) is suggested.
+T}
+
+In-Reply-To;string;T{
+A string identifier for the message to which this is a response.
+T}
+_
+.TE
+.\"
+
+No other attributes have been widely accepted by developers of
+Tickertape clients to date.  This document represents the first formal
+standardisation of the protocol, and codifies best-practice as
+developed by the Tickertape community over the course of these
+enhancements.
 
 m4_dnl
 m4_dnl ########################################################################
