@@ -22,6 +22,9 @@ distribute messages beyond the domain of a single server.
 This specification describes the client/server protocol and semantic
 requirements for client libraries and the server daemon.  It does not
 describe the inter-server protocol.
+
+m4_include(operational-overview.m4)
+
 m4_dnl
 m4_heading(2, Communication Model)
 

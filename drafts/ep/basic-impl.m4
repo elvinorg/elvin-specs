@@ -431,16 +431,15 @@ m4_heading(2, Subscription Errors)
 Elvin subscriptions are compiled by the server after submission at runtime.
 Various errors are possible; this section documents the error conditions.
 
-m4_remark(I don't think we should have ANY lang specific stuff
-here.  better to refer to a section on abstract errors independent of
-any particular naming conventions.  ie like the different packet types
-are current defined. Is this the Failures section in
-abstract-protocol.m4? jb)
-
 Errors are reported as numbers so that language-specific error
 messages may be used by the client. This section shows symbols from
 the C language binding; for the corresponding error numbers, please
 see <elvin4/errors.h> or documentation for your language binding.
+
+m4_remark(do we need ANY language/API specific stuff here?  better to
+refer to a section on abstract errors independent of any particular
+naming conventions.  ie like the different packet types are current
+defined. Is this the Failures section in abstract-protocol.m4? jb)
 
 .IP SYNTAX_ERROR 4
 Non-specific syntactic problem.

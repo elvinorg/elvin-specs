@@ -2,11 +2,12 @@ m4_dnl  -*- nroff -*-
 m4_dnl
 m4_dnl  protocol-details
 
-m4_heading(2, Packet Contents)
+m4_heading(2, Packet Details)
 
-This section provides detailed descriptions of each packet used in the
-Elvin protocol. Packets are comprised from a set of simple base types
-and described in a pseudo-C style as structs made up of these types.
+This section provides detailed descriptions of each packet and their
+use in the Elvin protocol. Packets are comprised from a set of simple
+base types and described in a pseudo-C style as structs made up of
+these types.
 
 .KS
 The following definitions are used in several packets:
@@ -147,7 +148,12 @@ m4_heading(3, Unreliable Notification)
 Unreliable notifications are sent by a client to a server outside the
 context of a session (see ConnRqst below).  Using the protocol and
 endpoint information obtained either directly or via server discovery,
-a client may send single UNotify packets to the server.
+a client may make a transport level connection to the server.  Over
+this connection, one or more UNotify packets MAY be to the server.
+
+The server MUST NOT send any data to the client over the transport
+connection (if the the trasport is bi-directional, etc TCP).  However,
+The server MAY 
 
 m4_pre(
 struct UNotify {
