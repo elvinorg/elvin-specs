@@ -373,7 +373,7 @@ operation.
 m4_pre(
 struct Nack {
     id32 xid;
-    int16 error;
+    uint16 error;
     string message;
     Value args[]
 };)m4_dnl
