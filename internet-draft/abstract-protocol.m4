@@ -4,23 +4,38 @@ include(macros.m4)
 dnl
 heading(2, Abstract Protocol)
 
-This section descibes the operations of the Elvin4 protocol.  
+This section describes the operation of the Elvin4 protocol.  
 
 heading(3, Protocol Overview)
 
 After an Elvin server has been located (see section on SLP) a client
-requests a connection. If the server can accept the requests, it MUST
-respond with a Connection Reply.
+requests a connection. The server MUST respond with either a
+Connection Reply, a Redirect or a Nack.
 
 *** fixme *** what params in a ConRqst.  how much is done in the ConRqst
 compared to SLP attr's?
 
+If the server accepts the request, it MUST respond with a Connection
+Reply, containing the agreed parameters of the connection.
 
 .KS
   +-------------+ ---ConRqst--> +---------+
   | Producer or |               |  Elvin  |  
   |  Consumer   |               |  Server |    SUCCESSFUL CONNECTION 
   +-------------+ <---ConRply-- +---------+
+.KE
+
+If the Elvin server cannot accept the connection itself, but is part
+of a server cluster, it MUST respond with a Redirect response and then
+close the socket connection on which the client made the request.  The
+client MAY then send a Connection Request to the server address
+supplied in the Redirect message.
+
+.KS
+  +-------------+ ---ConRqst--> +---------+
+  | Producer or |               |  Elvin  |
+  |  Consumer   |               |  Server |    REDIRECTED CONNECTION
+  +-------------+ <--Redirect-- +---------+
 .KE
 
 If the Elvin server cannot accept the connection, it MUST send a Nack
@@ -47,7 +62,7 @@ original notification.
 
 The NotifDel packet differs slightly from the original Notif sent 
 by the producer.  As well as the sequence of named-typed-values,
-it contains information about which subsciption was used to match
+it contains information about which subsciptions were used to match
 the event.  This allows the client library of the consumer to
 dispatch the event with out having to do any additional matching.
 
@@ -61,9 +76,9 @@ dispatch the event with out having to do any additional matching.
 
 A Consumer descibes what events it is interested in by sending a
 predicate in the Elvin subscripton language to the Elvin server.  The
-predicate is sent in a SubAddRqst.  On receipt of the request, the 
-server checks the syntatical correctness of the
-predicate. If valid, an Ack is returned.  
+predicate is sent in a SubAddRqst.  On receipt of the request, the
+server checks the syntatical correctness of the predicate. If valid,
+an Ack is returned.
 
 If the predicate fails to parse, a Nack is returned with the error
 code set to indicate a parser error.
@@ -105,6 +120,7 @@ Possible values for the type field in a packet are:
   Quench Deliver                QnchDel              12
   Acknowledgement               Ack                  13
   Negative Acknowledgement      Nack                 14
+  Redirect                      Redir                15
 
   More...
 
@@ -196,8 +212,7 @@ messages may be used by the client.
   *** fixme *** can 1,2,3 happen in a notif as well as sub?
 
 .IP "Protocol Error"
-Non-specific error related to client-server communications.  This will
-generally be sent to the client if the server recieves unexpected data.
+Non-specific error related to client-server communications.  This willgenerally be sent to the client if the server recieves unexpected data.
 The server SHOULD close the socket after sending a ProtErr Nack.
 
 .IP "Syntax Error" 4
