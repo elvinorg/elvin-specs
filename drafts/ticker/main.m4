@@ -4,7 +4,7 @@ m4_dnl
 m4_dnl              Tickertape Message Format Specification
 m4_dnl
 m4_dnl File:        $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/ticker/main.m4,v $
-m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.5 $
+m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.6 $
 m4_dnl Copyright:   (C) 2001-2002, David Arnold.
 m4_dnl
 m4_dnl This specification may be reproduced or transmitted in any form or by
@@ -38,6 +38,9 @@ m4_dnl    internal section references
 m4_dnl
 m4_define(CONTACT_DETAILS,`16')m4_dnl
 m4_define(PROTOCOL_REGISTRY,`11.2')m4_dnl
+m4_define(HISTORICAL_FORMATS,`Appendix B')m4_dnl
+m4_define(EXAMPLE_FORMATS,`Appendix A')m4_dnl
+.\"
 m4_dnl
 m4_dnl    general macros for I-D formatting
 m4_dnl
@@ -106,7 +109,7 @@ simple, consistent interface for presentation of a variety of
 interactive-time data.
 
 The for`'mat is derived from a series of earlier for`'mats, as
-documented in the appendix.
+documented in HISTORICAL_FORMATS.
 
 m4_heading(1, Terminology)
 
@@ -521,7 +524,61 @@ registered marks belong to their respective owners.
 .\"
 .\"
 .bp
-em4_unnumbered(`Appendix A \- Previous Versions')
+em4_unnumbered(`Appendix A \- Example Notifications')
+
+This section shows some example notifications using previous versions
+of the Tickertape specification, and compares them with their
+representation using this version of the specification.
+
+Consider a simple message, with an attached URL:
+
+.nf
+Message-Id: "1d906567-e491-48c6-9607-1b9f79f926da"
+TICKERTAPE: "Chat"
+TICKERTEXT: "check this out!"
+USER: "Spammeister"
+TIMEOUT: 5
+MIME_TYPE: "x-elvin/url"
+MIME_ARGS: "http://www.spamradio.net"
+.fi
+
+This would now be sent as
+
+.nf
+Message-Id: "1d906567-e491-48c6-9607-1b9f79f926da"
+Group: "Chat"
+Message: "check this out!"
+From: "Spammeister"
+Timeout: 5
+Attachment: [4d 49 4d 45 2d 56 65 72 73 69 6f 6e 3a 20 31 2e 30 0a 43
+             6f 6e 74 65 6e 74 2d 74 79 70 65 3a 20 74 65 78 74 2f 75
+             72 69 2d 6c 69 73 74 0a 0a 68 74 74 70 3a 2f 2f 77 77 77
+             2e 73 70 61 6d 72 61 64 69 6f 2e 6e 65 74 0a]
+User-Agent: "Example Ticker v1.0"
+.fi
+
+The Attachment field is the most changed.  Obviously, it is now an
+opaque rather than a string -- in this example, the string value is
+
+.nf
+MIME-Version: 1.0
+Content-type: text/uri-list
+
+http://www.spamradio.net
+.fi
+
+Note especially that the format has changed to include all the MIME
+headers within the value of the Attachment field, rather than putting
+the content type and encoding as separate attributes.
+
+This makes for simpler handling using standard library facilities, and
+enables the proper use of all features from the MIME standards.
+
+Note also the recommended change from the experimental "x-elvin/url"
+content type, to the standard type "text/uri-list".
+
+.bp
+em4_unnumbered(`Appendix B \- Previous Versions')
 
 The protocol specified by this document has undergone several years of
 evolutionary development.  Several dozen implementations exist, with
