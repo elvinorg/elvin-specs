@@ -505,13 +505,15 @@ m4_heading(3, Server Report)
 
 m4_pre(
 struct ServerReport {
-  id32 xid;
-  id16 router_id;
-  id8  mode;
+  id32   xid;
+  id16   router_id;
+  id8    mode;
+  string urls[];
 };)m4_dnl
 
 Report a change of operating mode for an Elvin router.  The new mode is
-specified.  The mode can by one of the following values:
+specified.  The router indentifier indicates which server the report relates
+to. The mode can by one of the following values:
 
 .KS
 .nf 
@@ -530,6 +532,7 @@ specified.  The mode can by one of the following values:
 
 Upon receiving an ServerReport for Shutdown or Restart, an Elvin
 router SHOULD remove all state associated with that Elvin router.
+
 
 When a master node leaves the cluster, if there are any remaining
 nodes, it picks a new master and sends a ServerReport, mode
