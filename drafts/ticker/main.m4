@@ -4,8 +4,8 @@ m4_dnl
 m4_dnl              Tickertape Message Format Specification
 m4_dnl
 m4_dnl File:        $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/ticker/main.m4,v $
-m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.12 $
-m4_dnl Copyright:   (C) 2001-2003, David Arnold.
+m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.13 $
+m4_dnl Copyright:   (C) 2001-2004, David Arnold.
 m4_dnl
 m4_dnl This specification may be reproduced or transmitted in any form or by
 m4_dnl any means, electronic or mechanical, including photocopying,
@@ -56,22 +56,22 @@ m4_dnl .nr LT 7.2i
 .ds CF Expires in 6 months
 .ds LH Internet Draft
 .ds RH dd mmm yyyy
-.ds CH Tickertape Chat Protocol
+.ds CH Tickertape Chat Protocol v3
+.ds PU PUBLISHED
 .\" hyphenation mode 0
 .hy 0
 .\" adjust left
 .ad l
 .\" indent 0
 .in 0
-Elvin Project                                          D. Arnold, Editor
-Preliminary INTERNET-DRAFT                                tickertape.org
-                          
+INTERNET-DRAFT                                         D. Arnold, Editor
+                                                          tickertape.org
 Expires: aa bbb cccc                                         dd mmm yyyy
 
 .ce
-Tickertape Chat Protocol
+Tickertape Chat Protocol version 3
 .ce
-PUBLISHED
+\*(PU
 
 m4_heading(1, Status of this Memo)
 
@@ -102,8 +102,8 @@ inter-person and machine-to-person instant messaging and provides a
 simple, consistent interface for presentation of a variety of
 interactive-time data.
 
-This specification is derived from a series of earlier message
-for`'mat conventions, as documented in HISTORICAL_FORMATS.
+This specification is derived from a series of earlier informal
+message for`'mat conventions, as documented in HISTORICAL_FORMATS.
 
 m4_heading(1, Terminology)
 
@@ -145,8 +145,8 @@ Producers support composition of messages and sending them to a
 specified group.  A particular message can be sent independently, or
 as a reply to a preceding message.
 
-Consumers subscribe to messages, often by channel, but alternatively
-by some combination of attributes of the message.
+Consumers subscribe to messages, often by group name, but
+alternatively by some other combination of attributes of the message.
 
 Interactive clients normally display a subset of the received
 messages' attributes, and facilitate composition of initial or reply
@@ -222,6 +222,29 @@ because no clear consensus has arisen that it is a problem.  Collision
 between identifiers does occur, but it is resolved by social, rather
 than protocol, mechanisms.
 
+m4_heading(1, Elvin)
+
+Tickertape uses Elvin as its underlying communications layer.  Elvin
+provides a one-to-any, publish/subscribe transport with atomic,
+consistent per-source ordering, best-effort delivery semantics.
+Defined mappings exist for TCP, UDP and other bearer protocols.
+
+Elvin messages are structured, using a flat name space of basic data
+types, including Unicode strings.  Messages are transmitted to an
+Elvin router, where they are compared against the registered
+subscriptions.  A copy of the message is delivered to the owner of
+each matching subscription and to other connected routers.
+
+Subscriptions are expressed as predicates in a simple, C-like syntax.
+In addition to the usual comparison and arithmetic operators,
+functions are provided to test the existence and type of values, to
+perform case folding and normalisation, and for regular expression and
+glob-style wildcard matching.
+
+Further details of the protocol and subscription language are
+available in [ELVIN].
+
+
 m4_heading(1, Message Specification)
 
 This document specifies the basic Tickertape 'chat' message for`'mat.
@@ -282,7 +305,7 @@ The Elvin subscription language provides operations to transform
 strings to canonical representations to ensure that strings using
 different representations of the same characters are correctly
 matched.  Implementors of Tickertape protocol clients SHOULD use these
-features to overcome this issue.
+features to ensure that user expectations are fulfilled.
 
 m4_heading(2, `Replies and Intra-group Threads')
 
@@ -382,10 +405,13 @@ attribute allows the producer to suggest a time period after which the
 message might be removed from the display or otherwise deprioritised.
 
 A positive value suggests that the message be removed from display
-after that many minutes.  A value of zero indicates that the message
-should be shown briefly: less than one minute, but still shown.  A
-negative value suggests that it not be shown at all, but displayed
-only in logs or historical views.
+after that many seconds.  Clients MAY interpret this value liberally;
+a resolution in the order of minutes is normally adequate.
+
+Special interpretation SHOULD be applied for a value of zero,
+indicating that the message be shown briefly; and negative values,
+suggesting that it not be shown at all, but displayed only in logs or
+historical views.
 
 .KS
 .TS
@@ -489,21 +515,22 @@ content to a Tickertape message.
 This attribute provides a means to attach additional content encoded
 using the MIME standards [RFC2045-RFC2049].
 
-Note that this field is a string type, and thus must be legitimate
-UTF-8.  The MIME specification provides various options for encoding
-data which is is not pure 7 bit ASCII (ie. base64 encoding, see
-[RFC1421] section 4.3.2.4).  These mechanisms should be used to ensure
-binary content is safely transported.
+Note that this field is an Elvin string type, and thus its value must
+be legitimate UTF-8.  The MIME specification provides various options
+for encoding data which is not compatible with its containing protocol
+(ie. base64 encoding, see [RFC1421] section 4.3.2.4).  One of these
+mechanisms MUST be used to ensure that binary content is safely
+transported.
 
 In choosing to use a string type for this attribute, our major
 motivation was to enable subscription to the attached information
-(where it is in un-encoded form).  This includes things like MIME
+(where it is in un-encoded form).  This includes things like the MIME
 content types, etc.  Content that is valid UTF-8 SHOULD NOT be
 additionally encoded so as to facilitate subscription to messages by
 their attached content.
 
-The most common form of attachment is a URL which SHOULD use the
-text/uri-list MIME type.  Multiple attached objects SHOULD be encoded
+The most common form of attachment is a URL.  URLs SHOULD use the
+text/uri-list MIME type.  Multiple attached objects can be encoded
 using the multipart/mixed MIME type.
 
 .TS
@@ -522,7 +549,7 @@ _
 .\"
 m4_heading(3, `Updating Existing Messages')
 
-In a scrolling user interface, it can be useful to have messages which
+In a scrolling user interface, it can be useful to have messages that
 are constantly visible, but whose content is updated over time.  An
 example of such a message might be the current score in a sporting
 event.
@@ -628,12 +655,11 @@ The Elvin client protocol [ELVIN] defines an abstract protocol for
 communication between Elvin clients and Elvin routers, and concrete
 protocols for TCP-based transport and XDR-based data marshaling.
 
-A RECOMMENDED extension to [ELVIN] providing automatic router
+A recommended extension to [ELVIN] providing automatic router
 discovery is defined in [ERDP].
 
-Inter-router protocols for clustering [ERCP] and wide-area routing
-[ERFP] are also available.  Elvin router implementations MAY support
-clustering and SHOULD support federation.
+An inter-router protocol wide-area routing [ERFP] are also available.
+Elvin router implementations normally support federation.
 .\"
 .\"
 m4_heading(1, `Contact for further information')
@@ -643,12 +669,14 @@ See section CONTACT_DETAILS for full contact details.
 .\"
 m4_heading(1, `Author/Change controller')
 
-This specification is a component of the Elvin protocol suite.  Elvin
-specifications are maintained by DSTC Pty Ltd, and change control
-authority is retained by DSTC Pty Ltd, at this time.
+This specification is a product of the informal Tickertape developer
+community.  It is derived from work originally done at DSTC
+(www.dstc.com), and now conducted through the facilities of
+tickertape.org with the cooperation of Mantara Software.
 
 Suggested revisions or extensions to this specification should be sent
-to DSTC, at the address listed in section CONTACT_DETAILS.
+to the working group, at the address listed in section
+CONTACT_DETAILS.
 
 
 m4_dnl  bibliography
@@ -659,6 +687,16 @@ m4_heading(1, REFERENCES)
 .IP [ELVIN] 12
 D. Arnold, Editor,
 "Elvin Client Access Protocol",
+Work in progress
+
+.IP [ERDP] 12
+D. Arnold, J. Boot, T. Phelps, B. Segall,
+"Elvin Router Discovery Protocol",
+Work in progress
+
+.IP [ERFP] 12
+D. Arnold, I. Lister,
+"Elvin Router Federation Protocol",
 Work in progress
 
 .IP [RFC1421] 12
@@ -720,31 +758,46 @@ ISBN 0-321-18578-1.
 .KS
 m4_heading(1, Contact)
 
-Author's Address
+Editor's Address
 
 .nf
 David Arnold
+tickertape.org
 
-Mantara Software
-PO Box 1820
-Toowong QLD 4066
-Australia
-
-Phone:  +617 3876 8844
-Fax:    +617 3876 8843
 Email:  ticker-dev@tickertape.org
+.fi
+.KE
+
+.KS
+Contributors
+
+.nf
+David Arnold
+Julian Boot
+Phil Cook
+Anna Gerber
+Michael Henderson
+Michael Lawley
+Ian Lister
+Thomas Maslen
+Ted Phelps
+Matthew Phillips
+Clinton Roy
+Bill Segall
+Martin Wanicki
 .fi
 .KE
 .bp
 m4_heading(1, `Full Copyright Statement')
 
 Copyright (C) 2003-yyyy by tickertape.org.
-Copyright (C) 2000-2003 DSTC Pty Ltd, Brisbane, Australia.
-
+.br
+Copyright (C) 2001-2003 DSTC Pty Ltd.
+.br
 All Rights Reserved.
 
-This specification may be reproduced or transmitted in any form or by
-any means, electronic or mechanical, including photocopying,
+This specification may be reproduced or transmitted in any form
+or by any means, electronic or mechanical, including photocopying,
 recording, or by any information storage or retrieval system,
 providing that the content remains unaltered, and that such
 distribution is under the terms of this licence.
@@ -755,8 +808,8 @@ omissions, or for damages resulting from the use of the information
 herein.
 
 Comments on this specification are welcome.  Please address any
-queries, comments or fixes (please include the name and version of the
-specification) to the mailing list below:
+queries, comments or fixes (please include the name and version of
+the specification) to the mailing list below:
 
 .nf
     ticker-dev@tickertape.org
@@ -792,17 +845,17 @@ Message-Id: "1d906567-e491-48c6-9607-1b9f79f926da"
 Group: "Chat"
 Message: "check this out!"
 From: "Spammeister"
-Timeout: 5
-MIME-Attachment: "MIME-Version: 1.0\\r\\n" \\
-                 "Content-type:text/uri-list\\r\\n" \\
-                 "\\r\\n" \\
-                 "http://www.spamradio.net\\r\\n"
+Timeout: 300
+Attachment: "MIME-Version: 1.0\\r\\n" \\
+            "Content-type:text/uri-list\\r\\n" \\
+            "\\r\\n" \\
+            "http://www.spamradio.net\\r\\n"
 User-Agent: "Example Ticker v1.0"
 .fi
 
-The MIME-Attachment field is the most changed.  It has been renamed,
-and is now a proper MIME document, rather than putting the content
-type and encoding as separate attributes.
+The Attachment field is the most changed.  It has been renamed, and is
+now a proper MIME document, rather than putting only the content type
+and the data as separate attributes.
 
 This makes for simpler handling using standard library facilities, and
 enables the proper use of all features from the MIME standards.
@@ -810,6 +863,11 @@ enables the proper use of all features from the MIME standards.
 Note also the recommended change from the experimental "x-elvin/url"
 content type, to the standard type "text/uri-list" when attaching a
 URL to a message.
+
+Also note that the Timeout field has changed from using units of
+minutes, to seconds.  While minutes are sufficient resolution for this
+application, in other Elvin applications, Timeout normally uses
+seconds, and so that usage is adopted here.
 
 .bp
 em4_unnumbered(`Appendix B \- Previous Versions')
@@ -826,7 +884,7 @@ practice for Elvin applications.
 \fBBasic Attributes\fR
 
 The basic attributes have remained unchanged since the first
-implementation of the Tickertape protocol for Elvin3.  All subsequent
+implementation of the Tickertape protocol for Elvin 3.  All subsequent
 revisions have expanded on this basic set.
 .\"
 .TS 
@@ -874,14 +932,10 @@ T}
 MIME_ARGS;string;T{
 The body of the MIME object.
 T}
-
-MIME_ENCODING;string;T{
-The content transfer encoding of the body of the MIME object.  If not
-supplied, defaults to '8bit'.
-T}
 _
 .TE
 .\"
+.KS
 .B `Replacement'
 
 Replacement of previous messages was introduced to support sports
@@ -900,6 +954,7 @@ value should replace this message when presented.
 T}
 _
 .TE
+.KE
 .\"
 .B `Threads'
 

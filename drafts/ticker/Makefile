@@ -1,32 +1,29 @@
 ################################################################
-# Copyright (C) DSTC Pty Ltd (ACN 052 372 577) 2001-2003.
-# All Rights Reserved.
+# COPYRIGHT_BEGIN
+# Copyright (C) 2001-2004, David Arnold.
 #
-# The software contained on this media is the property of the
-# DSTC Pty Ltd.  Use of this software is strictly in accordance
-# with the license agreement in the accompanying LICENSE.DOC file.
-# If your distribution of this software does not contain a
-# LICENSE.DOC file then you have no rights to use this software
-# in any manner and should contact DSTC at the address below
-# to determine an appropriate licensing arrangement.
+# This specification may be reproduced or transmitted in any form or
+# by any means, electronic or mechanical, including photocopying,
+# recording, or by any information storage or retrieval system,
+# providing that the content remains unaltered, and that such
+# distribution is under the terms of this licence.
 # 
-#      DSTC Pty Ltd
-#      Level 7, Gehrmann Labs
-#      University of Queensland
-#      St Lucia, 4072
-#      Australia
-#      Tel: +61 7 3365 4310
-#      Fax: +61 7 3365 4311
-#      Email: enquiries@dstc.edu.au
+# While every precaution has been taken in the preparation of this
+# specification, the authors assume no responsibility for errors or
+# omissions, or for damages resulting from the use of the information
+# herein.
 # 
-# This software is being provided "AS IS" without warranty of
-# any kind.  In no event shall DSTC Pty Ltd be liable for
-# damage of any kind arising out of or in connection with
-# the use or performance of this software.
+# We welcome comments on this specification.  Please address any
+# queries, comments or fixes (please include the name and version of
+# the specification) to the address below:
+# 
+#     ticker-dev@tickertape.org
+# 
+# Elvin is a trademark of Mantara Software.  All other trademarks and
+# registered marks belong to their respective owners.
+# COPYRIGHT_END
 #
-# Project:  Elvin
-# File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/ticker/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.5 $
+# $Id: Makefile,v 1.6 2004/03/19 07:55:59 d Exp $
 #
 ################################################################
 
@@ -39,7 +36,7 @@ yyyy=$(shell date +%Y)
 exp=$(shell date -d "6 months" "+%d %b %Y")
 
 FILENAME := draft-arnold-ticker-chat-v3
-VERSION := 02
+VERSION := 00
 PUBLISHED := $(FILENAME)-$(VERSION).txt
 
 
