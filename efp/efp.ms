@@ -379,11 +379,42 @@ struct SubDBRply {
 
 
 m4_heading(3, FedNotifyEmit)
+
+m4_pre(
+struct FedNotifyEmit {
+  NameValue attributes[];
+  opaque prime_keys[];
+};)m4_dnl
+
 m4_heading(3, FedNotifyDeliver)
 m4_heading(3, FedSubAdd)
+
+m4_pre(
+struct FedSubAdd {
+  int64 sub_id;
+  string sub_expr;
+  boolean accept_insecure;
+  opaque prime_keys[];
+};)m4_dnl
+  
 m4_heading(3, FedSubMod)
+
+m4_pre(
+struct FedSubMod {
+  int64 sub_id;
+  string sub_expr;
+  boolean accept_insecure;
+  opaque add_prime_keys[];
+  opaque del_prime_keys[];
+};)m4_dnl
+  
 m4_heading(3, FedSubDel)
 
+m4_pre(
+struct FedSubDel {
+  int64 sub_id;
+};)m4_dnl
+  
 
 .nf
 *** from here on is a bit crap
