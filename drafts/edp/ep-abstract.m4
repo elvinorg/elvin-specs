@@ -190,8 +190,9 @@ only send its own request if no others (from other clients) are
 observed during the waiting period.  
 
 For a given hop limit, the waiting period before sending the SvrAdvt
-MUST NOT be less than the intervals defined below, and the variation
-from the base value MUST be determined randomly for each packet sent.
+MUST NOT be less than the intervals defined below, and the random
+variation from the base value MUST be re-calculated every time a
+SvrRqst is sent.
 
 .KS
 .nf
