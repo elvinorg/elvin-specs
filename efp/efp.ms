@@ -440,8 +440,8 @@ m4_heading(3, FedNotifyDeliver)
 
 m4_pre(
 struct FedNotifyDeliver {
-  boolean deliver_insecure;
   NameValue attributes[];
+  boolean deliver_insecure;
   Keys keys;
 };)m4_dnl
 
