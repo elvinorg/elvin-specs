@@ -123,7 +123,7 @@ m4_heading(3, Leaving a Group)m4_dnl
 A member may leave the groups at any time by sending a LEAVE message
 to the sequencer, which multicasts it to the group.  The member must
 wait until the multicast LEAVE is received before closing the group
-socket.  The LEAVE packet should be resent up to 10 times before
+endpoint.  The LEAVE packet should be resent up to 10 times before
 assuming that the sequencer is dead.
 
 On receiving a LEAVE message, a member should remove the indicated
