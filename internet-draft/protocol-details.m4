@@ -418,7 +418,7 @@ Error Code  |  Meaning / Action                    |  Arguments
 2002        |  Key exists                          |  None
 2003        |  Bad key                             |  None
 2004        |  Nothing to do                       |  None
-2005- 2100  |  (Reserved)                          |  Undefined
+2005- 2100  |  ( Reserved )                        |  Undefined
 2101        |  Parse error                         |  offset, int32
             |                                      |  token, string
 2102        |  Invalid token                       |  offset, int32
