@@ -152,8 +152,8 @@ of identifiers can be encoded using a single byte.
 
   Cluster Request               ClstRqst                160
   Cluster Reply                 ClstRply                161
-  Join Request                  JoinRqst                162
-  Join Reply                    JoinRply                163
+  Cluster Join Request          ClstJoinRqst            162
+  Clister Join Reply            ClstJoinRply            163
 
 
   Cluster Subscription Add      ClstSubAdd              166
@@ -161,8 +161,8 @@ of identifiers can be encoded using a single byte.
   Cluster Subscription Delete   ClstSubDel              168
   Cluster Notify                ClstNotify              169
   Cluster Redirect              ClstRedir               170
-  Client Disconnect Notify      CliDisconnNotify        171
-  Leave                         Leave                   172
+  Cluster Client Notify         ClstCliNotify           171
+  Cluster Leave                 ClstLeave               172
   ----------------------------------------------------------------
 .fi
 .KE
@@ -306,7 +306,7 @@ struct ClstRply {
   string address;
 };)m4_dnl
 
-m4_heading(3, Join Request)
+m4_heading(3, Cluster Join Request)
 
 Unicast request to the cluster controller to join its managed cluster.
 The server and urls fields match the information sent in SvrAdvt
@@ -314,7 +314,7 @@ packets by the server, and are used to allow the cluster to take over
 the role of advertising server endpoints to client programs.
 
 m4_pre(
-struct JoinRqst {
+struct ClstJoinRqst {
   id32 xid; 
   string server;        /* unique name for server */
   string urls[];        /* set of URLs for server */
@@ -328,14 +328,14 @@ struct JoinRqst {
 *** or something else entirely?
 .fi
 
-m4_heading(3, Join Reply)
+m4_heading(3, Cluster Join Reply)
 
 Unicast reply to a server requesting entry to a cluster.  Includes the
 server's unique identifier and the current subscription database of
 the cluster.
 
 m4_pre(
-struct JoinRply {
+struct ClstJoinRply {
   id32 xid;
   id32 server_id;
   struct {
@@ -346,7 +346,7 @@ struct JoinRply {
   }  subscriptions[];
 };)m4_dnl
 
-m4_heading(3, Leave )
+m4_heading(3, Cluster Leave )
 
 Unicast request to the cluster controller to leave a previously joined
 cluster.  This SHOULD be generated when the server is locally
@@ -357,7 +357,7 @@ packets, followed by a Shutdown.  The server should send a
 ServerStatusNotify before the process terminates.
 
 m4_pre(
-struct Leave {
+struct ClstLeave {
   id32 server_id;
 };)m4_dnl
 
@@ -423,13 +423,13 @@ struct ClstSubDel {
   id64 sub_id;
 };)m4_dnl
 
-m4_heading(3, Client Disconnect Notify)
+m4_heading(3, Cluster Client Notify)
 
 When a client disconnects from a server, the server MUST notify the
 cluster.
 
 m4_pre(
-struct CliDisconnNotify {
+struct ClstCliNotify {
   id32 server_id;
   id32 client_id;
 };)m4_dnl
