@@ -26,14 +26,14 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/rlm/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.2 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.3 $
 #
 ################################################################
 
 .PHONY: all macros outline
 
 FILENAME := draft-arnold-reliable-local-multicast
-VERSION := prelim-01
+VERSION := prelim-02
 
 SOURCE_FILES:= $(wildcard *.ms)
 

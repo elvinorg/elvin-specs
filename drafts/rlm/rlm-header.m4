@@ -8,7 +8,7 @@
 .ds RF PUTFFHERE[Page %]
 .ds CF Expires in 6 months
 .ds LH Internet Draft
-.ds RH dd mmm yyyy
+.ds RH _d __m __yr
 .ds CH Reliable Local Multicast
 .hy 0
 .ad l
