@@ -23,32 +23,32 @@ interactions between clients and the server.
 -----------------------------------------------------------------
 Packet Type                   Abbreviation    Usage   Cast Subset
 -----------------------------------------------------------------
-Unreliable Notification       UNotify         C -> S    U    A
-Negative Acknowledgement      Nack            S -> C    U    B
-Connect Request               ConnRqst        C -> S    U    B
-Connect Reply                 ConnRply        S -> C    U    B
-Disconnect Request            DisconnRqst     C -> S    U    B
-Disconnect Reply              DisconnRply     S -> C    U    B
-Disconnect                    Disconn         S -> C    U    B
-Security Request              SecRqst         C -> S    U    B
-Security Reply                SecRply         S -> C    U    B
-Notification Emit             NotifyEmit      C -> S    U    B
-Notification Deliver          NotifyDeliver   S -> C    U    B
-Subscription Add Request      SubAddRqst      C -> S    U    B
-Subscription Modify Request   SubModRqst      C -> S    U    B
-Subscription Delete Request   SubDelRqst      C -> S    U    B
-Subscription Reply            SubRply         S -> C    U    B
-Dropped Packet Warning        DropWarn        S -> C    U    B
-Quench Add Request            QnchAddRqst     C -> S    U    C
-Quench Modify Request         QnchModRqst     C -> S    U    C
-Quench Delete Request         QnchDelRqst     C -> S    U    C
-Quench Reply                  QnchRply        S -> C    U    C
-Subscription Add Notify       SubAddNotify    S -> C    U    C
-Subscription Change Notify    SubModNotify    S -> C    U    C
-Subscription Delete Notify    SubDelNotify    S -> C    U    C
-Server Request                SvrRqst         C -> S    M    D
-Server Advertisement          SvrAdvt         S -> C    M    D
-Server Advertisement Close    SvrAdvtClose    S -> C    M    D
+Server Request                SvrRqst         C -> S    M    A
+Server Advertisement          SvrAdvt         S -> C    M    A
+Server Advertisement Close    SvrAdvtClose    S -> C    M    A
+Unreliable Notification       UNotify         C -> S    U    B
+Negative Acknowledgement      Nack            S -> C    U    C
+Connect Request               ConnRqst        C -> S    U    C
+Connect Reply                 ConnRply        S -> C    U    C
+Disconnect Request            DisconnRqst     C -> S    U    C
+Disconnect Reply              DisconnRply     S -> C    U    C
+Disconnect                    Disconn         S -> C    U    C
+Security Request              SecRqst         C -> S    U    C
+Security Reply                SecRply         S -> C    U    C
+Notification Emit             NotifyEmit      C -> S    U    C
+Notification Deliver          NotifyDeliver   S -> C    U    C
+Subscription Add Request      SubAddRqst      C -> S    U    C
+Subscription Modify Request   SubModRqst      C -> S    U    C
+Subscription Delete Request   SubDelRqst      C -> S    U    C
+Subscription Reply            SubRply         S -> C    U    C
+Dropped Packet Warning        DropWarn        S -> C    U    C
+Quench Add Request            QnchAddRqst     C -> S    U    D
+Quench Modify Request         QnchModRqst     C -> S    U    D
+Quench Delete Request         QnchDelRqst     C -> S    U    D
+Quench Reply                  QnchRply        S -> C    U    D
+Subscription Add Notify       SubAddNotify    S -> C    U    D
+Subscription Change Notify    SubModNotify    S -> C    U    D
+Subscription Delete Notify    SubDelNotify    S -> C    U    D
 -----------------------------------------------------------------
 .fi
 .KE
@@ -63,9 +63,11 @@ The subsets in the above table reflect capabilities of an
 implementation.  An implementation MUST implement all or none of the
 packet types in a subset.
 
-Subsets A, B and D are independent.  An implementation MAY suport any
-or all of subsets A, B and D.  Subset C is dependent on subset B.  An
-implementation supporting subset C MUST support subset B.
+Subsets A, B and C are independent.  An implementation MAY suport any
+or all of subsets A, B and C.  Subset A is RECOMMENDED, subset B is
+OPTIONAL, subset C is RECOMMENDED and subset D is OPTIONAL.  Subset D
+is dependent on subset C.  An implementation supporting subset D MUST
+support subset C.
 
 m4_remark(is subset C really depeneding on subset B?  i'd like the ability
 to have	quenching only clients. jb)
