@@ -4,7 +4,7 @@ m4_dnl
 m4_dnl              Tickertape Message Format Specification
 m4_dnl
 m4_dnl File:        $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/ticker/main.m4,v $
-m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.11 $
+m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.12 $
 m4_dnl Copyright:   (C) 2001-2003, David Arnold.
 m4_dnl
 m4_dnl This specification may be reproduced or transmitted in any form or by
@@ -14,24 +14,18 @@ m4_dnl providing that the content remains unaltered, and that such
 m4_dnl distribution is under the terms of this licence.
 m4_dnl 
 m4_dnl While every precaution has been taken in the preparation of this
-m4_dnl specification, DSTC Pty Ltd assumes no responsibility for errors or
+m4_dnl specification, the authors assume no responsibility for errors or
 m4_dnl omissions, or for damages resulting from the use of the information
 m4_dnl herein.
 m4_dnl 
-m4_dnl DSTC Pty Ltd welcomes comments on this specification.  Please address
-m4_dnl any queries, comments or fixes (please include the name and version of
-m4_dnl the specification) to the address below:
+m4_dnl We welcome comments on this specification.  Please address
+m4_dnl any queries, comments or fixes (please include the name and
+m4_dnl version of the specification) to the address below:
 m4_dnl 
-m4_dnl     DSTC Pty Ltd
-m4_dnl     Level 7, General Purpose South
-m4_dnl     University of Queensland
-m4_dnl     St Lucia, 4072
-m4_dnl     Tel: +61 7 3365 4310
-m4_dnl     Fax: +61 7 3365 4311
-m4_dnl     Email: elvin@dstc.com
+m4_dnl     ticker-dev@tickertape.org
 m4_dnl 
-m4_dnl Elvin is a trademark of DSTC Pty Ltd.  All other trademarks and
-m4_dnl registered marks belong to their respective owners.
+m4_dnl Elvin is a trademark of Mantara Software.  All other trademarks
+m4_dnl and registered marks belong to their respective owners.
 m4_dnl ########################################################################*
 m4_dnl
 m4_dnl    internal section references
@@ -70,7 +64,7 @@ m4_dnl .nr LT 7.2i
 .\" indent 0
 .in 0
 Elvin Project                                          D. Arnold, Editor
-Preliminary INTERNET-DRAFT                                          DSTC
+Preliminary INTERNET-DRAFT                                tickertape.org
                           
 Expires: aa bbb cccc                                         dd mmm yyyy
 
@@ -127,7 +121,7 @@ and receivers as ``consumers''.  A single client may perform either or
 both roles.
 
 Further details of the Elvin protocol, its entities and their roles is
-available in [EP].
+available in [ELVIN].
 m4_dnl
 m4_heading(2, Notation Conventions)
 
@@ -169,7 +163,66 @@ proprietary instant messaging systems, is its ability to extend beyond
 a point-to-point, group or channel-based communications using the
 content-based routing abilities of the underlying Elvin transport.
 
-m4_heading(1, Messages)
+m4_heading(2, `Groups')
+
+The basic structural element of the Tickertape communications space is
+the concept of groups.  A group is defined by its name: a string that
+is specified by the message producer, and this provides a basic point
+of context for rendezvous with consumers.  The group name performs the
+role of a channel or forum, for selecting messages with related
+content.
+
+Most Tickertape clients maintain a persistent list of group names
+which are simply selectable during message composition.  Many clients
+also allow group names to be entered directly, allowing ad hoc group
+creation.
+
+Group names need not be predefined, nor do they have any required
+structure.  Collisions between same-named groups from previously
+unconnected administrative domains are both possible and likely.  Such
+collisions can be desirable: the two communities might share a common
+interest or purpose.  Where the collision is not productive, the
+normal response is to restrict the distribution of messages in that
+group to within the administrative domain.
+
+m4_heading(2, `Sender Identity')
+
+Tickertape messages include the identity of the sending entity as a
+string value.  
+
+While there are no constraints on the values that may be used for this
+attribute, common usage has evolved several conventions for the
+identity string:
+
+Most clients default to using an identity string of the form
+
+  user@domain
+
+thus providing a simple distinction between users, derived from the
+implicit uniqueness of their login name in combination with their
+machine's domain name.
+
+The obvious similarity with email addresses is not unintentional.
+Rather than requiring a new naming scheme, use of an email address
+reduces the likelyhood of collisions, and takes advantage of users'
+familiarity with this form of identifier.
+
+However, a second convention has evolved that uses the form
+
+  user@location
+
+This usage, while similar in appearance, is quite distinct.  One
+typical value for the location component is the user's company name,
+which provides some level of uniqueness, but is not as robust as a
+complete domain name.  However, a second common usage has the location
+as "home", which provides very little distinction between users.
+
+These issues have not been addressed in the protocol specification
+because no clear consensus has arisen that it is a problem.  Collision
+between identifiers does occur, but it is resolved by social, rather
+than protocol, mechanisms.
+
+m4_heading(1, Message Specification)
 
 This document specifies the basic Tickertape 'chat' message for`'mat.
 Several other message formats are frequently implemented by a
@@ -507,9 +560,9 @@ _
 m4_heading(1, `Access Control')
 
 Elvin supports the use of keys to control visibility of both messages
-and subscriptions [EP].  This specification does not mandate the use
-of a particular key scheme, or a method of applying the general Elvin
-access control facilities to Tickertape Chat messages.
+and subscriptions [ELVIN].  This specification does not mandate the
+use of a particular key scheme, or a method of applying the general
+Elvin access control facilities to Tickertape Chat messages.
 
 It is likely that a companion document, or a future revision of this
 document, will describe such a method.
@@ -571,12 +624,12 @@ This specification places no requirements on the IANA.
 .\"
 m4_heading(1, `Relevant Publications')
 
-The Elvin client protocol [EP] defines an abstract protocol for
+The Elvin client protocol [ELVIN] defines an abstract protocol for
 communication between Elvin clients and Elvin routers, and concrete
 protocols for TCP-based transport and XDR-based data marshaling.
 
-A RECOMMENDED extension to [EP] providing automatic router discovery
-is defined in [ERDP].
+A RECOMMENDED extension to [ELVIN] providing automatic router
+discovery is defined in [ERDP].
 
 Inter-router protocols for clustering [ERCP] and wide-area routing
 [ERFP] are also available.  Elvin router implementations MAY support
@@ -603,9 +656,9 @@ m4_dnl  bibliography
 .bp
 m4_heading(1, REFERENCES)
 
-.IP [EP] 12
-D. Arnold, J. Boot, T. Phelps, B. Segall,
-"Elvin Client Protocol",
+.IP [ELVIN] 12
+D. Arnold, Editor,
+"Elvin Client Access Protocol",
 Work in progress
 
 .IP [RFC1421] 12
@@ -672,22 +725,21 @@ Author's Address
 .nf
 David Arnold
 
-Distributed Systems Technology Centre
-Level7, General Purpose South
-Staff House Road
-University of Queensland
-St Lucia QLD 4072
+Mantara Software
+PO Box 1820
+Toowong QLD 4066
 Australia
 
-Phone:  +617 3365 4310
-Fax:    +617 3365 4311
-Email:  elvin@dstc.com
+Phone:  +617 3876 8844
+Fax:    +617 3876 8843
+Email:  ticker-dev@tickertape.org
 .fi
 .KE
 .bp
 m4_heading(1, `Full Copyright Statement')
 
-Copyright (C) 2000-yyyy DSTC Pty Ltd, Brisbane, Australia.
+Copyright (C) 2003-yyyy by tickertape.org.
+Copyright (C) 2000-2003 DSTC Pty Ltd, Brisbane, Australia.
 
 All Rights Reserved.
 
@@ -698,25 +750,19 @@ providing that the content remains unaltered, and that such
 distribution is under the terms of this licence.
 
 While every precaution has been taken in the preparation of this
-specification, DSTC Pty Ltd assumes no responsibility for errors or
+specification, the authors assume no responsibility for errors or
 omissions, or for damages resulting from the use of the information
 herein.
 
-DSTC Pty Ltd welcomes comments on this specification.  Please address
-any queries, comments or fixes (please include the name and version of
-the specification) to the address below:
+Comments on this specification are welcome.  Please address any
+queries, comments or fixes (please include the name and version of the
+specification) to the mailing list below:
 
 .nf
-    DSTC Pty Ltd
-    Level 7, General Purpose South
-    University of Queensland
-    St Lucia, 4072
-    Tel: +61 7 3365 4310
-    Fax: +61 7 3365 4311
-    Email: elvin@dstc.com
+    ticker-dev@tickertape.org
 .fi
 
-Elvin is a trademark of DSTC Pty Ltd.  All other trademarks and
+Elvin is a trademark of Mantara Software.  All other trademarks and
 registered marks belong to their respective owners.
 .\"
 .\"
