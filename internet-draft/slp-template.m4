@@ -40,3 +40,4 @@ marshal= string L O X
   xdr, none
 
 -----------------------template ends here------------------------
+.DE
