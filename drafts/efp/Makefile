@@ -26,7 +26,7 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/efp/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.1 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.2 $
 #
 ################################################################
 
@@ -34,6 +34,9 @@
 
 SOURCE_FILES:= $(wildcard *.ms)
 
+FILENAME := draft-arnold-elvin-federation
+VERSION := prelim-00
+PUBLISHED := $(FILENAME)-$(VERSION).txt
 
 all: main.txt
 
@@ -49,6 +52,11 @@ main.tmp: efp.ms
 
 clean:
 	rm -f main.txt main.tmp
+
+publish: $(PUBLISHED)
+
+$(PUBLISHED): main.txt
+	sed -e 's/aa bbb cccc/${EXP}/g' $^ > $@
 
 ################################################################
 

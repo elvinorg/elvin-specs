@@ -26,7 +26,7 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/elvin-url/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.6 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.7 $
 #
 ################################################################
 
@@ -38,6 +38,9 @@ mmm=$(shell date +%b)
 yyyy=$(shell date +%Y)
 exp=$(shell date -d "6 months" "+%d %b %Y")
 
+FILENAME := draft-arnold-elvin-uri
+VERSION := prelim-01
+PUBLISHED := $(FILENAME)-$(VERSION).txt
 
 all: main.txt
 
@@ -53,6 +56,12 @@ main.ms: *.m4 Makefile
 
 clean:
 	rm -f main.txt main.ms
+
+
+publish: $(PUBLISHED)
+
+$(PUBLISHED): main.txt
+	sed -e 's/aa bbb cccc/${EXP}/g' $^ > $@
 
 ################################################################
 
