@@ -179,30 +179,31 @@ m4_heading(2, Packet Types)
 m4_heading(2, Management Packets)
 
 Remote management of an Elvin server is implemented using a secure
-unicast connection to the server in question.  The management protocol
+connection to the server in question.  The management protocol
 provides a number of operations.
 
 m4_heading(3, Go Idle)
 
 A server process operates in two modes: active, or idle.  An idle
-server remains an active Unix process, but it suspends any activity
-via the Elvin client protocol.
-
+server remains an active process, and continues to process management
+requests, but it suspends any activity via the Elvin client protocol.
 This is used to provision servers for periods of greater activity, in
 a hot-standby role for reliability, etc.
 
-The Go Idle message forced a server from active, into idle mode.  Any
+The Go Idle message forces a server from active, into idle mode.  Any
 clients currently connected to the server are disconnected and no
 further connections are accepted.
 
 The Go Idle packet MAY include a redirection specification, allowing
 the server to direct connected clients to a specific alternative
-server.
+server.  If the redirection string is zero-length, clients MUST NOT be
+redirected
 
 m4_pre(
 struct GoIdle {
   int32  xid;
   string server;
+  string redirection;
 };)m4_dnl
 
 m4_heading(3, Go Active)
@@ -212,12 +213,78 @@ An idle server process may be made active by sending this message.
 m4_pre(
 struct GoActive {
   int32 xid;
+  string server;
 };)m4_dnl
+
 
 m4_heading(3, Restart)
 
 Restart the server with the current configuration.  Used to reclaim
-virtual memory space used by a previously busy server process.
+virtual memory space used by a previously busy server process.  This
+spawns a new process from the current process before shutting down the
+current process.
+
+m4_pre(
+struct Restart {
+  int32 xid;
+  string server;
+};)m4_dnl
+
+
+m4_heading(3, Shutdown)
+
+Shut down the server.  Once a server has been shut down, it cannot be
+restarted by the cluster controller.
+
+m4_pre(
+struct Shutdown {
+  int32 xid;
+  string server;
+};)m4_dnl
+
+
+
+m4_heading(3, Client Information Request)
+
+Return of client information from the server uses the ClientInfoRqst
+packet.  It includes a summary of all the server's current clients.
+
+m4_pre(
+struct ClientInfoRqst {
+  int32 xid;
+  string server;
+  int64 clients[];
+};)m4_dnl
+
+
+m4_pre(
+struct ClientInfoRply {
+  int32 xid;
+  struct {
+    int64 client;
+    string protocol;
+    opaque peer_address;
+    etc ...
+  } clients[];
+};)m4_dnl
+
+
+
+
+m4_heading(3, Transfer Client)
+
+m4_pre(
+struct TransferClients {
+  int32 xid;
+  string server;
+  string redirection;
+  int64 clients[];
+};)m4_dnl
+
+
+
+
+
 
 m4_heading(3, Add Scope)
 
@@ -261,7 +328,6 @@ FIXME: what implications on clustering ????
 
 m4_heading(3, Add Protocol)
 m4_heading(3, Remove Protocol)
-m4_heading(3, Drop Client)
 m4_heading(3, Zero Stats)
 
 per subscription:
