@@ -116,7 +116,6 @@ providing the same service semantics as a single server daemon with
 better performance or reliability.
 
 m4_heading(1, ABSTRACT PROTOCOL)
-
 m4_heading(2, Protocol Overview)
 
 An Elvin server is statically configured with an initial state.  This
@@ -183,7 +182,7 @@ of identifiers can be encoded using a single byte.
 .fi
 .KE
 
-m4_heading(2, Joining and Leaving the Cluster)
+m4_heading(2, Joining the Cluster)
 
 Servers are staticly configured to use a specified RLM group number
 for cluster management operations.  When configured to become part of
@@ -235,7 +234,7 @@ request, it MUST ignore the second and subsequent packets.
 The leader is responsible for responding to further ClstJoinRqst's and
 also to client server discovery requests on behalf of the cluster.
 
-.nf
+m4_remark(
 *** dealing with changes in the set of protocols or their options
 *** offered by a server during its membership of the cluster is an
 *** open issue.  do we forbid this?  is it controlled by the cluster
@@ -244,8 +243,7 @@ also to client server discovery requests on behalf of the cluster.
 
 *** this is related to the elvind.conf issue of specifying protocol
 *** options.  the current URL-based scheme is bogus, and should go
-*** away ASAP.  at that time, we should revisit this packet format.
-.fi
+*** away ASAP.  at that time, we should revisit this packet format.)
 
 m4_heading(3, Cluster Join Reply)
 
@@ -266,23 +264,75 @@ struct ClstJoinRply {
   }  subscriptions[];
 };)m4_dnl
 
-m4_heading(3, Cluster Leave)
+m4_heading(2, Leaving the Cluster)
 
-Multicast when a server initiates the process of leaving the cluster
-(normally because of a controlled shutdown of the host machine, a
-console interupt, or similar occurance).  
+Servers leave a cluster in several defferent circumstances.
 
-After receiving a Leave, servers should wait for a ServerReport
-specifying a change to \fIshutdown\fR mode before freeing state
-associated with the server.
+Uncontrolled loss of a server is detected by the underlying reliable
+multicast protocol, and reported to all (remaining) nodes.  Such a
+loss can occur through exit of the server process either through a
+failure or an uncontrolled terminatation (ie. kill -9), a crash of the
+machine hosting the server process, or a loss of network connectivity.
+
+Upon receiving such a report for the multicast layer, the server
+should purge all state information held for those nodes no longer
+active.  
+
+Should a network partition heal, the multicast protocol will reject
+those packets from previous members of the cluster.  A server
+receiving notification of such a rejected packet MUST restart (see
+below), but MUST NOT send the restart notification.
+
+Leaving the cluster under control is initiated either by an interrupt
+from the host operating system (ie. SIGINT), a request from the local
+management API (via HTTP) or a remote request from another management
+API within the cluster.
+
+A locally initiated leave MUST multicast a Shutdown or Restart,
+specifying the local server's identifier.
+
+m4_heading(3, Restart)
 
 m4_pre(
-struct ClstLeave {
-  id16 server_id;
+struct Restart {
+  id32 xid;
+  id16 server_ids[];
 };)m4_dnl
 
+Request that the specified server or servers restart. 
 
-m4_heading(2, Management Packets)
+m4_heading(3, Shutdown)
+
+m4_pre(
+struct Shutdown {
+  id32 xid;
+  id16 server_ids[];
+};)m4_dnl
+
+Request the the specified server or servers shutdown.
+
+On receiving a Shutdown or Restart request, the server MUST withdraw
+all client protocol offers, send a Disconn (with no redirect) to all
+remaining clients, multicast a ServerReport for the final state
+(either Shutdown or Restart), and exit or restart the process as
+required.
+
+m4_heading(3, Server Report)
+
+m4_pre(
+struct ServerReport {
+  id32 xid;
+  id16 server_id;
+  id8  mode;
+};)m4_dnl
+
+Report a change of operating mode for a server.  The new mode is
+specified.
+
+Upon receiving a ServerReport for Shutdown or Restart, a server SHOULD
+remove all state associated with that server.
+
+m4_heading(2, Additional Management Packets)
 
 Management of an Elvin server is implemented using a secure connection
 either directly to the server in question, or to any server in the
@@ -301,7 +351,7 @@ Regardless of whether the operation was requested directly, or via
 multicast from another server in the cluster, the affected server(s)
 MUST multicast a Server Report packet describing their new state.
 
-.nf
+m4_remark(
 *** additional operations here could include: changing the log level,
 *** enabling/disabling protocols (and thus offers), interface usage,
 *** QoS value changes, etc.
@@ -312,20 +362,7 @@ MUST multicast a Server Report packet describing their new state.
 
 *** having done that, what if we were expecting a NACK (like, an
 *** active server been told to go active) but don't see one?  do we
-*** need a ConfigQuery?  or should we abort?  eek ...
-.fi
-
-m4_heading(3, Server Report)
-
-Describe the status of a server.  Sent in response to a (successful)
-request to change a server's status.
-
-m4_pre(
-struct ServerReport {
-  id32 xid;
-  id16 server_id;
-  id8  mode;
-};)m4_dnl
+*** need a ConfigQuery?  or should we abort?  eek ...)
 
 m4_heading(3, Server Negative Acknowledge)
 
@@ -371,34 +408,6 @@ struct Standby {
   id16 server_ids[];
 };)m4_dnl
 
-m4_heading(3, Restart)
-
-Restart the server with the current configuration.  Used to reclaim
-virtual memory space used by a previously busy server process.
-
-If the server is not currently in standby mode, a ServerActive error
-MUST be returned.
-
-m4_pre(
-struct Restart {
-  id32 xid;
-  id16 server_ids[];
-};)m4_dnl
-
-m4_heading(3, Shutdown)
-
-Shut down the server.  Once a server has been shut down, it cannot be
-restarted via the Elvin protocols.
-
-If the server is not currently in standby mode, a ServerActive error
-MUST be returned.
-
-m4_pre(
-struct Shutdown {
-  id32 xid;
-  id16 server_ids[];
-};)m4_dnl
-
 m4_heading(3, Cluster Redirect)
 
 Multicast to all servers, the Cluster Redirect packet specifies a set
@@ -434,7 +443,6 @@ struct ServerStatsReport {
 
 
 m4_heading(2, Data Packets)
-
 m4_heading(3, Cluster Notify)
 
 m4_pre(
