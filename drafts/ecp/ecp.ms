@@ -102,10 +102,12 @@ m4_heading(1, Basic Operation)
 Elvin routers, in addition to whatever client-server protocols they
 support, use a separate router cluster protocol.  This protocol has
 two purposes:
-.IP 1. 3
-management of the router(s)
-.IP 2. 3
-clustering of local routers for scaling or reliability
+
+.in 6
+1. management of the router(s)
+
+2. clustering of local routers for scaling or reliability
+.in _default_in
 
 m4_heading(2, Router Management)
 
@@ -164,7 +166,7 @@ to domain, it is possible to reduce netowrk load in the cluster
 and still provide complete access to all notifications at all
 clients.
 
-m4_heading(3, Notification Deleiver)
+m4_heading(3, Notification Delivery)
 
 When a notification arrives at a router, the evaluation engine MUST
 match the contents of the notification against clients connected
@@ -208,32 +210,53 @@ An Elvin router acting as a Master in the cluster MUST perform
 all the same tasks as a Slave node, as well as provide two
 other functions for the cluster.
 
-The first function is internal to the cluster.  The Master
-listens to the traffic in the configured RLM group and
-looks for ClstJoinRqst packets.  Seeing on, it MUST respond
-with a ClstJoinRply, thus accepting the new router into the
-cluster.
+The first function is internal to the cluster.  The Master listens to
+the traffic in the configured RLM group and looks for ClstJoinRqst
+packets.  Seeing on, it MUST respond with a ClstJoinRply, thus
+accepting the new router into the cluster.
 
-The second function is external to the cluster.  The Elvin
-router acting as Master is the only node in the cluster
-which MAY activate Elvin router discovery.  If an Elvin
-scope has been set, or the cluster is to provide default
-Elvin routing for a subnet, the Master node SHOULD listen
-for SvrRqst's.  On seeing a request for its services,
-the master node SHOULD select a random or load balanced
-selection of offered URLs from all the nodes in the cluster
-and emit a SvrAdvt.  See [ERDP] for full details of dynamic
-service discovery with Elvin.
+The second function is external to the cluster.  The Elvin router
+acting as Master is the only node in the cluster which MAY activate
+Elvin router discovery.  If an Elvin scope has been set, or the
+cluster is to provide default Elvin routing for a subnet, the Master
+node SHOULD listen for SvrRqst's.  On seeing a request for its
+services, the master node SHOULD select a random or load balanced
+selection of offered URLs from all the nodes in the cluster and emit a
+SvrAdvt.  See [ERDP] for full details of dynamic service discovery
+with Elvin.
 
 m4_heading(3, Master Failover)
 
-There MUST be exactly one master router in every 
+There MUST be exactly one master router in every cluster.  When a
+Elvin router is shutdown, if it is currently actiing as the Master, it
+MUST send a ServerReport packet selecting a new master node, if there
+is one or more nodes still in the cluster.  When the router which is
+shutting down sees the ServerReport which it multicast, it MUST
+deactivte server discovery and complete its shutdown or restart.
 
-reelection on abort
+If one or more Elvin routers detect that a Master node is no longer
+active in the cluster, the cluster must elect a new Master.  This is
+done by each active node checking to see if its router ID in the
+cluster is the minimum.  If so, the router with the lowest ID sends a
+ServerReport electing itself as the new master, and starts a timer.
+
+If no other ServerReport's are seen within the timeout with a lower
+router ID, the router assumes the Master role and MAY activate router
+discovery.  If a lower ID is seen, the router MUST cancel its timer
+and NOT assume the master role.
+
+If a node in the cluster does not have the lowest ID, it SHOULD
+start a timer.  When the router sees a Master ServerReport it
+MUST cancel the timer.  If the timer expires with no other
+node assuming the master role, this node MUST send a ServerReport
+indicating it is the new Master.  A timer is then started as if
+this node had the lowest ID.
+
+If 
 
 m4_heading(3, Load Balancing)
 
-redir clients when ew get unbalanced
+**** redir clients when ew get unbalanced
 
 m4_heading(1, Abstract Protocol)
 
