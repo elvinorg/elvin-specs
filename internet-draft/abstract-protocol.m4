@@ -61,16 +61,18 @@ Possible values for the type field in a packet are:
 .KE
 
 A concrete protocol implementation is free to use the most suitable
-method for distinguishing packet types.  
+method for distinguishing packet types.  If a packet type number is
+used, it SHOULD reflect the above ordering.
+
+The subset numbers in the above table reflect capabilities of an
+implementation.  An implementation MUST implements all or none of the
+packet types in a subset.
 
 m4_heading(2, Protocol Overview)
 
-After an Elvin server has been located (see section on SLP) a client
-requests a connection. The server MUST respond with either a
-Connection Reply, a Redirect or a Nack.
-
-*** fixme *** what params in a ConnRqst.  how much is done in the ConnRqst
-compared to SLP attr's?
+After an Elvin server has been located (see section on server
+discovery) a client requests a connection. The server MUST respond
+with either a Connection Reply, a Disconnect or a Nack.
 
 If the server accepts the request, it MUST respond with a Connection
 Reply, containing the agreed parameters of the connection.
