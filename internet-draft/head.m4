@@ -8,7 +8,7 @@
 .ds RF PUTFFHERE[Page %]
 .ds CF Expires in 6 months
 .ds LH Internet Draft
-.ds RH _date_
+.ds RH dd mmm yyyy
 .ds CH Elvin
 .hy 0
 .ad l
@@ -19,4 +19,4 @@ Category: Standards Track                                    M.Henderson
                                                                T. Phelps 
                                                                B. Segall
                                                                     DSTC
-                                                            dd mmmm _yr_
+                                                             dd mmm yyyy

@@ -26,11 +26,16 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/internet-draft/Attic/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.5 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.6 $
 #
 ################################################################
 
 .PHONY: all macros outline
+
+#  create date string
+mmm=$(shell date | cut -b5-7)
+dd=$(shell date | cut -b9-10)
+yyyy=2000
 
 all: main.txt
 
@@ -50,7 +55,7 @@ clean:
 ################################################################
 
 %.txt : %.ms
-	nroff -ms $< | ./fix.pl | sed 's/_//g'  > $@
+	nroff -ms $< | ./fix.pl | sed -e 's/_//g' -e 's/dd mmm/${dd} ${mmm}/g' -e 's/yyyy/${yyyy}/g'  > $@
 
 %.ms : %.m4
 	m4 -P $< > $@

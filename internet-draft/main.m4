@@ -18,7 +18,7 @@ status of this protocol.  Distribution of this memo is unlimited.
 Copyright Notice
 
 .in 3
-Copyright (C) The Internet Society (_yr_).  All Rights Reserved.
+Copyright (C) The Internet Society (yyyy).  All Rights Reserved.
 
 
 .ti 0

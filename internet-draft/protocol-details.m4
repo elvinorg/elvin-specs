@@ -396,30 +396,30 @@ Receiving a reserved error code SHOULD be handled as a protocol error.
 .nf
 Error Code  |  Meaning / Action                    |  Arguments
 ------------+--------------------------------------+------------
-   0        |  Undefined error opening connection  |    none
-   1        |  ConnRqst version mismatch           |    none
-   2        |  Authorisation failure               |    none
-   3        |  Authentication failure              |    none
-   4-  499  |  ( Reserved )                        |  undefined
- 500-  999  |  ( Implementation-specific           |  undefined
+   0        |  Undefined error opening connection  |  None
+   1        |  ConnRqst version mismatch           |  None
+   2        |  Authorisation failure               |  None
+   3        |  Authentication failure              |  None
+   4-  499  |  ( Reserved )                        |  Undefined
+ 500-  999  |  ( Implementation-specific           |  Undefined
             |    connection establishment error )  |
-1000        |  Undefined protocol error. Requires  |    none
+1000        |  Undefined protocol error. Requires  |  None
             |     connection abort                 |
-1001        |  Protocol error                      |    none
+1001        |  Protocol error                      |  None
 1002        |  No such subscription                |  sub_id, id64
 1003        |  No such quench                      |  quench_id, id64
 1004        |  Bad keys scheme                     |  scheme_id, id32
 1005        |  Bad keyset index                    |  scheme_id, id32
             |                                      |  index, int32
-1006- 1499  |  ( Reserved )                        |  undefined
-1500- 1999  |  ( Implementation-specific error     |  undefined
+1006- 1499  |  ( Reserved )                        |  Undefined
+1500- 1999  |  ( Implementation-specific error     |  Undefined
             |    requiring connection abort )      |
-2000        |  Undefined error with request        |    none
-2001        |  No such key                         |    none
-2002        |  Key exists                          |    none
-2003        |  Bad key                             |    none
-2004        |  Nothing to do                       |    none
-2005- 2100  |  (Reserved)                          |  undefined
+2000        |  Undefined error with request        |  None
+2001        |  No such key                         |  None
+2002        |  Key exists                          |  None
+2003        |  Bad key                             |  None
+2004        |  Nothing to do                       |  None
+2005- 2100  |  (Reserved)                          |  Undefined
 2101        |  Parse error                         |  offset, int32
             |                                      |  token, string
 2102        |  Invalid token                       |  offset, int32
@@ -438,10 +438,10 @@ Error Code  |  Meaning / Action                    |  Arguments
             |                                      |  function, string
 2109        |  Invalid regular expression          |  offset, int32
             |                                      |  regexp, string
-2110- 2499  |  ( Reserved )                        |  undefined
-2500- 2999  |  ( Implementation-specific           |  undefined
+2110- 2499  |  ( Reserved )                        |  Undefined
+2500- 2999  |  ( Implementation-specific           |  Undefined
             |    operation failure )               |
-3000-65535  |  ( Reserved )                        |  undefined   
+3000-65535  |  ( Reserved )                        |  Undefined   
 .fi
 .KE
 
