@@ -4,7 +4,7 @@ m4_dnl
 m4_dnl              Elvin Router Discovery Protocol
 m4_dnl
 m4_dnl File:        $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/edp/main.m4,v $
-m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.8 $
+m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.9 $
 m4_dnl Copyright:   (C) 2000-2001, DSTC Pty Ltd.
 m4_dnl
 m4_dnl This specification may be reproduced or transmitted in any form or by
@@ -269,7 +269,7 @@ interactions between clients and routers.
 .nf 
   Packet Type                      |  Abbreviation |  Usage 
  ----------------------------------+---------------+---------
-  Router Solicitation Request     |  SvrRqst      |  C -> R
+  Router Solicitation Request      |  SvrRqst      |  C -> R
   Router Advertisement             |  SvrAdvt      |  R -> C
   Router Advertisement Withdrawal  |  SvrAdvtClose |  R -> C
 .fi
@@ -353,13 +353,13 @@ a SvrRqst is sent.
   Pre-Request Interval  |  Locality
   ----------------------+-----------
        0.0 seconds      |      0
-       0.4 +/- 0.2      |      1
-       2.0 +/- 1.0      |      2
-       2.0 +/- 1.0      |      4
-       2.0 +/- 1.0      |      8
-       4.0 +/- 2.0      |     16
-       4.0 +/- 2.0      |     32
-       8.0 +/- 4.0      |     64
+       0.2 +/- 0.1      |      1
+       1.0 +/- 0.5      |      2
+       1.0 +/- 0.5      |      4
+       1.0 +/- 0.5      |      8
+       2.0 +/- 1.0      |     16
+       2.0 +/- 1.0      |     32
+       4.0 +/- 2.0      |     64
 .fi
 .KE
 
@@ -401,7 +401,7 @@ m4_heading(2, Router Advertisements)
 A router advertisement packet SHOULD be sent when the router is
 started, and MUST be sent in response to version-compatible SvrRqst
 packets received from clients, except, that it MUST NOT be sent more
-often than once every two seconds.
+often than once every one second.
 
 m4_pre(
 struct SvrAdvt {
