@@ -1,9 +1,9 @@
 m4_dnl ########################################################################
 m4_dnl
-m4_dnl              Elvin Router Disoovery Protocol
+m4_dnl              Elvin Router Discovery Protocol
 m4_dnl
 m4_dnl File:        $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/edp/main.m4,v $
-m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.5 $
+m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.6 $
 m4_dnl Copyright:   (C) 2000-2001, DSTC Pty Ltd.
 m4_dnl
 m4_dnl This specification may be reproduced or transmitted in any form or by
@@ -183,7 +183,7 @@ m4_changequote({,})m4_dnl
 .KE
 m4_changequote(`,')m4_dnl
 
-Both the solicitation and the resulting advertisments use a multicast
+Both the solicitation and the resulting advertisements use a multicast
 transport.  The use of multicast for the advertisements allows active
 clients to maintain a cache of available routers, to be used for
 future connection attempts.
@@ -257,7 +257,7 @@ m4_dnl
 m4_heading(2, Abstract Protocol Definitions)
 
 The discovery protocol is specified at two levels: an abstract
-description, able to be implemented using different marshalling and
+description, able to be implemented using different marshaling and
 transport protocols, and a concrete specification of one such
 implementation, defined as a standard protocol for IPv4 networks.
 
@@ -268,7 +268,7 @@ interactions between clients and routers.
 .nf 
   Packet Type                      |  Abbreviation |  Usage 
  ----------------------------------+---------------+---------
-  Router Solicitiation Request     |  SvrRqst      |  C -> R
+  Router Solicitation Request     |  SvrRqst      |  C -> R
   Router Advertisement             |  SvrAdvt      |  R -> C
   Router Advertisement Withdrawal  |  SvrAdvtClose |  R -> C
 .fi
@@ -297,8 +297,8 @@ m4_heading(3, Router Solicitation Request)
 
 The client-side of the discovery protocol has two modes of operation:
 passive and active.  During passive discovery, a client caches
-onserved router advertisements.  During active discovery, clients
-explicitly solict advertisements from routers.
+observed router advertisements.  During active discovery, clients
+explicitly solicit advertisements from routers.
 
 Clients SHOULD implement active discovery and MAY add passive
 discovery for better performance and network utilisation.
@@ -367,7 +367,7 @@ greater locality than that to be used for the next SvrRqst is observed
 during the pre-request interval, sending of the SvrRqst MUST be
 suppressed.
 
-If the client receives one or more version-compatible advertisment
+If the client receives one or more version-compatible advertisement
 (SvrAdvt) packets during the pre-request interval, the SvrRqst MUST be
 postponed until the client application requests that further
 advertisements be solicited (for example, because it cannot connect to
@@ -410,7 +410,7 @@ struct SvrAdvt {
   id32     revision;
   string   scope_name;
   string   server_name;
-  string   urls[];
+  string   uri[];
 };)m4_pre
 
 Router advertisement packets specify the version of the discovery
@@ -508,7 +508,7 @@ Currently, mappings are defined for IPv4 and IPv6 protocols.
 m4_heading(2, Use of IPv4)
 
 The implementation of ERDP on IPv4 uses IP any-source multicast as the
-basic transport, and the XDR marshalling protocol for packet data.
+basic transport, and the XDR marshaling protocol for packet data.
 
 m4_heading(3, Multicast Transport)
 
@@ -556,10 +556,10 @@ m4_pre(
     SvrAdvtClose   = 18,
 } pkt_id;')
 
-In XDR, enumerations are marshalled as 32 bit integral values.  Each
+In XDR, enumerations are marshaled as 32 bit integral values.  Each
 packet starts with a value from the above pkt_id enumeration.  The
 format for the remainder of the packet is then specific to the value
-of the packet identifer.
+of the packet identifier.
 
        0   1   2   3    
      +---+---+---+---+---+---+---+...+---+---+---+
@@ -567,7 +567,7 @@ of the packet identifer.
      +---+---+---+---+---+---+---+...+---+---+---+
      |<---header---->|<-----------data---------->|
 
-Note that the XDR marshalling layer does not provide packet
+Note that the XDR marshaling layer does not provide packet
 framing. This is left to the underlying UDP layer.
 
 m4_heading(4, Base Types)
@@ -576,8 +576,8 @@ The protocol relies on four basic types used to construct each packet:
 boolean, uint8, id32, string.
 
 Below is a summary of how these types are represented when using XDR
-encoding.  Each datatype used in the abstract descriptions of the
-packets has a one-to-one mapping to a corresponsing XDR data type as
+encoding.  Each data type used in the abstract descriptions of the
+packets has a one-to-one mapping to a corresponding XDR data type as
 defined in [RFC1832].
 .KS
 .nf
@@ -597,7 +597,7 @@ defined in [RFC1832].
 .KE
 m4_heading(2, Use of IPv6)
 
-The protocol mapping to IPv6 is imcomplete.
+The protocol mapping to IPv6 is incomplete.
 
 For IPv6 multicast, the client MUST use the following table to
 translate locality values to multicast scopes.
@@ -629,7 +629,7 @@ m4_heading(3, Router Advertisement Solicitation)
 
 An attacker could send a constant stream of SvrRqst packets to an ERDP
 multicast group.  Aside from the loss of network bandwidth and
-consumption of CPU in processing these requests, the protcol requires
+consumption of CPU in processing these requests, the protocol requires
 that routers advertise no more often than once every two seconds,
 preventing a packet storm.
 
@@ -660,7 +660,7 @@ advertisement from the router.
 
 m4_heading(2, Preventative Measures)
 
-The are no novel preventation measures effective against these
+The are no novel preventative measures effective against these
 attacks.  Most measures will rely on the underlying concrete protocol
 implementation, but as an example, IP firewalling technology will
 reduce the ability of an attacker to inject the false packets required
