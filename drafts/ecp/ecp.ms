@@ -204,6 +204,8 @@ the role of advertising server endpoints to client programs.
 m4_pre(
 struct ClstJoinRqst {
   id32 xid; 
+  uint8 version_major;
+  uint8 version_minor;
   string server;        /* unique name for server */
   string urls[];        /* set of URLs for server */
 };)m4_dnl
