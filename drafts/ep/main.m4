@@ -1,40 +1,44 @@
-
+m4_define(__title, `Elvin Client Protocol')
 m4_include(macros.m4)m4_dnl
 m4_include(head.m4)m4_dnl
 
 .ce
-Elvin \- Content-Addressed Messaging Client Protocol
+__title
+.ce
+__file
 
-.ti 0
-Status of this Memo
+m4_heading(1, Status of this Memo)
 
-.in 3
 This document specifies an Internet standards track protocol for the
 Internet community, and requests discussion and suggestions for
 improvements.  Please refer to the current edition of the "Internet
 Official Protocol Standards" (STD 1) for the standardization state and
 status of this protocol.  Distribution of this memo is unlimited.
 
-.ti 0
-Copyright Notice
+Internet-Drafts are working documents of the Internet Engineering Task
+Force (IETF), its areas, and its working groups.  Note that other
+groups may also distribute working documents as Internet-Drafts.
 
-.in 3
-Copyright (C) The Internet Society (yyyy).  All Rights Reserved.
+Internet-Drafts are draft documents valid for a maximum of six months
+and may be updated, replaced, or obsoleted by other documents at any
+time.  It is inappropriate to use Internet- Drafts as reference
+material or to cite them other than as "work in progress."
 
+The list of current Internet-Drafts can be accessed at
+http://www.ietf.org/1id-abstracts.html
 
-.ti 0
-ABSTRACT
+The list of Internet-Draft Shadow Directories can be accessed at
+http://www.ietf.org/shadow.html
 
-.in 3
+m4_heading(1, ABSTRACT)
+
 This document describes the Elvin notification service: its
 architecture, protocols, packet formats, operational semantics,
 programming interfaces and management.
 
-.ti 0
-TABLE OF CONTENTS
-
-(tdb) (probably last ;-)
-
+m4_dnl .ti 0
+m4_dnl TABLE OF CONTENTS
+m4_dnl (tdb) (probably last ;-)
 .bp
 
 m4_include(introduction.m4)

@@ -8,15 +8,15 @@
 .ds RF PUTFFHERE[Page %]
 .ds CF Expires in 6 months
 .ds LH Internet Draft
-.ds RH dd mmm yyyy
+.ds RH __date
 .ds CH Elvin
 .hy 0
 .ad l
 .in 0
-Network Working Group                                          D. Arnold
-Internet Draft                                                   J. Boot
-Category: Standards Track                                    M.Henderson
-                                                               T. Phelps 
+Elvin Projet                                                   D. Arnold
+Preliminary INTERNET-DRAFT                                       J. Boot
+                                                             M.Henderson
+Expires: aa bbb cccc                                           T. Phelps 
                                                                B. Segall
                                                                     DSTC
-                                                             dd mmm yyyy
+                                                             _d __m __yr

@@ -26,7 +26,7 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/ep/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.1 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.2 $
 #
 ################################################################
 
@@ -36,6 +36,28 @@
 mmm=$(shell date | cut -b5-7)
 dd=$(shell date | cut -b9-10)
 yyyy=2000
+
+FILENAME := draft-arnold-elvin-client
+VERSION := prelim-02
+
+SOURCE_FILES:= $(wildcard *.ms)
+
+PUBLISHED := $(FILENAME)-$(VERSION).txt
+
+DATE := $(shell date +"%B %Y")
+YEAR := $(shell date +"%Y")
+MTH := $(shell date +"%b")
+DAY := $(shell date +"%e")
+
+EXP=$(shell date -d "6 months" "+%d %b %Y")
+
+
+M4FLAGS := \
+	-D__file="$(PUBLISHED)" \
+	-D__yr="$(YEAR)" \
+	-D__date="$(DATE)" \
+	-D__m="$(MTH)" \
+	-D_d="$(DAY)"
 
 all: main.txt
 
@@ -47,22 +69,22 @@ outline.txt: main.ms
 main.txt: main.ms
 
 main.ms: *.m4
-	m4 -P main.m4 > $@
+	m4 -P $(M4FLAGS) main.m4 > $@
 
 clean:
 	rm -f main.txt main.ms
 
+publish: $(PUBLISHED)
+
+$(PUBLISHED): main.txt
+	sed -e 's/aa bbb cccc/${EXP}/g' $^ > $@
+
 ################################################################
 
 %.txt : %.ms
-	nroff -ms $< | ./fix.pl | sed -e 's/_//g' -e 's/.//g' -e 's/dd mmm/${dd} ${mmm}/g' -e 's/yyyy/${yyyy}/g'  > $@
+	nroff -ms $< | ./fix.pl | sed -e 's/_//g' -e 's/.//g'  > $@
 
 %.ms : %.m4
 	m4 -P $< > $@
-
-################################################################
-
-billstall: main.txt
-	cp main.txt /home/bill/e4/web-public/download/internet-draft.txt
 
 
