@@ -20,41 +20,45 @@ interactions between clients and the server.
 
 .KS
 .nf 
-  ---------------------------------------------------------------
-  Packet Type                   Abbreviation	Usage	Subset
-  ---------------------------------------------------------------
-  Unreliable Notification	UNotify		C -> S	 1
+-----------------------------------------------------------------
+Packet Type                   Abbreviation    Usage   Cast Subset
+-----------------------------------------------------------------
+Unreliable Notification       UNotify         C -> S    U    A
 
-  Negative Acknowledgement      Nack		S -> C	 2
+Negative Acknowledgement      Nack            S -> C    U    B
 
-  Connect Request               ConnRqst	C -> S	 2
-  Connect Reply                 ConnRply	S -> C	 2
+Connect Request               ConnRqst        C -> S    U    B
+Connect Reply                 ConnRply        S -> C    U    B
 
-  Disconnect Request            DisconnRqst	C -> S	 2
-  Disconnect Reply		DisconnRply	S -> C	 2
-  Disconnect	                Disconn		S -> C	 2
+Disconnect Request            DisconnRqst     C -> S    U    B
+Disconnect Reply              DisconnRply     S -> C    U    B
+Disconnect                    Disconn         S -> C    U    B
 
-  Security Request              SecRqst		C -> S	 2
-  Security Reply		SecRply		S -> C	 2
+Security Request              SecRqst         C -> S    U    B
+Security Reply                SecRply         S -> C    U    B
 
-  Notification Emit             NotifyEmit	C -> S	 2
-  Notification Deliver          NotifyDeliver	S -> C	 2
+Notification Emit             NotifyEmit      C -> S    U    B
+Notification Deliver          NotifyDeliver   S -> C    U    B
 
-  Subscription Add Request      SubAddRqst	C -> S	 2
-  Subscription Modify Request   SubModRqst	C -> S	 2
-  Subscription Delete Request   SubDelRqst	C -> S	 2
-  Subscription Reply            SubRply		S -> C	 2
+Subscription Add Request      SubAddRqst      C -> S    U    B
+Subscription Modify Request   SubModRqst      C -> S    U    B
+Subscription Delete Request   SubDelRqst      C -> S    U    B
+Subscription Reply            SubRply         S -> C    U    B
 
-  Quench Add Request            QnchAddRqst	C -> S	 3
-  Quench Modify Request         QnchModRqst	C -> S	 3
-  Quench Delete Request         QnchDelRqst	C -> S	 3
-  Quench Reply                  QnchRply	S -> C	 3
+Quench Add Request            QnchAddRqst     C -> S    U    C
+Quench Modify Request         QnchModRqst     C -> S    U    C
+Quench Delete Request         QnchDelRqst     C -> S    U    C
+Quench Reply                  QnchRply        S -> C    U    C
 
-  Subscription Add Notify	SubAddNotify	S -> C	 3
-  Subscription Change Notify	SubModNotify	S -> C	 3
-  Subscription Delete Notify	SubDelNotify	S -> C	 3
+Subscription Add Notify       SubAddNotify    S -> C    U    C
+Subscription Change Notify    SubModNotify    S -> C    U    C
+Subscription Delete Notify    SubDelNotify    S -> C    U    C
 
-  ---------------------------------------------------------------
+Server Request                SvrRqst         C -> S    M    D
+Server Advertisement          SvrAdvt         S -> C    M    D
+Server Advertisement Close    SvrAdvtClose    S -> C    M    D
+
+-----------------------------------------------------------------
 .fi
 .KE
 
@@ -62,12 +66,17 @@ A concrete protocol implementation is free to use the most suitable
 method for distinguishing packet types.  If a packet type number or
 enumeration is used, it SHOULD reflect the above ordering.
 
-The subset numbers in the above table reflect capabilities of an
+m4_heading(2, Protocol Subsets)
+
+The subsets in the above table reflect capabilities of an
 implementation.  An implementation MUST implement all or none of the
 packet types in a subset.
 
+Subsets A, B and D are independent.  An implementation MAY suport any
+or all of subsets A, B and D.  Subset C is dependent on subset B.  An
+implementation supporting subset C MUST support subset B.
+
 m4_include(protocol-overview.m4)
 m4_include(protocol-details.m4)
-m4_include(server-discovery.m4)
 m4_include(connection-opts.m4)
 m4_include(protocol-errors.m4)

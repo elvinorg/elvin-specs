@@ -2,10 +2,63 @@ m4_dnl  -*- nroff -*-
 m4_dnl
 m4_dnl  protocol-overview
 
-m4_heading(2, Protocol Overview)
+m4_heading(2, `Protocol Overview')
+
+This section describes the protocol packet types and their allowed
+use.  The following sections describe in detail the content of each
+packet in protocol and the requirements of both the server and the
+client library.
+
+m4_heading(3, `Server Discovery')
+
+Server discovery SHOULD be implemented by client libraries.
+
+Clients multicast a request for server URLs; servers respond with a
+multicast list of URLs describing their available endpoints.  Where
+multicast is not available for a concrete protcol, link-layer
+broadcast MAY be used instead.
+
+m4_changequote({,})
+.KS
+                             ,-->     +---------+
+  +-------------+ ---SvrRqst-+-->   +---------+ |
+  | Producer or |            `--> +---------+ | |
+  |  Consumer   | <--.            |  Elvin  | |-+
+  +-------------+ <--+-SvrAdvt--- | Servers |-+     SOLICITATION and
+                  <--'            +---------+          ADVERTISEMENT
+.KE
+
+When a server is shutting down, it SHOULD multicast an announcement to
+all clients that its endpoints are no longer available.
+
+.KS
+      +-------------+
+    +-------------+ |                     +---------+
+  +-------------+ | | <--.                |  Elvin  |
+  | Producers & | |-+ <--+-SvrAdvtClose-- |  Server |
+  |  Consumers  |-+   <--'                +---------+  ADVERTISEMENT
+  +-------------+                                         WITHDRAWAL
+.KE
+m4_changequote(`,')
+
+m4_heading(3, Session-less Operation)
+
+Client libraries MAY implement session-less transfer of messages from
+the client to the server.  It is not possible to receive messages or
+quench notifications outside of a session.
+
+.KS
+  +-------------+                  +---------+
+  |  Producer   | ----UNotify----> |  Server |          NOTIFICATION
+  +-------------+                  +---------+
+.KE
+
+No other packets are allowed during session-less operation.
+
+m4_heading(3, Session-based Operation)
 
 After an Elvin server has been located (see section on server
-discovery) a client requests a connection. The server MUST respond
+discovery) a client MAY request a connection. The server MUST respond
 with either a Connection Reply, a Disconnect or a Nack.
 
 If the server accepts the request, it MUST respond with a Connection
@@ -24,8 +77,11 @@ the connection on which the client made the request.  The client MAY
 then send a Connection Request to the server address supplied in the
 Disconnect message.
 
-*** fixme *** may a client ignore a redirect and re-attempt the same
-server?  if not, how long until it may?
+A server MAY detect repeated connection attempts from a single client
+ignoring a redirect, and SHOULD disconnect with a reason code
+reflecting repeated protocol error.  Such servers SHOULD also take
+appropriate steps at the concrete level to prevent or delay further
+attempts at connection by this client.
 
 .KS
   +-------------+ --ConnRqst--> +---------+
@@ -218,11 +274,6 @@ The server MUST NOT refuse to disconnect a client (ie. using a Nack).
   |  Consumer   |                   |  Server |       DISCONNECTION 
   +-------------+ <--DisconnRply--- +---------+
 .KE
-
-
-The following sections describe in detail the content of each packet
-in protocol and the requirements of both the server and the client
-library.
 
 m4_heading(2, Errors)
 

@@ -10,7 +10,20 @@ and described in a pseudo-C style as structs made up of these types.
 
 .KS
 The following definitions are used in several packets:
+m4_pre(`
+typedef uint32 id32;
+typedef uint64 id64;
+')m4_dnl
+These types are opaque n-bit identifiers.  No semantics is required
+other than bitwise comparison.  In all cases, an all zeros value is
+reserved.
 
+Implementations are free to use any type capable of holding the
+required number of bits for these values.  In particular, the
+signedness of the underlying type does not matter.
+
+.KE
+.KS
 m4_pre(`
 typedef byte[] opaque;
 
@@ -18,24 +31,35 @@ union Value {
     int32 i32;     // 4 byte signed integer
     int64 i64;     // 8 byte signed integer
     real64 r64;    // 8 byte double precision float
-    string str;    // length encoded string
+    string str;    // length encoded UTF-8 Unicode string
     opaque bytes;  // binary data sequence
 };
 
 struct NameValue {
     string  name;
     Value   value;
-};
+};')m4_dnl
 
+Arrays of NameValue elements are used for notification data and
+description of server options.  The value type defines the range of
+data that may be exchanged using Elvin messages.  Note that there are
+no unsigned integer types, nor an explicit boolean type.
+
+.KE
+.KS
 struct Keys {
     struct KeySetList {
-	int32 scheme;
+	id32 scheme;
 	struct KeySet {
 	    opaque keys[];
 	} key_sets[];
     } key_set_lists[];
 };
- 
+
+Keys and keysets are explained more fully in a later section.
+.KE
+.KS 
+m4_pre(`
 struct SubASTNode {
     SubAST[] children;
 };
@@ -101,15 +125,13 @@ union SubAST {
     SubASTNode equals;
     SubASTNode size;
 };')m4_dnl
+The subscription AST types are used to describe the compiled form of
+subscription expressions in the quench notification packets.
 
 .KE
-
-Arrays of NameValue elements are used for notification data and
-description of server options.
-
 .KS
 m4_pre(
-  uint32 xid
+  id32 xid
 )m4_dnl
 .na
 Where a request packet is sent by the client (other than NotifyEmit or
@@ -122,9 +144,9 @@ NOT be used.
 m4_heading(3, Unreliable Notification)
 
 Unreliable notifications are sent by a client to a server outside the
-context of a session.  Using the protocol and endpoint information
-obtained either directly or via server discovery, a client may send
-single UNotify packets to the server.
+context of a session (see ConnRqst below).  Using the protocol and
+endpoint information obtained either directly or via server discovery,
+a client may send single UNotify packets to the server.
 
 m4_pre(
 struct UNotify {
@@ -143,25 +165,34 @@ operation.
 
 m4_pre(
 struct Nack {
-    uint32 xid;
-    int32 error;
+    id32 xid;
+    id32 error;
     string message;
     Value args[]
 };)m4_dnl
 
+*** fixme ***
+
+we need to refer to the definition of errors here.  we also need to
+decide what to do wrt the error numbers, as discussed in jun00 design
+meetings.
+
+*** fixme ***
+
 m4_heading(3, Connect Request)
 
 Using the protocol and endpoint information obtained either directly
-or via server discovery, the client establishes a connection to the
+or via server discovery, a client MAY initiate a session with the
 server endpoint.  It MUST then send a ConnRqst to establish protocol
 options to be used for the session.
 
-It is a protocol violation for the client to send anything other than
-a UNotify to the server before a ConnRqst.  A server connection that
-has not received a UNotify or a ConnRqst within five (5) seconds of
-being opened SHOULD be closed by the server.
+Concrete protocols MAY choose not to provide an implementation of the
+concept of a session.  Such protocols MUST NOT support ConnRqst or any
+other packets from subsets B or C.
 
-*** fixme *** do we need to set a hard time limit here?  what is reasonable?
+An initiated session that has not received a ConnRqst within a limited
+time period SHOULD be closed by the server.  This time period MUST NOT
+be less than five (5) seconds.
 
 The ConnRqst MAY contain requests for various protocol options to be
 used by the connection.  These options are identified using a string
@@ -173,7 +204,7 @@ defined later in this document.
 
 m4_pre(
 struct ConnRqst {
-    uint32 xid;
+    id32 xid;
     uint8 client_major_version;
     uint8 client_minor_version;
     NameValue options[];
@@ -188,7 +219,7 @@ Specifies the connection option values agreed by the server.
 
 m4_pre(
 struct ConnRply {
-    uint32 xid;
+    id32 xid;
     NameValue options[];
 };)m4_dnl
 
@@ -209,7 +240,7 @@ Sent by client to the Elvin server.  Requests disconnection.
 
 m4_pre(
 struct DisconnRqst {
-    uint32 xid;
+    id32 xid;
 };)m4_dnl
 
 A client MUST send this packet and wait for confirmation via
@@ -235,7 +266,7 @@ to a Disconnect Request, prior to breaking the connection.
 
 m4_pre(
 struct DisconnRply {
-    uint32  xid;
+    id32 xid;
 };)m4_dnl
 
 This MUST be the last packet sent by a server on a connection.  The
@@ -251,7 +282,7 @@ server, or to inform that client that the server is shutting down.
 
 m4_pre(
 struct Disconn {
-    int32  reason;
+    id32  reason;
     string args;
 };)m4_dnl
 
@@ -306,7 +337,7 @@ sets as an atomic operation.
 
 m4_pre(
 struct SecRqst {
-    uint32  xid;
+    id32 xid;
     Keys add_nfn_keys;
     Keys del_nfn_keys;
     Keys add_sub_keys;
@@ -322,7 +353,7 @@ Sent by the server to clients to confirm a successful change of keys.
 
 m4_pre(
 struct SecRply {
-    uint32 xid;
+    id32 xid;
 };)m4_dnl
 
 m4_heading(3, Notification Emit)
@@ -332,7 +363,7 @@ modes, determining how the server should match supplied security keys.
 Delivery can be specified as requiring the consumer to have a matching
 key (deliver_insecure is not set).  Alternatively, the producer can
 not require that the consumer have a key, but if one or more are
-supplied, then at least one must match (deliver_insecure is set).
+supplied, then at least one MUST match (deliver_insecure is set).
 
 m4_pre(
 struct NotifyEmit {
@@ -349,8 +380,8 @@ Sent by the Elvin server to a client.
 m4_pre(
 struct NotifyDeliver {
     NameValue attributes[];
-    int64 secure_matches[];
-    int64 insecure_matches[];
+    id64 secure_matches[];
+    id64 insecure_matches[];
 };)m4_dnl
 
 m4_heading(3, Subscription Add Request)
@@ -360,7 +391,7 @@ notifications which match the supplied subscription expression.
 
 m4_pre(
 struct SubAddRqst {
-    uint32 xid;
+    id32 xid;
     string expression;
     boolean accept_insecure;
     Keys keys;
@@ -385,8 +416,8 @@ or to alter the security keys associated with the subscription.
 
 m4_pre(
 struct SubModRqst {
-    uint32 xid;
-    int64 subscription_id;
+    id32 xid;
+    id64 subscription_id;
     string  expression;
     boolean accept_insecure;
     Keys add_keys;
@@ -394,18 +425,10 @@ struct SubModRqst {
 };)m4_dnl
 
 Any (and all) of the expression, add_keys and del_keys field MAY be
-empty.  If all fields are empty, the modification SHALL be considered
-successful.
-
-*** FIXME *** when (if?) the accept_insecure is removed:
-
-Client libraries SHOULD not send SubModRqst's with all of expression,
-add_prime_keys and del_prime_keys as empty.  Server implementations,
-however, MUST still handle such packets by sending a SubRply with the
-xid and subscription_id set to the same corresponding values in the
-SubModRqst.
-
-***
+empty.  The accept_insecure field cannot be empty: it must always be
+set to the required value. If the accept_insecure field value is
+unchanged from that registered at the server, and all other fields are
+empty, the modification SHALL be considered successful.
 
 A successful modification of the subscription MUST return a SubRply to
 the client.
@@ -431,8 +454,8 @@ subscription identifier is not valid.
 
 m4_pre(
 struct SubDelRqst {
-    uint32 xid;
-    int64 subscription_id;
+    id32 xid;
+    id64 subscription_id;
 };)m4_dnl
 
 m4_heading(3, Subscription Reply)
@@ -442,8 +465,8 @@ subscription change.
 
 m4_pre(
 struct SubRply {
-    uint32 xid;
-    int64 subscription_id;
+    id32 xid;
+    id64 subscription_id;
 };)m4_dnl
 
 m4_heading(3, Quench Add Request)
@@ -453,7 +476,7 @@ subscriptions referring to the specified attributes.
 
 m4_pre(
 struct QnchAddRqst {
-    uint32 xid;
+    id32 xid;
     string names[];
     boolean deliver_insecure;
     Keys keys;
@@ -466,8 +489,8 @@ attribute names associated with a quench identifier.
 
 m4_pre(
 struct QnchModRqst {
-    uint32 xid;
-    int64 quench_id;
+    id32 xid;
+    id64 quench_id;
     string names_add[];
     string names_del[];
     boolean deliver_insecure;
@@ -483,8 +506,8 @@ associated attribute names.
 
 m4_pre(
 struct QnchDelRqst {
-    uint32 xid;
-    int64 quench_id;
+    id32 xid;
+    id64 quench_id;
 };)m4_dnl
 
 m4_heading(3, Quench Reply)
@@ -494,8 +517,8 @@ quench requirements change (QnchAddRqst, QnchModRqst, QnchDelRqst):
 
 m4_pre(
 struct QnchRply {
-    uint32 xid;
-    int64 quench_id;
+    id32 xid;
+    id64 quench_id;
 };)m4_dnl
 
 m4_heading(3, Subscription Add Notification)
@@ -509,8 +532,8 @@ subscription has no associated keys.
 
 m4_pre(
 struct SubAddNotify {
-    int64 quench_ids[];
-    int64 term_id;
+    id64 quench_ids[];
+    id64 term_id;
     boolean insecure;
     SubAST sub_expr;
 };)m4_dnl
@@ -532,8 +555,8 @@ request.
 
 m4_pre(
 struct SubModNotify {
-  int64 quench_ids[];
-  int64 term_id;
+  id64 quench_ids[];
+  id64 term_id;
   boolean insecure;
   SubAST sub_expr;
 };)m4_dnl
@@ -546,7 +569,91 @@ attribute name list for each of the identified quench registrations.
 
 m4_pre(
 struct SubDelNotify {
-  int64 quench_ids[];
-  int64 term_id;
+  id64 quench_ids[];
+  id64 term_id;
 };)m4_dnl
 
+m4_heading(3, Server Request)
+
+A client MAY request that servers advertise their available endpoints
+by multicasting a Server Request.  
+
+All attempts to send a Sever Request MUST be delayed by a random
+period of between zero (0) and five (5) seconds.  If any Server
+Request packets (from other clients) are observed during this time,
+the client MUST cancel its own pending request.
+
+If a client observes any Server Advertisements during the startup
+period, it SHOULD attempt to connect to them immediately.
+
+A client MUST NOT send a Server Request more than once in any twenty
+(20) second period.
+
+m4_pre(
+struct SvrRqst {
+  uint8      major;
+  uint8      minor;
+};)m4_dnl
+
+m4_heading(3, Server Advertisement)
+
+Servers MUST respond to a SvrRqst with a multicast Server
+Advertisement, but MUST NOT send SvrAdvt more often than once every
+five (5) seconds.
+
+m4_pre(
+struct SvrAdvt {
+  uint8    major;
+  uint8    minor;
+  string   server;
+  id32     revision;
+  string   scope;
+  boolean  default;
+  string   urls[];
+};)m4_dnl
+
+The returned major and minor version numbers MUST reflect the protocol
+version of the reply packet.  Where a server is capable of using
+multiple protocol versions, this MUST be reflected in the endpoint
+URLs, and the SvrAdvt message MUST use the client's protocol version.
+
+The SvrAdvt includes a server name that MUST be globally unique.  It
+is RECOMMENDED that the fully-qualified DNS host name, server process
+number and a random integer value be used to prevent collisions.
+
+The revision number distinguishes between advertisements from the same
+server reflecting changes in the available protocols.  As a server's
+configuration is altered (at runtime), the advertisement version
+number MUST be incremented.  This allows clients to discard duplicate
+advertisements quickly.
+
+The scope name must be the string scope name for the server.  An empty
+scope name is allowed.  If this scope has been configured to be the
+default scope for a site, the default flag should be set true.
+
+The set of URLs reflect the endpoints available from the server.  A
+SvrAdvt message SHOULD include all endpoints offered by the server.
+Where the limitations of the underlying concrete protocol prevent
+this, the server cannot advertise all its endpoints.  Each SvrAdvt
+MUST contain at least one URL.
+
+Clients SHOULD maintain a cached list of all endpoint URLs it has seen
+announced.  If available, this list MUST be used to attempt connection
+before sending a SvrRqst.  Cached URLs MUST be replaced by those in a
+subsequent advertisement with higher version number from the same
+server.  URLs cached for a given server SHOULD be flushed after eight
+(8) observed SvrRqst/SvrAdvt cycles that have not included a SvrAdvt
+from that server.
+
+m4_heading(3, Server Advertisement Close)
+
+A server shutting down SHOULD send a Server Advertisement Close
+message.
+
+m4_pre(
+struct SvrAdvtClose {
+  string   server;
+};)m4_dnl
+
+Caching clients MUST monitor such messages and remove all endpoints for
+the specified server from their cache.
