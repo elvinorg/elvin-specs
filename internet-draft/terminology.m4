@@ -6,43 +6,25 @@ m4_dnl
 m4_heading(1, TERMINOLOGY)
 
 This document discusses clients, client libraries, servers, producers,
-consumers, subscription, notification, events and federation.  
+consumers, quenchers, messages, and subscriptions.
 
-The Elvin server is a background process that runs on a single server.
-It acts as a distribution mechanism for event notifications. A client
-is a program which uses the Elvin server, via the client library for a
-particular programming language.  The client library implements the
-Elvin protocol and manages that client's connection to the server.
+An Elvin server is a daemon process that runs on a single machine.  It
+acts as a distribution mechanism for Elvin message. A client is a
+program that uses the Elvin server, via a client library for a
+particular programming language.  A client library implements the
+Elvin protocol and manages clients' connections to an Elvin server.
 
-Clients can have two roles: producer or consumer.  Producer clients
-detect events of interest, and send a notification describing that
-event to the server using the client library.  Consumer clients
-subscribe to the server, requesting delivery of notifications matching
-a subscription language query.  Some clients can be both producers and
-consumers of notifications.
+Clients can have three roles: producer, consumer or quencher.
+Producer clients create structured messages and send them, using a
+client library, to an Elvin server.  Consumer clients establish a
+session with an Elvin server and register a request for delivery of
+messages matching a subscription expression.  Quenching clients also
+establish a session with a server, and register a request for
+notification of changes to the server's subscription database that
+match criteria supplied by the quencher.
 
-Elvin servers can also act as clients, enabling groups of servers to
-exchange notifications.  This grouping, called federation, allows the
-system to scale beyond a single company or network.
-
-.nf
-   int32    Signed 32-bit integer
-
-   int64    Signed 64-bit integer
-
-   real64   Double precision float using IEEE standard encoding 
-
-   string   Variable length string, UTF8 encoded and are NOT null
-            terminated.  
-  
-   opaque   Variable length byte array
-
-   server   the process and/or host computer distributing 
-            notifications to and from connected clients.
-
-   client   A process that interacts with an Elvin server as a
-            producer or consumer of notifications.
-.fi
+Clients MAY take any number of the producer, consumer and quencher
+roles concurrently.
 
 m4_heading(2, Notation Conventions)
 

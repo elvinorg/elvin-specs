@@ -26,68 +26,11 @@ distribute messages beyond the domain of a single server.
 This specification describes the client/server protocol and semantic
 requirements for client libraries and the server daemon.  It does not
 describe the inter-server protocol.
-
-m4_heading(2, Philosophy)
-
-The Elvin protocol is designed to provide undirected, content-routed
-messaging.  The raw protocol is expected to be accessed via an
-interface library, not unlike the Berkeley sockets interface.  Unlike
-sockets, however, the use of message content for routing requires that
-the message body be structured.
-
-The messages are routed from their source to required destinations by
-Elvin server(s).  Delivery has best-effort, at-most-once semantics.
-Under no circumstances will an Elvin client receive duplicate
-messages.  Messages from a single source must be delivered in order,
-but interleaving of messages from different sources is allowed in any
-order.
-
-Inter-server routing is not specified by this document.  It is noted,
-however, that messages are routed between servers, and that such
-journeys are subject to filtering and greater latency than messages
-between clients of a single router process.
-
-m4_heading(3, Simplicity)
-
-API, data-types, administration
-
-m4_heading(3, Speed)
-
-Directed communication (like UDP or TCP) has a significant advantage
-over undirected messaging in that its routing decisions are
-comparitively simple.  If undirected messaging is to become a useful
-part of the Internet protocol suite, its performance is critical.
-
-The architecture and implementation of an Elvin server are directed by
-this concern.  The protocol design supports
-
-m4_heading(3, Fail-stop Communications)
-m4_heading(3, Best-effort Reliability)
-
-m4_heading(3, Use of Multicast)
-
-It is often suggested that delivery of Elvin messages make use of IP
-multicast.  While this is certainly possible, it is important to note
-that the use of subscriptions to filter delivered messages means that
-few clients receive that same message traffic.
-
-m4_heading(2, Server)
-
-The Elvin server is central to the implementation of the protocol.  It
-acts as a local router for message traffic, evaluating message content
-against registered subscriptions and queuing messages for delivery to
-clients.
-
-*** FIXME ***
-
-perhaps we should not use the term "queuing" in this context - it has
-the connotation of message queues and persistence.
-
-*** FIXME ***
-
-m4_heading(2, Client)
-
+m4_dnl
 m4_heading(2, Communication Model)
+
+UNotify
+sessions
 
 An Elvin client must maintain a connection to its server.  If the
 connection is closed (or lost), the registered subscriptions are freed
@@ -102,24 +45,12 @@ Clients use the standard protocol to locate a suitable server.
 Establishment of a connection can involve negotiation of the server's
 capabilities, including underlying protocol options, supported limits
 on notification content, and available qualities of service.
-
-m4_heading(3, Notification)
-m4_heading(3, Subscription)
-m4_heading(3, Delivery)
-m4_heading(3, Quench)
-
+m4_dnl
 m4_heading(2, Security)
 
 Security of Elvin traffic is optional.  If required, the client can
 select a protocol which will provide mutual authentication of the
 server connection, and optional privacy of the channel.  
-
-*** FIXME ***
-
-do we need to flag messages that were sent on a secured channel and
-prohibit their distribution through an unsecured link????
-
-*** FIXME ***
 
 Access control of content-routed traffic is a complex issue.
 Obviously, the router process must have access to the message content
@@ -127,18 +58,11 @@ in order to perform routing decisions, and must therefore be trusted.
 
 The principle difficulty comes because the server ensures that the
 client does not know the identity of the message's receivers.
-
+m4_dnl
 m4_heading(3, Authentication)
-
-m4_heading(3, Anonymous Access Control)
-
-m4_heading(2, Federation)
-
-Federation refers to the inter-connection of multiple Elvin servers to
-provide a routing network.  Federation is desirable for several
-reasons, which can be divided into two categories: local and wide
-area.
-
+m4_dnl
+m4_heading(3, Access Control)
+m4_dnl
 m4_heading(3, Local Area Clustering)
 
 The capacity of a single Elvin server is limited.  The computation
@@ -155,15 +79,82 @@ load.
 An Elvin server cluster should provide a "single-system" image to its
 clients.  This requires support for automatic failover, consistent
 ordering of message delivery and transparent connection management.
+m4_dnl
+m4_heading(2, Messages)
 
-m4_heading(3, Wide Area)
+An Elvin message consists of a sequence of named, typed, attribute
+values.  The client libraries support the creation of such messages
+using idioms suited to the various languages.
 
-Wide-area federation addresses different goals to clustering.  While
-it is possible to implement a server cluster over a wide-area network,
-the need for global access to content-routed messages requires
-different implementation choices.
+An implementation MAY limit the number of attributes in a message
+and/or the total size of the message data.  See section X on
+Server Features.
+m4_dnl
+m4_heading(3, Message Attributes)
 
-The wide-area federation protocol provides for filtering of messages
-at enterprise boundaries and routing of message traffic between local
-Elvin domains through analysis of message generation and subscription
-patterns.
+An attribute name is a string value from a subset of the printable
+ASCII character set.  The maximum length of an attribute name is 1024
+bytes.  An attribute name may have any value comprised of legal
+characters; there are no reserved values.
+m4_dnl
+m4_heading(3, Data Types)
+
+Elvin specifies a set of simple, platform-independent types for
+communication of message data.  The types have been chosen to enable
+implementation using a wide range of marshalling standards and
+programming languages.  They are
+m4_dnl
+m4_heading(2, Subscription)
+
+m4_dnl
+m4_heading(2, Quenching)
+
+description of quenching: problem, what it is, how it works, impact on
+security, impact on federation
+
+Quenching is a facility named for its ability to reduce notification
+traffic by preventing the propagation of unwanted notifications.  It
+has two components: manual and automatic.  Both cases use the server's
+knowledge of consumers subscriptions to prevent producer clients from
+notifying events for which no subscription exists.
+
+m4_heading(3, Manual Quench)
+
+Some types of producer clients must perform significant work to detect
+events.  As an example, consider a file system monitor that reports
+changes to the monitored file system.  Indiviually checking each
+directory and file for modification would not only place significant
+loading on the host processor, but would be unable to detect changes
+within useful time bounds.
+
+Manual quenching provides a mechanism through which the producer can
+specify a filter over the set of subscriptions registered at the
+server, and be informed of changes to the matching set of
+subscriptions.
+
+In this way, to continue our example above, the file and directory
+names that are to be monitored can be isolated from the subscriptions
+registered by consumers, and only those particular files need be
+monitored for changes.
+
+m4_heading(3, Automatic Quench)
+
+Manual quench requires that clients take explicit action to filter the
+registered subscriptions and determine what events to detect and
+notify.
+
+Automatic quench is an extension to the Elvin client library which
+peforms quenching on behalf of the client code.  It monitors notified
+events, building a profile of the notifications emitted.  This profile
+is registered with the server as a quench filter (as for manual
+quenching).  The server's updates of matching subscriptions are used
+to filter notifications within the client library.
+
+m4_heading(2, Security)
+m4_heading(3, Requirements)
+m4_heading(3, Client-Server)
+m4_heading(4, Authentication)
+m4_heading(4, Privacy and Integrity)
+m4_heading(3, Access Control)
+m4_heading(3, Quenching)
+

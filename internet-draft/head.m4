@@ -4,7 +4,7 @@
 .lt 7.2i
 .nr LL 7.2i
 .nr LT 7.2i
-.ds LF Arnold, Boot & Segall
+.ds LF Arnold, et al
 .ds RF PUTFFHERE[Page %]
 .ds CF Expires in 6 months
 .ds LH Internet Draft
@@ -15,7 +15,7 @@
 .in 0
 Network Working Group                                          D. Arnold
 Internet Draft                                                   J. Boot
-Category: Standards Track                                      T. Maslen
+Category: Standards Track                                    M.Henderson
                                                                T. Phelps 
                                                                B. Segall
                                                                     DSTC

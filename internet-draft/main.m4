@@ -2,7 +2,7 @@ m4_include(macros.m4)m4_dnl
 m4_include(head.m4)m4_dnl
 
 .ce
-Elvin \- Content-Addressed Messaging Protocol
+Elvin \- Content-Addressed Messaging Client Protocol
 
 .ti 0
 Status of this Memo
@@ -44,10 +44,6 @@ m4_include(abstract-protocol.m4)
 m4_include(protocol-impl.m4)
 m4_include(security-issues.m4)
 m4_include(sub-syntax.m4)
-m4_include(c-api.m4)
-m4_include(java-api.m4)
-m4_include(python-api.m4)
-m4_include(slp-template.m4)
 m4_include(bib.m4)
 m4_include(contact.m4)
 m4_include(copyright.m4)

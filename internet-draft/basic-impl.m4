@@ -1,29 +1,77 @@
-m4_dnl  basic-impl
+m4_dnl  -*- nroff -*-
 m4_dnl
 m4_dnl  this is the basic implementation details
 m4_dnl
-m4_heading(1, IMPLEMENTATION)
-.LP
-Throughout the remainder of this document, unless otherwise specified,
-any quantity value is defined to be represented using a signed, 32 bit
-2's complement integer, making the maximum value 2**31 - 1.
-
-m4_heading(2, Data Types)
-
-*** FIXME *** 
-
-this whole section really describes the representation of datatypes in
-the subscription language, rather than the actual underlying datatypes
-as supported by the evaluation engine and notifications.
-
-*** FIXME ***
-
-Elvin defines a set of simple, platform-independent types for
-communication of notification data.  The types have been chosen to
-enable implementation using a wide range of marshalling standards and
-programming languages.  They are
-
 .KS
+m4_heading(1, SUBSCRIPTION LANGUAGE)
+
+Consumer clients register subscription expressions with a server to
+request delivery of messages.  The language used for these expressions
+is defined in this section.  The subscription language syntax and
+semantics are considered part of the protocol: all servers supporting
+a particular protocol version will understand the same subscription
+language.  There is no provision for alternative languages.
+.KE
+
+A consumer client registers a subscription expression that the server
+evaluates on its behalf for each message delivered to the server. If
+the expression evaluates to true then the notification is delivered,
+otherwise, it it not delivered.
+m4_dnl
+m4_heading(2, Subscription Expressions)
+
+The subscription language uses a ternary logic when evaluating
+expressions; this is then resolves to a binary result.  During
+evaluation, the value `bottom' is added to represent undefined values.
+For example, a comparison involving an attribute which is not present
+in a notification evaluates to bottom.
+
+With respect to boolean operations, the behaviour of bottom is quite
+similar to that of false with the notable exception that the negation
+of bottom (! bottom) is still bottom.
+
+It should be emphasized that:
+.IP - 2
+There is neither an explicit boolean type nor are there boolean
+constants for true or false.
+.IP - 2
+Whereas some programming languages, such as C and C++, provide an
+implicit conversion from numeric values to truth values (zero means
+false, nonzero means true), the Elvin subscription language requires
+such a conversion to be made explicit, for example 
+.QP
+(i-have-been-notified != 0)
+m4_dnl
+m4_heading(3, Grouping)
+
+Clauses in an expression may be grouped to override precedence of
+evaluation using parentheses.  Unlike the logical or arithmetic
+operators, parentheses need not be separated from attribute
+identifiers or literal values by whitespace.
+
+An implementation MAY limit the depth of nesting able to be evaluated
+in subscription expressions; an expression which exceeds this limit
+MUST generate a NESTING_TOO_DEEP error in response to registration
+with the server.
+m4_dnl
+m4_heading(3, Logical Operators)
+
+A subscription expression may be a single predicate, or it may consist
+of multiple predicates composed by logical operators. The logical
+operators are
+.ID 2
+&&   Logical AND
+||   Logical OR
+^^   Logical Exclusive-OR
+!    Logical NOT (unary)
+.DE
+Logical NOT has highest precedence, followed by AND, XOR and then OR.
+.KS
+m4_heading(3, Literal Syntax)
+.LP
+A subscription expression may include literal values for most of the
+message data types.  These types are
+
 Integer Numbers
 m4_dnl ***FIXME*** we lose our indent here  ***
 .IP int32 10
@@ -39,8 +87,7 @@ the value should be of type int64.
 .LP
 Literal values too large to be converted to an int32, but without the
 suffix specifying an int64 type, are illegal.  Similarly, values with
-the suffix too large to be converted to an int64, are illegal.
-
+the suffix, too large to be converted to an int64, are illegal.
 
 .KS
 Real Numbers
@@ -61,7 +108,7 @@ A UTF-8 encoded Unicode string of known length.
 String literals must be quoted using either the UTF-8 single or double
 quote characters.  Within the (un-escaped) quotes, a backslash
 character functions as an escape for the following character.  All
-escaped characters represent themselves.
+escaped characters except the quotes represent themselves.
 .KE
 There is no mechanism for including special characters in string
 literals; each language mapping is expected to use its own mechanism
@@ -84,108 +131,24 @@ using the existing types and structured naming.
 String and opaque data values have known sizes (ie. they don't use a
 termination character).  An implementation MAY enforce limits on these
 sizes; see section X on Server Features.
+m4_dnl
+m4_heading(3, Reference Syntax)
 
-m4_heading(2, Notifications)
+Predicates and function may also use values obtained from the message
+under evaluation.  Values are referred to using the name of the
+message attribute.
 
-A notification consists of a sequence of named, typed, attribute
-values.  The client libraries support the creation of notifications
-using idioms suited to the various languages.
-
-An implementation MAY limit the number of attributes in a notification
-and/or the total size of the notification data.  See section X on
-Server Features.
-
-m4_heading(3, Notification Attributes)
-
-An attribute name is a string value from a subset of the printable
-ASCII character set.  The maximum length of an attribute name is 1024
-bytes.  An attribute name may have any value comprised of legal
-characters; there are no reserved values.
-
-
-m4_heading(2, Subscriptions)
-
-An Elvin consumer client registers a test that the server applies on
-its behalf to each notification delivered to the server. If the test succeeds,
-the server will forward the notification to the consumer, if it fails,
-it won't.
-
-(forwarding and quench ?)
-
-This test is expressed as a predicate using the Elvin subscription
-language, described in this section.  
-
-
-m4_heading(3, Boolean values, Predicates and arithmetic operators)
-
-The elvin subscription language uses a ternary logic when evaluating
-expressions.  The value `bottom' is added to the usual true and false
-to represent undefined values.  For example, a comparison involving an 
-attribute which is not present in a notification evaluates to bottom.
-
-With respect to boolean operations, bottom's behavior is quite similar
-to that of false with the notable exception that the negation of
-bottom (! bottom) is still bottom.
-
-A subscription expression is a boolean expression which refers to the
-fields of a notification.  If the expression evaluates to true then
-the notification is delivered, if it evaluates to false or bottom then 
-it it not delivered.  
-
-It should be emphasized that:
-.IP - 2
-There is neither an explicit boolean type nor are there boolean
-constants for true or false.
-.IP - 2
-Whereas some programming languages, such as C and C++, provide an
-implicit conversion from numeric values to truth values (zero means
-false, nonzero means true), the Elvin subscription language requires
-such a conversion to be made explicit, for example 
-.QP
-(i-have-been-notified != 0)
-
-m4_heading(4, Grouping)
-
-Clauses in an expression may be grouped to override precedence of
-evaluation using parentheses.  Unlike the logical or arithmetic
-operators, parentheses need not be separated from attribute
-identifiers or literal values by whitespace.
-
-An implementation MAY limit the depth of nesting able to be evaluated
-in subscription expressions; an expression which exceeds this limit
-MUST generate a NESTING_TOO_DEEP error in response to registration
-with the server.
-
-m4_heading(4, Logical Operators)
-
-A subscription expression may be a single predicate, or it may consist
-of multiple predicates composed by logical operators. The logical
-operators are
-.ID 2
-&&   Logical AND
-||   Logical OR
-^^   Logical Exclusive-OR
-!    Logical NOT (unary)
-.DE
-Logical NOT has highest precedence, followed by AND, XOR and then OR.
-.KS
-m4_heading(4, General predicates)
+Names must be separated from operators by whitespace.  What other
+rules here?
+m4_dnl
+m4_heading(3, General predicates)
 .LP
 The subscription language defines a number of predicates that return
 boolean values.
 .KE
-
 Any predicate may be applied to any attribute name. If the named attribute
 does not exist in the current notification, or exists but has an
-inappropriate type for the predicate, the predicate returns false.
-
-This is important to note because it can cause unexpected results when
-expressions refer to non-existent attributes.  For example, if a
-notification has neither A nor B attributes,
-.QP
-A == B
-.LP
-will evaluate true!
+inappropriate type for the predicate, the predicate returns bottom.
 .IP exists(attribute) 4
 Returns true if the notification contains an attribute whose name
 exactly matches that specified (even if the attribute's value is, say,
@@ -222,7 +185,7 @@ Returns true if the type of the attribute is
 Returns true if the type of the attribute is 
 .B opaque.
 .KE
-
+m4_dnl
 m4_heading(3, String predicates)
 
 Some of the most used features of the subscription language are its
@@ -284,13 +247,13 @@ is equivalent to
 .LP
 There are no predicates for string comparison, i.e. testing whether one
 string "is less than" another string.
-
-m4_heading(3, Operations on International Characters)
+m4_dnl
+m4_heading(3, Implications of International Characters)
 
 Unicode characters introduce some complexity to the string
 predicates.  Comparison of Unicode characters must consider two
 aspects: character decomposition, and strength of the comparison.
-
+m4_dnl
 m4_heading(4, Decomposition)
 
 A single Unicode "character" might consist of a base character
@@ -330,7 +293,7 @@ resulting string value.
 .IP "decompose_compat(string)" 4
 Perform compatible (and canonical) decomposition of the supplied string
 and return the resulting string value.
-
+m4_dnl
 m4_heading(4, Comparison Strength)
 .LP
 There are four "strengths" of comparison defined for Unicode
@@ -351,7 +314,7 @@ supplied string.  Strings which differ only in tertiary
 characteristics, are identical save for their bitwise representation:
 they have the same base character, case and accents.  Importantly,
 embedded control characters are stripped during tertiary conversion.
-
+m4_dnl
 m4_heading(3, Numeric predicates)
 
 The numeric predicates are the usual arithmetic comparison operators:
@@ -406,7 +369,7 @@ implemented using other predicates, like
 !(A == B)
 .LP
 which can again cause confusion when the attributes are not defined.
-
+m4_dnl
 m4_heading(3, Numeric functions)
 
 The following functions are defined on all three numeric types:
@@ -443,8 +406,8 @@ Bitwise OR
 Bitwise XOR
 .IP "~" 4
 Bitwise inversion (unary)
-
-m4_heading(3, Numeric type promotion)
+m4_dnl
+m4_heading(2, Numeric type promotion)
 
 The three numeric types (int32, int64 and real64) may be mixed freely
 in numeric expressions, and Elvin performs automatic type promotions
@@ -464,8 +427,32 @@ If either operand is real64, the promoted type is also real64.
 Otherwise, if either operand is int64, the promoted type is also int64.
 .IP "3." 3
 Otherwise, both operands must be int32, and no promotion is required.
+m4_dnl
+m4_heading(2, Subscription Errors)
 
-m4_heading(4, Evaluation errors in numeric expressions)
+Elvin subscriptions are compiled by the server after submission at runtime.
+Various errors are possible; this section documents the error conditions.
+
+*** fixme *** I don't think we should have ANY lang specific stuff
+here.  better to refer to a section on abstract errors independent of
+any particular naming conventions.  ie like the different packet types
+are current defined. Is this the Failures section in
+abstract-protocol.m4?  jb
+
+vErrors are reported as numbers so that language-specific error
+messages may be used by the client. This section shows symbols from
+the C language binding; for the corresponding error numbers, please
+see <elvin4/errors.h> or documentation for your language binding.
+
+.IP SYNTAX_ERROR 4
+Non-specific syntactic problem.
+.IP IDENTIFIER_TOO_LONG 4
+the supplied element identifier exceeds the maximum allowed length.
+.IP BAD_IDENTIFIER 4
+the supplied element identifier contains illegal characters. Remember
+that the first character must be only a letter or underscore.
+m4_dnl
+m4_heading(3, Runtime evaluation errors in numeric expressions)
 
 During the evaluation of a numeric predicate (including the evaluation of
 any expressions that are the arguments to the predicate), the following
@@ -497,93 +484,3 @@ Need to check whether 754 defines all relationals to return FALSE if
 either argument is NaN. (What about other magic numbers, e.g.
 underflow?) Does 754 specify behaviour of != with NaN, and how does
 that compare to Elvin semantics?
-
-m4_heading(3, Subscription Errors)
-
-Elvin subscriptions are compiled by the server after submission at runtime.
-Various errors are possible; this section documents the error conditions.
-
-*** fixme *** I don't think we should have ANY lang specific stuff
-here.  better to refer to a section on abstract errors independent of
-any particular naming conventions.  ie like the different packet types
-are current defined. Is this the Failures section in
-abstract-protocol.m4?  jb
-
-vErrors are reported as numbers so that language-specific error
-messages may be used by the client. This section shows symbols from
-the C language binding; for the corresponding error numbers, please
-see <elvin4/errors.h> or documentation for your language binding.
-
-.IP SYNTAX_ERROR 4
-Non-specific syntactic problem.
-.IP IDENTIFIER_TOO_LONG 4
-the supplied element identifier exceeds the maximum allowed length.
-.IP BAD_IDENTIFIER 4
-the supplied element identifier contains illegal characters. Remember
-that the first character must be only a letter or underscore.
-
-
-m4_heading(2, Quenching)
-
-description of quenching: problem, what it is, how it works, impact on
-security, impact on federation
-
-Quenching is a facility named for its ability to reduce notification
-traffic by preventing the propagation of unwanted notifications.  It
-has two components: manual and automatic.  Both cases use the server's
-knowledge of consumers subscriptions to prevent producer clients from
-notifying events for which no subscription exists.
-
-m4_heading(3, Manual Quench)
-
-Some types of producer clients must perform significant work to detect
-events.  As an example, consider a file system monitor that reports
-changes to the monitored file system.  Indiviually checking each
-directory and file for modification would not only place significant
-loading on the host processor, but would be unable to detect changes
-within useful time bounds.
-
-Manual quenching provides a mechanism through which the producer can
-specify a filter over the set of subscriptions registered at the
-server, and be informed of changes to the matching set of
-subscriptions.
-
-In this way, to continue our example above, the file and directory
-names that are to be monitored can be isolated from the subscriptions
-registered by consumers, and only those particular files need be
-monitored for changes.
-
-m4_heading(3, Automatic Quench)
-
-Manual quench requires that clients take explicit action to filter the
-registered subscriptions and determine what events to detect and
-notify.
-
-Automatic quench is an extension to the Elvin client library which
-peforms quenching on behalf of the client code.  It monitors notified
-events, building a profile of the notifications emitted.  This profile
-is registered with the server as a quench filter (as for manual
-quenching).  The server's updates of matching subscriptions are used
-to filter notifications within the client library.
-
-m4_heading(2, Security)
-m4_heading(3, Requirements)
-m4_heading(3, Client-Server)
-m4_heading(4, Authentication)
-m4_heading(4, Privacy and Integrity)
-m4_heading(3, Anonymous Access Control)
-m4_heading(3, Quenching)
-
-m4_heading(2, Federation)
-m4_heading(3, Requirements)
-m4_heading(3, Clustering)
-m4_heading(3, Wide Area)
-m4_heading(4, Network Issues)
-m4_heading(4, Security)
-m4_heading(3, Quenching)
-
-
-m4_heading(2, Quality of Service)
-m4_heading(3, Fairness)
-m4_heading(3, Policies)
-
