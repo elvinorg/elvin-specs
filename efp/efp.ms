@@ -321,13 +321,16 @@ struct SubDBRqst {
 
 m4_heading(3, Subscription Database Reply)
 
-Unicast reply to a server from the cluster controller.
+Unicast reply to a server from the cluster controller.  This is a
+complete copy of the cluster's subscription database at the time it is
+sent.  The client_id and sub_id values include a 32bit server
+identifier prefix.
 
 m4_pre(
 struct SubDBRply {
   int32 xid;
   struct {
-    int32 client_id;
+    int64 client_id;
     opaque keys[];
     struct {
       int64 sub_id;
