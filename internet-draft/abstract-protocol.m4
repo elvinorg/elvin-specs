@@ -19,8 +19,6 @@ The Elvin abstract protocol specifies a number of packets used in
 interactions between clients and the server.
 
 .KS
-Possible values for the type field in a packet are:
-
 .nf 
   ---------------------------------------------------------------
   Packet Type                   Abbreviation	Usage	Subset
@@ -122,11 +120,11 @@ server for consumers, the consumers matching those subscriptions SHALL
 be be sent a notification deliver message with the content of the
 original notification.
 
-The NotifDel packet differs slightly from the original Notif sent 
-by the producer.  As well as the sequence of named-typed-values,
+The NotifyDeliver packet differs slightly from the original NotifyEmit
+sent by the producer.  As well as the sequence of named-typed-values,
 it contains information about which subsciptions were used to match
-the event.  This allows the client library of the consumer to
-dispatch the event with out having to do any additional matching.
+the event.  This allows the client library of the consumer to dispatch
+the event with out having to do any additional matching.
 
 .KS
    +----------+                   +--------+
@@ -180,7 +178,6 @@ registered is a protocol error, and generates a Nack.
    | Consumer |                 | Server |   DELETING A SUBSCRIPTION
    +----------+ <---SubRply---- +--------+
 .KE
-
 
 Once connected, the client may request notification of changes in the
 subscription database managed by the server.  The client may request
@@ -264,13 +261,13 @@ using the Negative Acknowledge (Nack) packet.
 A single protocol error MUST NOT cause the client/server connection to
 be closed.  Repeated protocol errors on a single connection MAY cause
 the server to close the client connection, giving suspected denial of
-service attack as a reason (see Disconnect packet).
+service attack as a reason (see the Disconnect packet).
 
 m4_heading(2, Packet Contents)
 
 This section provides detailed descriptions of each packet used in the
-Elvin protocol. Packets are comprised of the Elvin base types and
-described in a pseudo-C style as structs made up of these types.
+Elvin protocol. Packets are comprised from a set of simple base types
+and described in a pseudo-C style as structs made up of these types.
 
 The following definitions are used in several packets:
 
@@ -281,6 +278,17 @@ struct NameValue{
 };)m4_dnl
 
 Where the "Value" type is one of int32, int64, string, real64 or opaque.
+
+m4_pre(
+  xid
+)m4_dnl
+
+Where a request packet is sent by the client (other than NotifyEmit),
+it MUST include transaction identifier (xid), used to match its reply.
+The xid is a 32 bit number, allocated by the client.  The allocation
+MUST ensure that no packet is sent with the same identifier as an
+outstanding request.  Also, the value zero is reserved, and MUST NOT
+be used.
 
 
 m4_heading(3, Unreliable Notification)
@@ -711,8 +719,7 @@ that the first character must be only a letter or underscore.
 m4_heading(2, Connection Options)
 
 Connection options control the behaviour of the server for the
-specified connection.  Set during connection, they may also be
-modified during the life of the connection using QosRqst.
+specified connection.
 
 A server implementation MUST support the following options.  It MAY
 support additional, implementation-specific options.
