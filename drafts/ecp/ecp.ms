@@ -557,6 +557,10 @@ URL from the list.
 
 m4_heading(3, Elvin Router Statistics Report)
 
+In order share the work in a cluster, router nodes share statistical
+information.  Each Elvin router publishes details about is recent load
+based on 
+
 m4_pre(
 struct Elvin ServerStatsReport {
   id16 router_id;
@@ -597,6 +601,17 @@ struct Elvin ServerStatsReport {
       /* quench (sent to clients) */
       real64  quench_rate;
       real64  quench_vol;
+
+      /* virtual CPU */
+      real64  percent_idle;
+      real64  percent_user;
+      real64  percent_system;
+
+      /* memory */
+      uint32  avail_phys_k;
+      uint32  total_phys_k;
+      uint32  avail_swap_k;
+      uint32  total_swap_k;
     } periods[];
   } stats[];
 };)m4_dnl
@@ -778,7 +793,7 @@ RFC 1832, August 1995.
 .NH 1
 CONTACT
 .ft
-.in 3
+.in _default_in
 
 Author's Address
 
@@ -804,7 +819,7 @@ Email:  elvin@dstc.edu.au
 .NH 1
 Full Copyright Statement
 .ft
-.in 3
+.in _default_in
 
 Copyright (C) 2000-__yr DSTC Pty Ltd, Brisbane, Australia.
 
