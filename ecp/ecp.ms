@@ -148,7 +148,7 @@ of identifiers can be encoded using a single byte.
   Restart                       Restart                 130
   Shutdown                      Shutdown                131
   Server Status Notify          ServerStatusNotify      132
-  Negative Acknowledge          Nack                    133
+  Negative Acknowledge          MgmtNack                133
 
   Cluster Request               ClusterRqst             160
   Cluster Reply                 ClusterRply             161
@@ -162,6 +162,7 @@ of identifiers can be encoded using a single byte.
   Cluster Notify                ClusterNotify           169
   Cluster Redirect              ClusterRedirect         170
   Client Disconnect Notify      ClientDisconnNotify     171
+  Leave Request                 LeaveRqst               172
   ----------------------------------------------------------------
 .fi
 .KE
