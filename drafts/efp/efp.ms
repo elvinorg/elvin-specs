@@ -45,7 +45,6 @@ http://www.ietf.org/1id-abstracts.html
 The list of Internet-Draft Shadow Directories can be accessed at
 http://www.ietf.org/shadow.html
 
-
 m4_heading(1, Abstract)
 
 This document describes a protocol for forwarding message traffic
@@ -75,24 +74,22 @@ and out of each server.
 
 m4_heading(1, Terminology)
 
-Wide-area federation
+This document discusses Elvin clients, client libraries and routers.
 
-Clustering
+An Elvin router is a daemon process that runs on a single machine.  It
+acts as a distribution mechanism for Elvin messages. A client is a
+program that uses an Elvin router, via a client library for a
+particular programming language.  A client library implements the
+Elvin protocols and manages clients' connections to an Elvin router.
 
-Scope
-
-Subscription scope
-
-Address space
-
-Elvin domain
+Further details of the Elvin protocol, its entities and their roles is
+available in [EP].
 
 m4_heading(2, Notation Conventions)
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
 "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
 document are to be interpreted as described in RFC 2119.
-
 
 m4_heading(1, Basic Operation)
 
@@ -270,14 +267,8 @@ to travel from one server to the other.
 Future revisions of the protocol may provide for automatic detection
 or configuration.
 
-
-
 .KS
-.ti 0
-.NH 1
-CONTACT
-.ft
-.in 3
+m4_heading(Contact)
 
 Author's Address
 
@@ -297,38 +288,37 @@ Fax:    +617 3365 4311
 Email:  elvin@dstc.edu.au
 .fi
 .KE
+.bp
+m4_heading(1, `Full Copyright Statement')
 
-.KS
-.ti 0
-.NH 1
-FULL COPYRIGHT STATEMENT
-.ft
-.in 3
+Copyright (C) 2000-__yr DSTC Pty Ltd, Brisbane, Australia.
 
-Copyright (C) The Internet Society (1999).  All Rights Reserved.
+All Rights Reserved.
 
-This document and translations of it may be copied and furnished to
-others, and derivative works that comment on or otherwise explain it
-or assist in its implmentation may be prepared, copied, published and
-distributed, in whole or in part, without restriction of any kind,
-provided that the above copyright notice and this paragraph are
-included on all such copies and derivative works.  However, this
-document itself may not be modified in any way, such as by removing
-the copyright notice or references to the Internet Society or other
-Internet organizations, except as needed for the purpose of
-developing Internet standards in which case the procedures for
-copyrights defined in the Internet Standards process must be
-followed, or as required to translate it into languages other than
-English.
+This specification may be reproduced or transmitted in any form or by
+any means, electronic or mechanical, including photocopying,
+recording, or by any information storage or retrieval system,
+providing that the content remains unaltered, and that such
+distribution is under the terms of this licence.
 
-The limited permissions granted above are perpetual and will not be
-revoked by the Internet Society or its successors or assigns.
+While every precaution has been taken in the preparation of this
+specification, DSTC Pty Ltd assumes no responsibility for errors or
+omissions, or for damages resulting from the use of the information
+herein.
 
-This document and the information contained herein is provided on an
-"AS IS" basis and THE INTERNET SOCIETY AND THE INTERNET ENGINEERING
-TASK FORCE DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING
-BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE INFORMATION
-HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES OF
-MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE."
-.KE
+DSTC Pty Ltd welcomes comments on this specification.  Please address
+any queries, comments or fixes (please include the name and version of
+the specification) to the address below:
 
+.nf
+    DSTC Pty Ltd
+    Level 7, General Purpose South
+    University of Queensland
+    St Lucia, 4072
+    Tel: +61 7 3365 4310
+    Fax: +61 7 3365 4311
+    Email: elvin@dstc.com
+.fi
+
+Elvin is a trademark of DSTC Pty Ltd.  All other trademarks and
+registered marks belong to their respective owners.
