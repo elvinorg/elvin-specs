@@ -328,10 +328,15 @@ struct ClusterRply {
 m4_heading(3, Join Request)
 
 Unicast request to the cluster controller to join its managed cluster.
+The server and urls fields match the information sent in SvrAdvt
+packets by the server, and are used to allow the cluster to take over
+the role of advertising server endpoints to client programs.
 
 m4_pre(
 struct JoinRqst {
   int32 xid; 
+  string server;        /* unique name for server */
+  string urls[];        /* set of URLs for server */
 };)m4_dnl
 
 m4_heading(3, Join Reply)
