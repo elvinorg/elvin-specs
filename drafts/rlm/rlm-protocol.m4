@@ -74,10 +74,10 @@ The member identifier is a 16 bit number, allocated by the sequencer
 when a member joins the group.  This puts an upper limit of 65535
 members in a group.
 
-The packet identifier is used to allow the sender of a packet to match
-it with the packet sent by the sequencer with an assigned sequence
-number.  This means that a member cannot have more than 65535 packets
-outstanding at any one time.
+The fragment identifier is used to allow the sender of a DATA packet
+to match it with the ACPT packet sent by the sequencer with an
+assigned sequence number.  This means that a member cannot have more
+than 65535 DATA packets outstanding at any one time.
 
 The last sequence is used as a group-wide identifier and ordering for
 a packet.  It is allocated by the sequencer, and may roll over if the
@@ -111,8 +111,19 @@ m4_heading(3, Sending and Receiving Data)m4_dnl
 Messages are sent to the sequencer using the DATA packet. Within the
 DATA packet, members send a piggybacked acknowledgement of the highest
 contiguous sequence number they have seen.  The sequencer then
-multicasts the data as an ACCEPT packet, together with an allocated
+multicasts the data as an ACPT packet, together with an allocated
 sequence number, to all group members.
+
+The sender maintains a buffer of sent DATA fragments and a sent-packet
+timer.  On seeing an ACPT packet, the timer is cancelled, and all sent
+DATA fragments buffered with a lesser fragment number can be freed,
+the ACPT proving that the sequencer has seen all fragments from the
+sender up to that number.
+
+If the send-packet timer expires without having seen a later numbered
+ACPT fragment, the original DATA packet, and all those sent after it,
+are resent to the sequencer, on the assumption that the first was
+lost, and all later fragments are discarded by the sequencer.
 
 Each member maintains a buffer of received messages, and a table of
 last sequence for each known member.  When all members have
@@ -263,20 +274,40 @@ the reply, and should be randomly chosen.
 
 m4_heading(3, `Join Reply')m4_dnl
 
-The member_id value is allocated by the sequencer, and may reuse
-values of previous members.  The packet_id is set to match that of
-the member's request. The last sequence is that of the last message
-sent by the sequencer, thus initialising the member to the state of
-the group at the time it joins.
+The member field is set to the value allocated by the sequencer for
+the new member.  Member numbers MAY reuse numbers of members that have
+left the group.  The fragment field is set to match that of the
+member's request. The last sequence is that of the last message sent
+by the sequencer, thus initialising the member to the state of the
+group at the time it joins.
+
+The sequencer's member number is included in the reponse, and MUST be
+saved by the new member.  It is used when the sequencer wishes to
+leave the group to determine that a new sequencer must be elected.
 
 The packet should be multicast to the group, and all existing members
 should allocate space in their history buffer for the new member.
 
+m4_changequote([,])m4_dnl
+m4_pre([
+ 0                   1                   2                 3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 0 1 2
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+| Ver |   Type  |     Flags     |          Incarnation          |
+|-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-|
+|             Member            |            Fragment           |
+|-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-|
+|                        Sequence Number                        |
+|-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-|
+|           Sequencer           |          Reserved             |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+])m4_dnl
+m4_changequote(`,')m4_dnl
+
 m4_heading(3, `Leave')m4_dnl
 
-The member_id is set to that of the leaving member (as specified in
-JRPY).  The packet_id should be 0, and the last sequence the last
-message seen by the member.
+The member field is set to that of the leaving member (as specified in
+JRPY).  The fragment field should be 0, and the last sequence value
+the last message seen by the member.
 
 m4_heading(3, `Data')m4_dnl
 
