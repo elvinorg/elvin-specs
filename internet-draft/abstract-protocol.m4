@@ -245,7 +245,9 @@ struct ConRqst {
    int32 xid;
    int32 client_major_version;
    int32 client_minor_version;
-   NameValue options[];   
+   NameValue options[];
+   opaque not_keys[];
+   opaque sub_keys[];
 };)
 
 m4_heading(3, Connect Reply)
