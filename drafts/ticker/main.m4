@@ -4,7 +4,7 @@ m4_dnl
 m4_dnl              Tickertape Message Format Specification
 m4_dnl
 m4_dnl File:        $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/ticker/main.m4,v $
-m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.13 $
+m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.14 $
 m4_dnl Copyright:   (C) 2001-2004, David Arnold.
 m4_dnl
 m4_dnl This specification may be reproduced or transmitted in any form or by
@@ -391,7 +391,7 @@ Name;Type;Description
 _
 org.tickertape.message;int32;T{
 The version of this specification implemented by the message.  For
-this revision, the value MUST be an Elvin int32, with a value of 3000.
+this revision, the value MUST be an Elvin int32, with a value of 3001.
 T}
 _
 .TE
@@ -421,7 +421,7 @@ l l lw(42).
 Name;Type;Description
 _
 Timeout;int32;T{
-Suggested lifetime of the message, in minutes.
+Suggested lifetime of the message, in seconds.
 T}
 _
 .TE
