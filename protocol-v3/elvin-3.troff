@@ -1,0 +1,448 @@
+.\" Copyright (C) 1999.
+.\"
+.if n \{ .po 0
+.	ll 78n
+.	na
+.\}
+.if t \{ .po 1.0i
+.	ll 6.5i
+.	nr pp 10		\" text point size
+.	nr sp \n(pp+2		\" section heading point size
+.	nr ss 1.5v		\" spacing before section headings
+.\}
+.nr tm 1i
+.nr bm 1i
+.nr fm 2v
+.he ''''
+.de bu
+.ip \0\s-2\(bu\s+2
+..
+.de SKEY
+\s-2S/KEY\s0\\$1
+..
+.nr PR 1
+.de PRE
+.sp
+.(b
+.ft CR
+.ps -2
+.nf
+..
+.de ERP
+.fi
+.ps
+.ft
+.sp
+.ce 1
+Figure \\n(PR\&: \\$1
+.)b
+.nr PR \\n(PR+1
+..
+.R1
+accumulate
+label L
+bracket-label " [" "]" ", "
+move-punctuation
+sort L
+.R2
+.lp
+.rs
+.ce 7
+.sp
+.sz 14
+.b "Elvin 3 Wire Protocol Specification"
+.sz 12
+.sp
+Bill Segall
+.sp
+.i
+CRC for Distributed Systems Technology (DSTC)
+The University of Queensland, St\ Lucia,\ 4072, Australia
+Phone:\ +61\ 7\ 3365\ 4310 Fax:\ +61\ 7\ 3365\ 4311
+.sp
+.r
+bill@segall.net
+.sp 1.5
+.2c
+.\"
+.\" abstract
+.\"
+.b Abstract
+.lp
+\fIThe Elvin3 wire protocol is use to communicate between client
+libraries and the server daemon.  The protocol is fundamentally
+flawed but is in sufficiently wide use so as to make replacement
+difficult.  Elvin4 completely replaces this protocol.
+.lp
+\fIThis document is a specification of the Elvin3 protocol, and is
+intended mostly for historical purposes.
+.\"
+.\"  introduction
+.\"
+.sh 1 "Introduction"
+.lp
+Elvin3
+.[
+[] SA97
+.]
+is a content-based routing system using messages structured as
+a dictionary of string-named values.  Receivers request delivery of
+messages matching a boolean expression evaluated over the messages'
+content.  Delivery of messages is completely decoupled from their
+sender, whose identity is not transmitted.
+.lp
+Messages are transmitted between client and server over a single
+TCP/IP connection, using a marshalling protocol described in this
+document.
+.\"
+.sh 1 "Connecting to the Server"
+.lp
+The Elvin server listens to a single TCP/IP port for connection
+requests from client programs.  There is no packet exchange to
+establish or break the connection; the standard TCP operations to open
+and close the connection suffice.
+.lp
+The connection establishment should allow three options for server
+host selection: local host, named host or the default host.  The host
+defaults to the name "elvin" in the current name resolution scope
+(ie. your local domain).
+.lp
+The server port likewise should support three options: the configured
+port, the specified port or the default port.  The configured port
+option uses the \fI/etc/services\fP file on Unix systems.  This is
+normally distributed by YP/NIS from a central configuration, and
+must use the server name "elvin" and protocol "tcp".
+.lp
+On systems other than Unix, the configuration mechanism is not
+specified for Elvin3, and should not be implemented.
+.lp
+The default port for Elvin3 is 5678 (decimal).  Note that this port is
+allocated by IANA to a Microsoft protocol, not Elvin3.  IANA has
+allocated port 2917 for Elvin client-to-server connections, and this
+will be the default port for Elvin4.
+.\"
+.sh 2 "Reconnection"
+.lp
+It is common for the TCP connection to the Elvin server to be lost
+because of network partition, host failure or a restart of the Elvin
+server process itself.  When a client libary loses connections to the
+server, it may return a failure to its client programs, or may attempt
+to re-establish the connection.
+.lp
+The reconnection behaviour of clients is not specified, but
+implementers should be careful to use an exponential backoff between
+reconnection attempts, and prefereably add a significant random
+component to the backoff time to prevent the server becoming
+overwhelmed as it restarts.  It is recommended that the initial
+backoff be at least 4 seconds, and that attempts to reconnect should
+cease after one hour.
+.\"
+.sh 1 "Data Formats"
+.lp
+Data in Elvin3 packets is marshalled using a string-based format.
+Each data item must be separated from the next using a field separator
+character.
+sh 2 "Integers"
+.lp
+Integers are represented as a decimal string, with an optional leading
+minus sign.  The total length is restricted to 10 digits, including
+the minus sign, and must be within the bounds of 2147483647 and
+-999999999 (ie. the positive limit is 0x7fffffff and the negative
+limit is 9 digits and a leading minus sign).
+.PRE
+struct int {
+  byte digits[10];
+  byte separator = 0x98;
+}
+.ERP "Integer Format"
+.\"
+.sh 2 "Floating Point Numbers"
+.lp
+Real numbers are also represented as a decimal string, comprised of
+the optional sign, the whole part, the fractional part and the
+exponent.
+.lp
+Negative numbers start with a minus sign ("-") and are one character
+longer than positive numbers. If the whole part is zero, the string
+must have a leading 0 in front of the decimal point, which must also
+be present.  Otherwise, the whole part must be constrained to a single
+digit, and the exponent adjusted appropriately.
+.lp
+Eight digits of fractional precision must always be present, even if
+zero-valued.  This is followed by a lower-case "e" character, a sign
+character("-" or "+"), and two digits of exponent.
+.lp
+It might be useful to note that this can be respresented as "%0.8e" in
+C printf-style formatting.
+.PRE
+struct int {
+  union {
+    byte   positive_whole;
+    struct {
+      byte sign = 0x2d;
+      byte digit;
+    }      negative_whole;
+  byte     decimal = 0x2e;
+  byte     fractional_part[8];
+  byte     exp_char = 0x65;
+  byte     exp_sign;
+  byte     exponent[2];
+  byte     separator = 0x98;
+}
+.ERP "Floating-point number format"
+.\"
+.sh 2 "Strings"
+.lp
+Strings are sequences of bytes, with values 0x0 (NUL) and 0x98 (the
+Elvin3 separator character) prohibited.  In general, string data
+should be constrained to the range 0x01 - 0x7f.  Note that the length
+of strings is not encoded: they are terminated by the field separator
+character.
+.PRE
+struct string {
+  byte   chars[];
+  byte   separator = 0x98;
+}
+.ERP "String format"
+.\"
+.sh 1 "Packets"
+.lp
+Packets are written as sequences of bytes.  The first byte of a packet
+defines the packet type.  The format of the remainder depends on the
+type of packet.
+.lp
+The following definitions are used in describing packets
+.PRE
+union data {
+  struct int    int_value;
+  struct float  float value;
+  struct string string_value;
+}
+
+union data_type {
+  byte   string_type = 0x1;
+  byte   int_type = 0x2;
+  byte   float_type = 0x3;
+}
+
+struct element {
+  struct string     key;
+  union  data_type  type;
+  union  data       value;
+}
+.ERP "Shared Defintions"
+.\"
+.sh 2 "Notify"
+.lp
+The Notify packet is used both to send a notification to the server,
+and to deliver the notification to consumer clients.
+.PRE
+struct Notify {
+  byte             pkt_type = 0x1;
+  int              sub_cnt;
+  int              sub_ids[];
+  int              element_cnt;
+  struct element   elements[];
+}  
+.ERP "Notify Packet"
+.lp
+Note that when sending notifications from producer clients to the
+server, the \fIsub_cnt\fP value must be zero, and thus there is no
+\fIsub_ids\fP data.
+.\"
+.sh 2 "SubscribeAdd"
+.lp
+There are three operations on subscriptions: add, replace and delete.
+Each packet uses basically the same format, with a different
+\fIpkt_type\fP identifier.
+.PRE
+struct SubscribeAdd {
+  byte   pkt_type = 0x3;
+  byte   sub_id[10];
+  byte   sub_expr[];
+  byte   null = 0x0;
+}
+.ERP "SubscribeAdd Packet"
+.lp
+Note that the \fIsub_id\fP is not marshalled as an integer (with a
+standard separator), but just as 10 decimal digits.  See the later
+section on allocation of subscription numbers.
+.\"
+.sh 2 "SubscribeReplace"
+.lp
+Subscriptions can be atomically modified at the server by sending a
+replacement expression.
+.PRE
+struct SubscribeReplace {
+  byte   pkt_type = 0x2;
+  byte   sub_id[10];
+  byte   sub_expr[];
+  byte   null = 0x0;
+}
+.ERP "SubscribeReplace Packet"
+.\"
+.sh 2 "SubscribeDelete"
+.lp
+Subscriptions are removed from the server in response to this
+request.  Note that because of the asynchronous nature of the server
+connection, it is possible to receive notifications for this
+subscription \fBafter\fP this request is sent.
+.PRE
+struct SubscribeDelete {
+  byte   pkt_type = 0x4;
+  byte   sub_id[10];
+  byte   null = 0x0;
+}
+.ERP "SubscribeDelete Packet"
+.\"
+.sh 2 "Management"
+.lp
+Management notifications are sent from a client to the server to
+control its behaviour.  It understands a very limited set of
+commands. 
+.PRE
+struct Management {
+  byte             pkt_type = 0x5;
+  int              sub_cnt = 0;
+  int              element_cnt;
+  struct element   elements[];
+}  
+.ERP "Management Packet"
+.\"
+.sh 2 "Quench"
+.lp
+Quench packets are sent from server to client.  They contain a string
+subscription expression, the aggregate of all subscriptions currently
+registered at the server.
+.PRE
+struct Quench {
+  byte   pkt_type = 0x6;
+  byte   quench_expr[];
+  byte   null = 0x0;
+}
+.ERP "Quench Packet"
+.\"
+.sh 2 "QuenchControl"
+.lp
+A client may request delivery of quench expressions, or, request that
+the current delivery be stopped.  Delivery of quench expressions is
+not initially enabled after connection.
+.PRE
+struct QuenchControl {
+  byte   pkt_type = 0x7;
+  byte   switch;
+  byte   null = 0x0;
+}
+.ERP "QuenchControl Packet"
+.lp
+The \fIswitch\fP character is used to control the delivery.  A value
+of "1" will request delivery commence, and a value of "0" will request
+that it stop.
+.\"
+.sh 1 "Notes"
+.lp
+Some aspects of the protocol itself, and the behaviour of libraries
+that implement it require further explanation in order to prevent
+anomalous behaviour.
+.\"
+.sh 2 "Unacknowledged Subscription"
+.lp
+Registration of a subscription is an asynchronous, unacknowledged
+operation in Elvin3.  This means that any error in the subscription
+request must be detected by the client library, as illegal requests
+will be discarded by the server without notice.
+.\"
+.sh 3 "Subscription Language Syntax"
+.lp
+The syntax of the subscription language is best described by the
+\fIlex\fP and \fIyacc\fP source for the server.  There is no better or
+more accurate description.
+.lp
+A client library should verify that subscription expressions (in both
+\fISubscribeAdd\fP and \fISubscribeReplace\fP requests) are
+syntactically correct.  This requires that a parser be implemented and
+included in the client library.
+.lp
+A request which includes an illegal subscription expression will
+generate a logged error message at the server -- you should check the
+server logs carefully when testing with a wide range of sample
+subscriptions.
+.lp
+Once a failed subscription expression has been submitted by a client
+connection, the subscription identifier algorithm will be out of
+synchronisation with the server, and all subsequent
+subscription-related operations will silently fail until the
+connection is closed.
+.\"
+.sh 3 "Allocating Subscription Numbers"
+.lp
+Subscription identifiers must be allocated by the client (before
+sending a \fISubcribeAdd\fP and de-allocated during
+\fISubscribeDelete\fP.  This allocation must follow the server's
+algorithm exactly in order to remain synchronised.
+.lp
+Subscription identifiers are allocated per connection, from the set of
+positive integers, starting from one.  Numbers are allocated in
+ascending order, first currently unused number first.
+.lp
+This is normally implemented as a \fIhighest-so-far\fP counter, and a
+free list (from deleted subscriptions).  If the free list is empty,
+the next highest number is use, and the counter incremented.
+Otherwise, the lowest number is removed from the free list and used.
+.\"
+.sh 2 "Limits"
+.lp
+Several limits are implemented by the server which must also be
+verified by the client in order (particularly) to ensure that
+reconnection behaviour does not degenerate.
+.lp
+The server will terminate the connection of any client which sends a
+packet exceeding these limits.  This can be confused for an accidental
+disconnection (because it cannot be determined otherwise), and the
+packet resent once connection is re-established.
+.\"
+.sh 3 "Number of connections"
+.lp
+The server has a hard-coded limit on the number of connections it can
+establish.  Defined in \fIsrc/server/client_t.h\fP this defaults to
+200 (for version 3.12p5).  If this limit is exceeded, ???.
+.lp
+A client library should also limit the number of concurrent
+connections made by a single process.  The normal number is 20.  This
+is well below the server limit, and well above the number of
+\fIconnections\fP that should be required for a single process.
+.\"
+.sh 3 "Number of Subscriptions"
+.lp
+The number of subscriptions allowed per connection is restricted only
+by the resolution of the subscription identifiers (positive 32 bit
+integers), and is therefore, 2147483647.  The server will run out of
+memory long before this, of course.
+.\"
+.sh 3 "Elements in a Notification"
+.lp
+A maximum of 256 elements are allowed in a single notification.  This
+limit must be enforced by all client libraries.
+.\"
+.sh 3 "Packet Size"
+.lp
+The maximum total size of a marshalled packet is 500000 bytes.  This
+should be checked before starting to send packet data.  This is also
+the maximum size of receive buffer that a client need allocate.
+.\"
+.\"    Availability
+.\"
+.uh Availability
+.nr pp 9
+.lp
+Elvin is available in both source and binary form under a
+not-for-commercial-use license.  Full documentation, FAQs, additional
+software and the download itself can be found on the Elvin homepage
+.(q
+http://www.elvin.org/
+.)q
+.\"@BIB@
+.[
+$LIST$
+.]
+
