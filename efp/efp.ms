@@ -189,7 +189,7 @@ of identifiers can be encoded using a single byte.
   ----------------------------------------------------------------
   Packet Type                   Abbreviation	     Identifier
   ----------------------------------------------------------------
-  Activatee                     Activate		128
+  Activate                      Activate		128
   Standby                       Standby			129
   Restart                       Restart			130
   Shutdown			Shutdown		131
