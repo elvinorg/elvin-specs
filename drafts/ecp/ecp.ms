@@ -203,7 +203,7 @@ struct ClstJoinRqst {
   id32 xid; 
   uint8 version_major;
   uint8 version_minor;
-  string server;        /* unique name for server */
+  id16 server_id;        /* unique id requested for server */
   string urls[];        /* set of URLs for server */
 };)m4_dnl
 
@@ -255,10 +255,9 @@ subscription database of the cluster.
 m4_pre(
 struct ClstJoinRply {
   id32 xid;
-  string master_name;
   id16 master_id;          /* id of master node */
-  string scope;            /* the scope used for this cluster */
   id16 server_id;          /* newly allocated id for the requestor */
+  string scope;            /* the scope used for this cluster */
   id16 servers[];          /* existing servers in cluster */
   struct {
     string attr_name;
