@@ -109,12 +109,21 @@ clustering of local routers for scaling or reliability
 
 m4_heading(2, Router Management)
 
-all routers maintain a list of other routers in the cluster
+All Elvin routers in a cluster listen for managment commands from the
+network.  Remote management clients emit commands to shutdown or
+restart a router daemon, activate a router on standy or move an active
+server to a standby state ready to be brought back on line later.
 
-each router can send commands to other router to perform
-adminstraction tasks
+Apart from actions on individual routers, the management protocol
+allows Elvin clients to be redirected from one router to another.
+Elvin clients who are sent a Disconn packet [EP] SHOULD reconnect
+automatically to the router specified in the redirection URL.  This
+allows clients to be moved around a cluster to balance load.
 
-SHutdown, Activate, Standby, Restart, Redirect
+One possible managment client implementation would be to provide a
+HTTP interface on one or more routers in the cluster which can display
+cluster information and allow an adminstrator to remotely control the
+nodes and clients of the cluster.
 
 m4_heading(2, Clustering)
 
@@ -124,11 +133,11 @@ subscription space.
 Where an address space has a large number of clients, it can be
 necessary to share the evaluation of their subscriptions over multiple
 host nodes to achieve adequate performance.  This is analogous to a
-web router farm, for example.
+Web server farm, for example.
 
 Alternatively, where performance is not an issue, it can still be
 desirable to have multiple local routers for an address space to
-continue service in the face of a router (daemon, node, network)
+continue service in the face of a server (daemon, node, network)
 failure.
 
 At a logical level, the cluster of Elvin routers must appear to
@@ -138,31 +147,87 @@ better performance or reliability.
 
 m4_heading(3, Subscription Sharing)
 
-Muliple routers in a cluster 
+Each router in an Elvin cluster shares client subscription information
+with every other node.  The information passed around the cluster
+is the unique list of subscription terms the server has subscriptions
+for. This is the union of all attributes mentioned in all subscriptions
+by all of the clients at a node.  The list of terms is mapped to
+unique identifers fopr each router.
 
-term lists per router id
+These subscription terms do not provide complete subscription 
+information at every node.  However, by checking the term list
+for the cluster, when a notifcation arrives from a client, the
+reciving node can make an initial descision as to whether any
+client attached to a remote router needs it at all.  If clients
+are partitioned at particular servers to partition traffic according
+to domain, it is possible to reduce netowrk load in the cluster
+and still provide complete access to all notifications at all
+clients.
 
 m4_heading(3, Notification Deleiver)
 
-eval against term list.  emit with list of routers in the notification
+When a notification arrives at a router, the evaluation engine MUST
+match the contents of the notification against clients connected
+directly and against the term list for each node in the cluster.  For
+each matching locally connected client, the notification is deleivered
+using a standard NotifDel packet.  If the notification contains any
+terms which are in a term list for one or more clustered router, it
+MUST be multicast in a ClstNotify packet.  The packet MUST contain
+the unique router identifer for every node in the cluster which
+has a matching term.
 
 m4_heading(3, Slave Role)
 
-do the data thing 
+In normal operation, an Elvin router joins a cluster as a slave
+to one master.  In this role, the slave router receives notifications
+from clients, forwarding them into the cluster and receives notifications
+from the cluster, forwarding them to its local clients.
 
-everyone shares all state: router url lists, etc
+A slave router MUST also listens to management traffic within the cluster
+and keep information about every node. The router maintains a list of
+participating routers with associated information including:
 
-ready to become master if master exits
+.in 6
+.nf
+\(bu current state (active or standby)
+\(bu list of subscription terms
+\(bu list of URL's offered by the router for client connection
+\(bu management URL, if the router allows remote manegement
+\(bu current router load and statistics
+.fi
+.in _default_in
+
+This information is used if the slave node gets promoted to be
+the cluster Master.
+
+A slave node MUST NOT activate Elvin router discovery [ERDP].
 
 m4_heading(3, Master Role)
 
-router discovery
+An Elvin router acting as a Master in the cluster MUST perform
+all the same tasks as a Slave node, as well as provide two
+other functions for the cluster.
 
-join replies
+The first function is internal to the cluster.  The Master
+listens to the traffic in the configured RLM group and
+looks for ClstJoinRqst packets.  Seeing on, it MUST respond
+with a ClstJoinRply, thus accepting the new router into the
+cluster.
+
+The second function is external to the cluster.  The Elvin
+router acting as Master is the only node in the cluster
+which MAY activate Elvin router discovery.  If an Elvin
+scope has been set, or the cluster is to provide default
+Elvin routing for a subnet, the Master node SHOULD listen
+for SvrRqst's.  On seeing a request for its services,
+the master node SHOULD select a random or load balanced
+selection of offered URLs from all the nodes in the cluster
+and emit a SvrAdvt.  See [ERDP] for full details of dynamic
+service discovery with Elvin.
 
 m4_heading(3, Master Failover)
 
-hand off on exit
+There MUST be exactly one master router in every 
 
 reelection on abort
 
@@ -195,6 +260,7 @@ forwarded notification, a router performs further evaluation,
 delivering the notification to the subscriptions it matches.
 
 .KS
+.nf
                                   +--------------+ Elvin
    +----------+                   | +----------+ | Cluster
    | Producer | ---NotifyEmit------>| Router 1 | |
@@ -207,6 +273,7 @@ delivering the notification to the subscriptions it matches.
    +----------+                   | +----------+ |
                                   +--------------+
                                                    NOTIFICATION PATH
+.fi
 .KE
 
 In addition to this basic data traffic, the clustered routers are able
@@ -416,32 +483,50 @@ Request that the specified Elvin router or Elvin routers shutdown.
 
 On receiving a Shutdown or Restart request, the Elvin router MUST withdraw
 all client protocol offers, send a Disconn (with no redirect) to all
-remaining clients, multicast an Elvin RouterReport for the final state
-(either Shutdown or Restart), and exit or restart the process as
+remaining clients, multicast a ServerReport with the mode set to
+.B Closing,
+and exit or restart the process as
 required.  If redirection of clients to another node in the
 cluster is required, a ClstRedir packet SHOULD be sent to Elvin router
-before the Shutdown or Redirect command.
+by a management client before the Shutdown or Restart command.
 
-m4_heading(3, Elvin Router Report)
+m4_heading(3, Server Report)
 
 m4_pre(
-struct Elvin RouterReport {
+struct ServerReport {
   id32 xid;
   id16 router_id;
   id8  mode;
 };)m4_dnl
 
 Report a change of operating mode for an Elvin router.  The new mode is
-specified.
+specified.  The mode can by one of the following values:
 
-Upon receiving an Elvin RouterReport for Shutdown or Restart, an Elvin
+.KS
+.nf 
+  ----------------------------------------------------------------
+  Mode        Value   Action
+  ----------------------------------------------------------------
+  Start         1     Initialise structures for new router
+  Activate      2     Change the state for the ID to active
+  Standby       3     Change the state for the ID to active
+  Closing       4     Remove all strucutres for the ID
+  Master        5     If the ID is the same, assume Master role
+  ----------------------------------------------------------------
+.fi
+.KE
+
+
+Upon receiving an ServerReport for Shutdown or Restart, an Elvin
 router SHOULD remove all state associated with that Elvin router.
 
-m4_remark(
-when a master node leaves, it picks a new master and sends an Elvin router
-report, mode set to master, and the Elvin router id set to the newly
-choosen Elvin router.  the router_ids list SHOULD be empty.
-)
+When a master node leaves the cluster, if there are any remaining
+nodes, it picks a new master and sends a ServerReport, mode
+set to master, and the Elvin router id set to the newly choosen Elvin
+router.  The router_ids list SHOULD be empty.  If a node recieves
+a ServerReport packet with its own ID in the router_id field and
+mode equal to Master, it MUST assume the role of master in the
+cluster, and MAY activate server discovery.
 
 m4_heading(2, Additional Management Packets)
 
