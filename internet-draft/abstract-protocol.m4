@@ -122,6 +122,7 @@ Possible values for the type field in a packet are:
   Quench Deliver                QnchDel              14
   Acknowledgement               Ack                  15
   Negative Acknowledgement      Nack                 16
+  Subscription Reply            SubRply              17
 
   More...
 
@@ -140,6 +141,16 @@ This section provides detailed descrptions of each packet used in the
 Elvin protocol. Packets are comprised of the Elvin base types and
 described in a pseudo-C style as structs made up of these types.
 
+The following definstions are used in several packets:
+
+m4_pre(
+struct NameValue{
+   string name;
+   Value  value;
+};)m4_dnl
+
+Where the "Value" type is one of int32, int64, string, real64 or opaque.
+
 m4_heading(3, Connect Request)
 
 Sent by client to the Elvin server.  Includes protocol version of the client library,
@@ -152,8 +163,7 @@ struct ConRqst {
    string protocol_preferences[];
    string qos_preferences[];
    opaque keys[];
-}
-)
+};)
 
 *** fixme *** whats the format of protocol_preferences strings? URLs
 perhaps.
@@ -169,18 +179,18 @@ struct ConRply {
    int32 major_version;
    int32 minor_version;
    string protocol_used;
-}
-)
+};)m4_dnl
 
 "protocol_used" tells the client
 
 m4_heading(3, Disconnect Request)
 
 Sent by client to the Elvin server.  Requests disconnection.
+
 m4_pre(
 struct DisConRqst {
-   int32 sequence_no;    
-})m4_dnl
+   int32 xid;    
+};)m4_dnl
 
 With the exception of retrying this request, the client library MUST
 NOT send any further messages to the server once this message has been
@@ -192,12 +202,14 @@ Sent by the Elvin server to a client.  This packet is sent in three
 different circumstances: as a response to a Disconnect Request, to
 direct the server to reconnect to another server, or to inform that
 client that the server is shutting down.
+
 m4_pre(
 struct DisCon {
    int32 why;
-   int32 sequence_no;
+   int32 xid;
    string args;
-})
+};)m4_dnl
+
 .KS
 where the defined values for "why" are
 
@@ -206,13 +218,13 @@ where the defined values for "why" are
 Why  Definition
 -----------------------------------------------------------------
  0   Reserved.
- 1   Server is closing down.  sequence_no MUST be zero.
+ 1   Server is closing down.  xid MUST be zero.
  2   Server is closing this connection, in response to your 
      request (DisConRqst) with sequence number matching 
-     sequence_no.
+     xid.
  4   Server is closing this connection, and requests that client
      makes new connection to server address in "args".  
-     sequence_no MUST be zero.
+     xid MUST be zero.
 ---------------------------------------------------------------
 .fi
 .KE
@@ -228,7 +240,20 @@ or server failure.
 m4_dnl
 m4_heading(3, Security Request)
 
+Sets the keys associated with the connection. Each notification sent
+from the client on the connection will have the keys specified in this
+packet attached implicitly;
+
+m4_pre(
+struct SecRqst {
+  int32  xid;
+  opaque subscription_keys[];
+  opaque notification_keys[];
+};)m4_dnl
+
 m4_heading(3, QoS Request)
+
+*** FIXME - tbd ***
 
 m4_heading(3, Subscription Add Request)
 
@@ -237,34 +262,34 @@ back, events may start arriving before the return of the sendSubscribe
 
 m4_pre(
 struct SubAddRqst {
-  int32 sequence_no;
-  int32 subscription_id;
+  int32 xid;
   string expression;
   opaque keys[];
-}
-)
+};)m4_dnl
 
 m4_heading(3, Subscription Modify Request)
 
 Sent by client to the Elvin server.  An Nack will be returned if the
 subscription id is not valid.
 
-  struct SubModRqst {
-    int32 sequence_no;
-    int32 subscription_id;
-    string expression;
-    opaque add_keys[];
-    opaque del_keys[];
-  }
+m4_pre(
+struct SubModRqst {
+  int32 xid;
+  int64 subscription_id;
+  string expression;
+  opaque add_keys[];
+  opaque del_keys[];
+};)m4_dnl
 
 m4_heading(3, Subscription Delete Request)
 
 Sent by client to the Elvin server.  An Nack will be returned if the subscription id is not valid.
 
-  struct SubDelRqst {
-    int32 sequence_no;
-    int32 subscription_id;
-  }
+m4_pre(
+struct SubDelRqst {
+  int32 xid;
+  int64 subscription_id;
+};)m4_dnl
 
 m4_heading(3, Quench Add Request)
 
@@ -282,10 +307,23 @@ m4_heading(3, Notification)
 
 Sent by client to the Elvin server. 
 
+m4_pre(
+struct Notif{
+   int32     xid;
+   NameValue attributes[];
+   opaque    keys[];
+};)m4_dnl
 
 m4_heading(3, Notification Deliver)
 
 Sent by the Elvin server to a client. 
+
+m4_pre(
+struct NotifDel{
+   int32     xid;
+   NameValue attributes[];
+   int64     matching_ids[];
+};)m4_dnl
 
 m4_heading(3, Quench Deliver)
 
@@ -295,9 +333,33 @@ headng(4, Acknowledgement)
 
 Sent by the Elvin server to a client. 
 
+m4_pre(
+struct Ack {
+  int32 xid;
+};)m4_dnl
+
 m4_heading(3, Negative Acknowledgement)
 
 Sent by the Elvin server to a client. 
+
+m4_pre(
+struct Nack {
+  int32  xid;
+  int32  error;
+  string message;
+  Value  args[]
+};)m4_dnl
+
+m4_heading(3, Subscription Reply)
+
+Sent from the Elvin server to the client as acknowledgement of a successful
+subscription change
+
+m4_pre(
+struct SubRply {
+  int32 xid;
+  int64 subscription_id;
+};)m4_dnl
 
 m4_heading(3, Add Link)
 m4_heading(3, Update Link)

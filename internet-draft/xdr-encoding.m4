@@ -203,8 +203,7 @@ the data type for the value.  For both the Notif and the NotifDel
 packets, we introduce a name-type-value (NTV) block used to encode
 a notification attribute.
 
-The name of an attribute is always encoded as an XDR string. The 
-type
+The name of an attribute is always encoded as an XDR string. The type
 is an enumeration of five different values indicating one of int32,
 int64, real64, string or opaque (byte array).  The value, encoded as a
 standard XDR type, is determined by the preceding type.
@@ -265,10 +264,10 @@ m4_heading(5, Notification Deliver)
  +------+------+------+------+...+------+...+------+...+------+
                        |<-------------n name-values----------->|
 
-           +------+------+...+-------+
-      <<<< |len m |sid 0 |   |sid m-1|
-           +------+------+...+-------+
-                  |<----m sub ids--->|
+           +------+-------------+...+--------------+
+      <<<< |len m |   sub id 0  |   |  sub id m-1  |
+           +------+-------------+...+--------------+
+                  |<-----------m sub ids---------->|
                                                 NOTIFICATION DELIVER
 
  pkt id        (enum)   packet type for NotifDel
@@ -280,7 +279,7 @@ m4_heading(5, Notification Deliver)
                         name-value blocks where n > 0.
  len m         (int32)  number of subscription ids this 
                         notification matched.
- sid x         (int32)  there MUST be m sub ids where m > 0
+ sid x         (int64)  there MUST be m sub ids where m > 0
 
 m4_heading(5, Quench Deliver)
 
