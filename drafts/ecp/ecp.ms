@@ -18,8 +18,8 @@ m4_define(__abbrev, `ERCP')m4_dnl
 .in 0
 XXX Working Group                                              D. Arnold
 Internet Draft                                                   J. Boot
-Category: Standards Track                                    _d __m __yr
-
+Category: Standards Track                                      T. Phelps
+                                                             _d __m __yr
 .ce
 __title
 .ce
@@ -50,7 +50,7 @@ http://www.ietf.org/shadow.html
 
 m4_heading(1, Abstract)
 
-This document describes a protocol for federation of Elvin [ELVIN]
+This document describes a protocol for federation of Elvin [EP]
 routers.  It enables exchange of message traffic and load-balancing
 across local clusters.
 
@@ -107,6 +107,13 @@ management of the router(s)
 clustering of local routers for scaling or reliability
 
 m4_heading(2, Router Management)
+
+all roouters maintain a list of other routers in the cluster
+
+each router can send commands to other router to perform
+adminstraction tasks
+
+SHutdown, Activate, Standby, Restart, Redirect
 
 m4_heading(2, Clustering)
 
@@ -204,10 +211,11 @@ delivering the notification to the subscriptions it matches.
 In addition to this basic data traffic, the clustered routers are able
 to be managed from any individual router in the cluster.  This
 management includes both reporting and control functions.  Individual
-routers accept management requests, and where required, forward these
-across the cluster.  Statistical and other reporting information is
-emitted by each router, and a cluster-wide summary is collated for
-presentation to a remote management client by each Elvin router.
+nodes accept management requests and, where required, forward these
+commands to other nodes in the cluster.  Statistical and other
+reporting information is emitted by each router, and a cluster-wide
+summary is collated at each router.  This information is used for
+reporting to users and for internal load balancing calculations.
 
 m4_heading(2, Packet Types)
 
@@ -217,7 +225,7 @@ In a concrete protocol implementation, if packets are identified using
 a number or string, these numeric values SHOULD be used.
 
 The numeric identifiers have been chosen such that they do not overlap
-with the identifiers used for the Elvin client protocol [ELVIN], and
+with the identifiers used for the Elvin client protocol [EP], and
 both sets of identifiers can be encoded using a single byte.
 
 .KS
@@ -255,7 +263,7 @@ connections.
 m4_heading(3, Cluster Join Request)
 
 Multicast request to the cluster to join its managed cluster.  The
-Elvin router and URLs fields match the information sent in SvrAdvt
+router indentification and URLs fields match the information sent in SvrAdvt
 packets by the Elvin router, and are used to allow the cluster to take
 over the role of advertising Elvin router endpoints to client
 programs.
@@ -654,29 +662,29 @@ m4_heading(1, References)
 
 
 .IP [EP] 12
-D. Arnold, J. Boot, T. Phelps, B. Segall,
+Arnold, D., Boot, J., Phelps, T., Segall, B.,
 "Elvin Client Protocol",
 Work in progress
 
 .IP [ERDP] 12
-D. Arnold, J. Boot, T. Phelps, B. Segall,
+Arnold, D., Boot, J., Phelps, T., Segall, B.,
 "Elvin Router Discovery Protocol",
 Work in progress
 
 .IP [ERFP] 12
-D. Arnold, I.Lister,
+Arnold, D., Lister, I.,
 "Elvin Router Federation Protocol",
+Work in progress
+
+.IP [RLM] 12
+Arnold, D., Boot, J.,
+"Reliable Local Multicast"
 Work in progress
 
 .IP [RFC1832] 12
 Srinivasan, R.,
 "XDR: External Data Representation Standard",
 RFC 1832, August 1995.
-
-.IP [RLM] 12
-Arnold, D., Boot, J.,
-"Reliable Local Multicast"
-April 2001.
 
 .KS
 .ti 0
@@ -690,6 +698,7 @@ Author's Address
 .nf
 David Arnold
 Julian Boot
+Ted Phelps
 
 Distributed Systems Technology Centre
 Level7, General Purpose South
