@@ -98,7 +98,7 @@ m4_heading(2, Server Management)
 m4_heading(2, Clustering)
 
 Clustering is used to link multiple local servers into a single
-address space or subscription scope.
+subscription space.
 
 Where an address space has a large number of clients, it can be
 necessary to share the evaluation of their subscriptions over multiple
@@ -119,20 +119,40 @@ m4_heading(1, ABSTRACT PROTOCOL)
 
 m4_heading(2, Protocol Overview)
 
-An Elvin server is statically configured with an initial state,
-including one or more scope names which it is to provide.  The server
-advertises these scope names (together with other information) via a
-well-known multicast address as described in [ELVIN].
+An Elvin server is statically configured with an initial state.  This
+state may include a direction to participate in a server cluster.
+Servers in a cluster communicate using a reliable multicast protocol
+over an IP network.
 
-Clustered servers communicate using a reliable multicast protocol over
-an IP network.
+To implement a common subscription space, all clustered servers
+maintain awareness of the traffic required by each server's clients.
+Arriving notifications are forwarded to servers in the cluster as
+required.  
+
+The awareness of other server's subscriptions is currently limited to
+the set of notification element names for which each server has
+subscriptions.  Further knowledge that will enable the ingress server
+to discard more traffic will be shared in a later protocol revision.
+
+Incoming notifications are evaluated for forwarding to all servers
+requiring traffic containing those element names.  On receiving a
+forwarded notification, a server performs further evaluation,
+delivering the notification to the subscriptions it matches.
+
+In addition to this basic data traffic, the clustered servers are able
+to be managed from any inidividual server in the cluster.  This
+management includes both reporting and control functions.  Individual
+servers accept management requests, and where required, forward these
+across the cluster.  Statistical and other reporting information is
+emitted by each server, and a cluster-wide summary is collated for
+presentation to a remote management client by each server.
 
 m4_heading(2, Packet Types)
 
 The protocol is defined in terms of individual packet specifications.
 Each packet has two unique identifiers: a string name and a number.
 In a concrete protocol implementation, if packets are identified using
-a number or string, these values SHOULD be used.
+a number or string, these numeric values SHOULD be used.
 
 The numeric identifiers have been chosen such that they do not overlap
 with the identifiers used for the Elvin client protocol, and both sets
@@ -147,8 +167,8 @@ of identifiers can be encoded using a single byte.
   Standby                       Standby                 129
   Restart                       Restart                 130
   Shutdown                      Shutdown                131
-  Managment Status Notify       MgmtStsNotify           132
-  Negative Acknowledge          MgmtNack                133
+  Server Config Notify          ServerConfigNotify      132
+  Negative Acknowledge          ServerNack              133
 
   Cluster Join Request          ClstJoinRqst            160
   Clister Join Reply            ClstJoinRply            161
@@ -159,8 +179,9 @@ of identifiers can be encoded using a single byte.
   Cluster Notify                ClstNotify              164
 
   Cluster Redirect              ClstRedir               165
-  Cluster Client Notify         ClstCliNotify           166
   Cluster Leave                 ClstLeave               167
+
+  
   ----------------------------------------------------------------
 .fi
 .KE
@@ -171,31 +192,43 @@ Management of an Elvin server is implemented using a secure connection
 either directly to the server in question, or to any server in the
 cluster of which it is a member.
 
-All management operations are considered privileged, and may require
+All management operations are considered privileged, and MUST require
 that the identity of the requestor be authenticated prior to
 authorisation of the request.
 
-The management protocol provides a number of operations.  The packets
-are unicast to a server, which should check the server_id and if it
-doesn't match, the server should forward the packet to the cluster's
-multicast address.
+When invoked from a server, a management operation may refer either to
+that server alone, to another single server, or to multiple servers.
+When the operation applies to any server other than that initiating
+the operation, the request MUST be multicast.
 
-In response to these packets, the affected server(s) should return a
-ServerStatusNotify packet via the delivery channel (either uni- or
-multicast) describing their new state and containing the XID of the
-causal request.  If a server forwarded the request, it MUST also
-return the reply to the connected management client.
+Regardless of whether the operation was requested directly, or via
+multicast from another server in the cluster, the affected server(s)
+MUST multicast a ServerConfigNotify packet describing their new state.
 
-m4_heading(3, Management Status Notify)
+.nf
+*** additional operations here could include: changing the log level,
+*** enabling/disabling protocols (and thus offers), interface usage,
+*** QoS value changes, etc.
+
+*** once we have a large cluster, these notifications will be
+*** problematic.  maybe it is better to always multicast the request,
+*** and then rely on the NACK if things don't go as planned?
+
+*** having done that, what if we were expecting a NACK (like, an
+*** active server been told to go active) but don't see one?  do we
+*** need a ConfigQuery?  or should we abort?  eek ...
+.fi
+
+m4_heading(3, Server Config Notify)
 
 Describe the status of a server.  Sent in response to a (successful)
 request to change a server's status.
 
 m4_pre(
-struct MgmtStsNotify {
+struct ServerConfigNotify {
   id32 xid;
-  id32 server_id;
-  id32 status;
+  id16 server_id;
+  id8  mode;
 };)m4_dnl
 
 m4_heading(3, Management Nack)
@@ -203,7 +236,7 @@ m4_heading(3, Management Nack)
 Return an error result to a requested operation.
 
 m4_pre(
-struct MgmtNack {
+struct ServerNack {
   id32 xid;
   id32 error_code;
   string default_template;
@@ -223,7 +256,7 @@ A standby server process may be made active by sending this message.
 m4_pre(
 struct Activate {
   id32 xid;
-  id32 server_ids[];
+  id16 server_ids[];
 };)m4_dnl
 
 m4_heading(3, Standby)
@@ -232,18 +265,20 @@ The Standby message forces a server from active into standby mode.
 The server MUST withdraw any currently offered protocols, and stop
 accepting client connections.
 
+Any clients connected to the specified server(s) MUST be disconnected
+(without redirection).  It is RECOMMENDED that explicit redirection be
+performed prior to a Standby.
+
 m4_pre(
 struct Standby {
   id32 xid;
-  id32 server_ids[];
+  id16 server_ids[];
 };)m4_dnl
 
 m4_heading(3, Restart)
 
 Restart the server with the current configuration.  Used to reclaim
-virtual memory space used by a previously busy server process.  This
-spawns a new process from the current process before shutting down the
-current process.
+virtual memory space used by a previously busy server process.
 
 If the server is not currently in standby mode, a ServerActive error
 MUST be returned.
@@ -251,7 +286,7 @@ MUST be returned.
 m4_pre(
 struct Restart {
   id32 xid;
-  id32 server_ids[];
+  id16 server_ids[];
 };)m4_dnl
 
 m4_heading(3, Shutdown)
@@ -265,7 +300,7 @@ MUST be returned.
 m4_pre(
 struct Shutdown {
   id32 xid;
-  id32 server_ids[];
+  id16 server_ids[];
 };)m4_dnl
 
 m4_heading(3, Cluster Join Request)
@@ -283,7 +318,7 @@ struct ClstJoinRqst {
 };)m4_dnl
 
 If a node gets no response after a reasonable timeout (?) then it
-should assume that it is the first node in teh cluster and assume
+should assume that it is the first node in the cluster and assume
 the role of "leader".  The leader is responsible for responding to
 further ClstJoinRqst's and also to client discovery requests on
 behalf of the cluster.
@@ -305,32 +340,29 @@ subscription database of the cluster.
 m4_pre(
 struct ClstJoinRply {
   id32 xid;
-  id32 server_id;
+  id16 server_id;
+  id16 servers[];
   struct {
     string attr_name;
     SubAST sub_expr;      /* not used at present - set to (int32)0 */
-    id32 server_ids[];
+    id16 server_ids[];
   }  subscriptions[];
 };)m4_dnl
 
-m4_heading(3, Cluster Leave )
+m4_heading(3, Cluster Leave)
 
-Unicast request to the cluster controller to leave a previously joined
-cluster.  This SHOULD be generated when the server is locally
-terminated (ie. SIGINT).
-
-The cluster will normally respond with a series of Cluster Redirect
-packets, followed by a Shutdown.  The server should send a
-ServerStatusNotify before the process terminates.
+Multicast when a server wishes to leave the cluster.  After receiving
+a Leave, servers should wait for a ServerConfigNotify of mode Shutdown
+before freeing state associated with that server.
 
 m4_pre(
 struct ClstLeave {
-  id32 server_id;
+  id16 server_id;
 };)m4_dnl
 
 m4_heading(3, Cluster Redirect)
 
-Multicast to all servers, the Client Redirect packet specifies a set
+Multicast to all servers, the Cluster Redirect packet specifies a set
 of clients to be disconnected from their current server and
 (optionally) redirected elsewhere.
 
@@ -350,23 +382,28 @@ packet).  If multiple address values are provided, a server SHOULD
 share the redirection specification across the provided addresses
 approximately evenly using a pseudo-random selection method.
 
+
 m4_heading(3, Cluster Notify)
 
 m4_pre(
 struct ClstNotify {
-  id32 server_id;
-  id32 server_ids[];
+  id16 server_id;
+  id16 server_ids[];
   NameValue attributes[];
   boolean deliver_insecure;
   Keys conn_keys;
   Keys nfn_keys;
 };)m4_dnl
 
+.nf
+*** what's the first server_id for ?
+.fi
+
 m4_heading(3, Cluster Term Add)
 
 m4_pre(
 struct ClstTermAdd {
-  id32 server_id;
+  id16 server_id;
   string names[];
 };)m4_dnl
   
@@ -374,24 +411,9 @@ m4_heading(3, Cluster Term Delete)
 
 m4_pre(
 struct ClstSubDel {
-  id32 server_id;
+  id16 server_id;
   string names[];
 };)m4_dnl
-
-m4_heading(3, Cluster Client Notify)
-
-When a client connects or disconnects from a server, the server MUST
-notify the cluster.
-
-m4_pre(
-struct ClstCliNotify {
-  id32 server_id;
-  id32 client_id;
-  boolean is_connect;
-};)m4_dnl
-  
-
-
 
 .KS
 .ti 0
