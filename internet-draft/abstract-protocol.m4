@@ -272,17 +272,21 @@ and described in a pseudo-C style as structs made up of these types.
 .KS
 The following definitions are used in several packets:
 
-m4_pre(
+m4_pre(`
+typedef byte[] opaque;
+
+union Value {
+     int32   i32;   // 4 byte signed integer
+     int64   i64;   // 8 byte signed integer
+     real64  r64;   // 8 byte double precision float
+     string  str;   // length encoded string
+     opaque  blob;  // binary data sequence
+};
+
 struct NameValue{
-   string name;
-   union {
-     int32   i;
-     int64   l;
-     string  str;
-     real64  f;
-     opaque  blob;
-   } value;
-};)m4_dnl
+   String    name;
+   Value     value;
+};')m4_dnl
 .KE
 
 Arrays of NameValue elements are used for notification data and
@@ -290,15 +294,15 @@ description of server options.
 
 .KS
 m4_pre(
-  int32  xid
+  int32 xid
 )m4_dnl
 .na
-Where a request packet is sent by the client (other than NotifyEmit),
-it MUST include transaction identifier (xid), used to match its reply.
-The xid is a 32 bit number, allocated by the client.  The allocation
-MUST ensure that no packet is sent with the same identifier as an
-outstanding request.  Also, the value zero is reserved, and MUST NOT
-be used.
+Where a request packet is sent by the client (other than NotifyEmit or
+UNotify), it MUST include transaction identifier (xid), used to match
+its reply.  The xid is a 32 bit number, allocated by the client.  The
+allocation MUST ensure that no packet is sent with the same identifier
+as an outstanding request.  Also, the value zero is reserved, and MUST
+NOT be used.
 .KE
 m4_heading(3, Unreliable Notification)
 
@@ -651,7 +655,7 @@ If the insecure flag is set, it indicates that the matching
 subscription has no associated keys.
 
 m4_pre(
-struct QnchAddNotif {
+struct QnchAddNotify {
   int64   quench_id;
   int64   term_id;
   boolean insecure;
@@ -667,7 +671,7 @@ If the insecure flag is set, it indicates that the matching
 subscription has no associated keys.
 
 m4_pre(
-struct QnchModNotif {
+struct QnchModNotify {
   int64   quench_id;
   int64   term_id;
   boolean insecure;
@@ -681,10 +685,22 @@ subscription predicate component that had matched their registered
 attribute name list.
 
 m4_pre(
-struct QnchDelNotif {
+struct QnchDelNotify {
   int64   quench_id;
   int64   term_id;
 };)m4_dnl
+
+m4_heading(3, Quench Reply)
+
+Sent from the Elvin server to the client as acknowledgement of a successful
+quench requirements change:
+
+m4_pre(
+struct QnchRply {
+  int32   xid;
+  int64   quench_id;
+};)m4_dnl
+
 
 m4_heading(2, Server Discovery)
 
@@ -733,7 +749,8 @@ the server be used.
 The set of URLs reflect the endpoints available from the server.  A
 SvrAdvt message SHOULD include all endpoints offered by the server.
 Where the limitations of the underlying concrete protocol prevent
-this, the server cannot advertise all its endpoints.
+this, the server cannot advertise all its endpoints. Each SvrAdvt MUST
+contain at least one URL.
 
 A server MUST NOT send SvrAdvt more often than once every five (5)
 seconds.
@@ -751,7 +768,7 @@ message.
 m4_pre(
 struct SvrAdvtClose {
   string   server;       /* unique name for server */
-};})m4_dnl
+};)m4_dnl
 
 Caching lients MUST monitor such messages and remove all endpoints for
 the specified server from their cache.

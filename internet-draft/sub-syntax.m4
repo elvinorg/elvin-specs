@@ -1,6 +1,5 @@
 m4_dnl sub-syntax
 m4_dnl
-m4_include(macros.m4)m4_dnl
 .bp
 m4_heading(1, APPENDIX A - ELVIN SUBSCRIPTION LANGUAGE)
 .LP

@@ -1,7 +1,7 @@
 m4_dnl
 m4_dnl macros for easier nroff editting
 m4_dnl
-m4_dnl $Id: macros.m4,v 1.5 1999/10/05 03:53:51 julian Exp $
+m4_dnl $Id: macros.m4,v 1.6 1999/11/24 08:02:56 julian Exp $
 m4_dnl
 m4_dnl MACRO FOR THE DEFAULT INDENTATION
 m4_dnl
@@ -26,3 +26,8 @@ $1
 .KE
 .in _default_in
 ')m4_dnl
+m4_dnl
+m4_dnl DATES
+m4_dnl
+m4_define(_yr_, `2000')m4_dnl
+m4_define(_date_, `dd mmmm _yr_')

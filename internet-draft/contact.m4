@@ -7,6 +7,7 @@ Author's Address
 David Arnold
 Julian Boot
 Thomas Maslen
+Ted Phelps
 Bill Segall
 
 Distributed Systems Technology Centre

@@ -8,13 +8,15 @@
 .ds RF PUTFFHERE[Page %]
 .ds CF Expires in 6 months
 .ds LH Internet Draft
-.ds RH dd mmmm 1999
-.ds CH Elvin \- an Internet Notification System
+.ds RH _date_
+.ds CH Elvin
 .hy 0
 .ad l
 .in 0
 Network Working Group                                          D. Arnold
 Internet Draft                                                   J. Boot
-Category: Standards Track                                      B. Segall
+Category: Standards Track                                      T. Maslen
+                                                               T. Phelps 
+                                                               B. Segall
                                                                     DSTC
-                                                            dd mmmm 1999
+                                                            dd mmmm _yr_

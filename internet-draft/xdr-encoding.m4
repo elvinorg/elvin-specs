@@ -1,9 +1,11 @@
 m4_dnl  -*- nroff -*-
 m4_dnl
 m4_dnl  xdr-encoding
+m4_heading(3, Marshalling)
 
 The standard Elvin 4 transport uses XDR encoding (see RFC 1832) to
-marshal base data types.  Each packet is a sequence of encoded XDR
+marshal base data types.  Messages sent between the a client and
+and Elvin server are encoded as a packet  sequence of encoded XDR
 types.
 
 In most illustrations, each box (delimited by a plus sign at the 4
@@ -24,8 +26,8 @@ along the top line of packet diagrams indicate byte lengths.
 
 m4_heading(4, Base Types)
 
-The XDR encoding for Elvin relies on five basic types used to
-construct each packet: int32, int64, real64, opaque.
+The XDR encoding for Elvin relies on seven basic types used to
+construct each packet: booelan, int8, int32, int64, real64, opaque.
 
 .KS
 Below is a summary of encodings for the different base types
@@ -36,40 +38,42 @@ details.
   ---------------------------------------------------------------
   Base Type  Type ID  XDR Type   Encoding Summary
   ---------------------------------------------------------------
-  int32         0     int        4 bytes, MSB first
+  reserved      0     -          -
 
-  int64         1     hyper      8 bytes, MSB first
+  int32         1     int        4 bytes, MSB first
 
-  string        2     string     4 byte length, UTF8 encoded 
-                                 string, zero padded to next four 
-                                 byte boundary
+  int64         2     hyper      8 bytes, MSB first
 
   real64        3     double     64-bit double precision float
 
-  opaque        4     opaque     4 byte length, data, zero padded
+  string        4     string     4 byte length, UTF8 encoded 
+                                 string, zero padded to next four 
+                                 byte boundary
+
+  opaque        5     opaque     4 byte length, data, zero padded
                                  to next four byte boundary
   ---------------------------------------------------------------
 .fi
 .KE
 
-When the type of following data needs to be described in a packet
-(eg, the value type in a name-value pair), one of the base type ID's
-is encoded as an XDR enumeration.  This is often needed when a value
-in a packet is one ofa number of possible types.
+When the type of following data needs to be described in a packet (eg,
+the value in a name-value pair used in NotifEmit packets), one of the
+base type ID's is encoded as an XDR enumeration.  This is often needed
+when a value in a packet is one of a number of possible types.
 
 .KS
 .nf
        0           4  
-     +--+--+--+--+--+--+--+...+--+--+--+--+
-     | type id   |        value           |             TYPED VALUE
-     +--+--+--+--+--+--+--+...+--+----+---+
-     |<--enum--->|
+     +--+--+--+--+--+--+--+--+...+--+--+--+--+
+     | type id   |          value            |        TYPED VALUE
+     +--+--+--+--+--+--+--+--+...+--+--+--+--+
+     |<--enum--->|<--format depends on enum-->
 .fi
 .KE
 
-For illustration, if an int64 of value 1024L is encoded preceded by
-its type, it would be sent as four bytes for the type id of 1 and
-eight bytes for the value.
+For illustration, if an int64 of value 1024L is preceded by its type
+for marshalling, it would be sent as four bytes for the type id of 1
+and eight bytes for the value.
 
 .KS
 .nf
@@ -80,6 +84,38 @@ eight bytes for the value.
      |<--enum--->|<--------hyper-------->|
 .fi
 .KE
+
+
+m4_heading(4, Packet Identification)
+
+The abstract deliberatly leaves the method for identifying packets
+to the concrete encoding.  For XDR, packets are 
+
+m4_pre(
+enum {
+    UNotify = 1,
+    Nack = 2,
+    ConnRqst = 3,
+    ConnRply = 4,
+    DisConnRqst = 5,
+    DisConnRply = 6,
+    DisConn = 7,
+    SecRqst = 8,
+    SecRply = 9,
+    NotifyEmit = 10,
+    NotifyDeliver = 11,
+    SubAddRqst = 12,
+    SubModRqst = 13,
+    SubDelRqst = 14,
+    SubRply = 15,
+    QnchAddRqst = 16,
+    QnchModRqst = 17,
+    QnchDelRqst = 18,
+    QnchRply = 19,
+    QnchAddNotify = 20,
+    QnchModNotify = 21,
+    QnchDelNotify = 22
+};)
 
 m4_heading(4, Packet Encodings)
 
@@ -95,7 +131,7 @@ are represented in four bytes each.  Following the eight byte
 header is the remainder of the packet.  The format of the rest
 of the packet varies and is determined by the packet type.
 
-       0           4          8        ...
+      0           4          8        ...
      +--+--+--+--+--+--+--+--+--+--+--+...+--+--+--+
      | packet id |sequence # |      remainder      |
      +--+--+--+--+--+--+--+--+--+--+--+...+----+---+
@@ -119,7 +155,7 @@ m4_heading(5, Subscription Add Request)
 .nf
    0      4      8     12      ...
   +------+------+------+------+...+------+
-  |pkt id|seq # |sub # |    expression   | >>>>
+  |pkt id| xid  |sub # |    expression   | >>>>
   +------+------+------+------+...+------+
 
            +------+------+...+------+...+------+...+------+
@@ -128,7 +164,7 @@ m4_heading(5, Subscription Add Request)
                   |<----------------n keys--------------->|
 
    pkt id      (enum)   packet type for SubAddRqst
-   seq #       (int32)  sequence number for this packet
+   xid         (int32)  transaction number for this packet
    sub #       (int32)  number identifier for this subscription, 
                         allocated by the client library
    expression  (string) the predicate to be used to select
@@ -146,7 +182,7 @@ the server.
 .KS
    0      4      8     12      ...
   +------+------+------+------+...+------+
-  |pkt id|seq # |sub # |    expression   | >>>>
+  |pkt id| xid  |sub # |    expression   | >>>>
   +------+------+------+------+...+------+
 .KE
 
@@ -168,7 +204,7 @@ the server.
 
 .KS
  pkt id      (enum)   packet type for SubModRqst
- seq #       (int32)  sequence number for this packet
+ xid         (int32)  transaction number for this packet
  sub #       (int32)  number identifier for the subscription to 
                       modify
  expression  (string) new predicate
@@ -185,12 +221,12 @@ at the server.
 .KS
                    0      4      8     12
                   +------+------+------+
-                  |pkt id|seq # |sub # |         SUBSCRIPTION DELETE
+                  |pkt id| xid  |sub # |         SUBSCRIPTION DELETE
                   +------+------+------+
 .KE
 .KS
  pkt id      (enum)   packet type for SubDelRqst
- seq #       (int32)  sequence number for this packet
+ xid         (int32)  transaction number for this packet
  sub #       (int32)  number identifier for the subscription to 
                         delete.
 .KE
@@ -232,9 +268,9 @@ int32.
 
 .KS
 .nf
-   0      4      8     12     ...
+  0      4      8     12      ...
  +------+------+------+------+...+------+...+------+...+------+
- |pkt id|seq # |len n |       ntv 0     |   |      ntv n-1    | >>>>
+ |pkt id| xid  |len n |       ntv 0     |   |      ntv n-1    | >>>>
  +------+------+------+------+...+------+...+------+...+------+
                       |<----------n name-type-values--------->|
 
@@ -247,7 +283,7 @@ int32.
 .KE
 .KS
    pkt id        (enum)   packet type for Notif
-   seq #         (int32)  sequence number for this packet
+   xid           (int32)  transaction number for this packet
    len n         (int32)  number of name-type-value triples in the 
                           notification.
    ntv x         [block]  encoded as a name-type-value triple, 
@@ -264,7 +300,7 @@ m4_heading(5, Notification Deliver)
 
   0      4      8     12      ...
  +------+------+------+------+...+------+...+------+...+------+
- |pkt id|seq # |len n |  name-value 0   |   | name-value n-1  | >>>>
+ |pkt id| xid  |len n |  name-value 0   |   | name-value n-1  | >>>>
  +------+------+------+------+...+------+...+------+...+------+
                        |<-------------n name-values----------->|
 
@@ -275,7 +311,7 @@ m4_heading(5, Notification Deliver)
                                                 NOTIFICATION DELIVER
 
  pkt id        (enum)   packet type for NotifDel
- seq #         (int32)  sequence number for this packet
+ xid           (int32)  transaction number for this packet
  len n         (int32)  number of name-value pairs in the 
                         notification.
  name-value x  [block]  encoded as a name-type-value triple, 
@@ -291,19 +327,19 @@ m4_heading(5, Acknowledgement)
 
                      0      4      8
                     +------+------+
-                    |pkt id|seq # |                              ACK
+                    |pkt id| xid  |                              ACK
                     +------+------+
 
  pkt id      (enum)   packet type for Ack
- seq #       (int32)  sequence number of the request this packet
+ xid         (int32)  transaction number of the request this packet
                       is acknowledging
 
 m4_heading(5, Negative Acknowledgement)
 
 .KS
- 0     4     8    12      ...
+  0     4     8    12     ...
  +-----+-----+-----+-----+...+-----+
- |pktid|seq #|error|    message    | >>>>  
+ |pktid| xid |error|    message    | >>>>  
  +-----+-----+-----+-----+...+-----+
 
           +-----+-----+----+...+----+...+-----+----+...+-----+
@@ -314,7 +350,7 @@ m4_heading(5, Negative Acknowledgement)
 .KE
 .KS
  pkt id      (enum)   packet type for Nack
- seq #       (int32)  sequence number of the request this packet
+ xid         (int32)  transaction number of the request this packet
                       is responding to.
  error       (int32)  error code indicating the reason for this
                       response. error != 0.

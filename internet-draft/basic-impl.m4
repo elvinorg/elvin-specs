@@ -2,8 +2,6 @@ m4_dnl  basic-impl
 m4_dnl
 m4_dnl  this is the basic implementation details
 m4_dnl
-m4_include(macros.m4)m4_dnl
-m4_dnl
 m4_heading(1, IMPLEMENTATION)
 .LP
 Throughout the remainder of this document, unless otherwise specified,

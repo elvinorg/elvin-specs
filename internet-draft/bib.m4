@@ -2,7 +2,6 @@ m4_dnl  bibliography
 m4_dnl
 m4_dnl  -*-nroff-mode-*-
 m4_dnl
-m4_include(macros.m4)m4_dnl
 .bp
 m4_heading(1, REFERENCES)
 

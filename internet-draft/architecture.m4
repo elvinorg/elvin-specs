@@ -3,10 +3,8 @@ m4_dnl
 m4_dnl  system architecture overview.  should introduce all system
 m4_dnl  components and their basic relationships.
 m4_dnl
-m4_include(macros.m4)m4_dnl
-m4_dnl
 m4_heading(1, ARCHITECTURE)
-m4_dnl
+
 .LP
 describe the basic concepts of notification, subscription, evaluation
 of subscriptions, delivery. 
@@ -58,7 +56,7 @@ m4_heading(3, Speed)
 Directed communication (like UDP or TCP) has a significant advantage
 over undirected messaging in that its routing decisions are
 comparitively simple.  If undirected messaging is to become a useful
-part of the protocol suite, its performance is critical.
+part of the Internet protocol suite, its performance is critical.
 
 The architecture and implementation of an Elvin server are directed by
 this concern.  The protocol design supports
@@ -79,6 +77,13 @@ The Elvin server is central to the implementation of the protocol.  It
 acts as a local router for message traffic, evaluating message content
 against registered subscriptions and queuing messages for delivery to
 clients.
+
+*** FIXME ***
+
+perhaps we should not use the term "queuing" in ths context - it has
+the conentation of message queues and persistence.
+
+*** FIXME ***
 
 m4_heading(2, Client)
 
@@ -153,10 +158,10 @@ ordering of message delivery and transparent connection management.
 
 m4_heading(3, Wide Area)
 
-Wide-area federation addresses different goals.  While it is possible
-to implement a server cluster over a wide-area network, the need for
-global access to content-routed messages requires different
-implementation choices.
+Wide-area federation addresses different goals to clustering.  While
+it is possible to implement a server cluster over a wide-area network,
+the need for global access to content-routed messages requires
+different implementation choices.
 
 The wide-area federation protocol provides for filtering of messages
 at enterprise boundaries and routing of message traffic between local

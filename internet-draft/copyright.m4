@@ -1,7 +1,7 @@
 .KS
 m4_heading(1, FULL COPYRIGHT STATEMENT)
 
-Copyright (C) The Internet Society (1999).  All Rights Reserved.
+Copyright (C) The Internet Society (_yr_).  All Rights Reserved.
 
 This document and translations of it may be copied and furnished to
 others, and derivative works that comment on or otherwise explain it
