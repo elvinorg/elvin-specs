@@ -1,0 +1,99 @@
+org.tickertape.message
+3.0
+2.0
+
+http://elvin.dstc.com/projects/tickertape
+ticker-dev@dstc.com
+TIckertape messages provide the user-to-user chat interaction
+component of tickertape.
+%%
+org.tickertape.channel  
+int32
+M
+Version of this specification.  Value must be 3000.
+%%
+Group
+string
+M
+Name of the group to which this message is sent.
+%%
+From
+string
+M
+Name of the sender.
+%%
+Message
+string
+M
+Text to be displayed in the scroller (or similar user interface
+location).
+%%
+Timeout
+int32
+M
+Lifetime of the message, in seconds (?).
+%%
+Message-Id
+string
+M
+
+Globally unique identifier for this message.  We recommend the use of
+a UUID (or GUID), optionally hashed (using SHA.1, MD5, etc) to ensure
+anonymity (since the UUID includes the MAC address of the generating
+machine).
+%%
+In-Reply-To
+string
+O
+The Message-Id of a previous message to which this is a reply.
+%%
+Thread-Id
+string
+O
+When sending a message to a group to which the sender is not
+subscribed, but wishes to see any replies, this field should be set
+(and the sender's user agent should alter its subscription so as to
+receive any messages with this Thread-Id value).
+
+User agents, receiving a message with a Thread-Id set, should copy the
+supplied value into any replies.
+
+This value must be globally unique.  See Message-Id for
+recommendations.
+%%
+Replacement
+string
+O
+???
+%%
+User-Agent
+string
+O
+The name and version of the user agent generating this message.
+%%
+No-Archive
+int32
+O
+If this message should not be archived, this field should be present,
+and the value should be non-zero.
+%%
+Distribution
+string
+O
+A value, intended for interpretation by forwarding filters at
+administrative boundaries, describing restrictions on the distribution
+of this message.
+
+No constraints are set on the value of this field, but examples might
+include "local", "company_name", etc.
+%%
+Attachment
+opaque
+O
+A MIME-encoded addition to the message.  multiple objects should be
+encoded using the multipart/mixed MIME type.
+
+Note that this field is an opaque type, and thus an array of bytes.
+therefore, it is not necessary to encode attachments (using, for
+example, base64) as is the usual practice for email.
+%%
