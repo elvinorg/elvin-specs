@@ -257,6 +257,7 @@ struct ClstJoinRply {
   id32 xid;
   string master_name;
   id16 master_id;          /* id of master node */
+  string scope;            /* the scope used for this cluster */
   id16 server_id;          /* newly allocated id for the requestor */
   id16 servers[];          /* existing servers in cluster */
   struct {
