@@ -335,7 +335,7 @@ struct SubDBRply {
     struct {
       int64 sub_id;
       string sub_expr;
-      int32 accept_insecure;
+      boolean accept_insecure;
       opaque keys[];    
     }  subscriptions[];
   }  clients[];
