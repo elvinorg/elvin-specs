@@ -15,7 +15,7 @@ m4_include(macros.m4)
 .ad l
 .in 0
 XXX Working Group                                              D. Arnold
-Internet Draft                                                      DSTC
+Internet Draft                                                 I. Lister
 Category: Standards Track                                   dd mmmm _yr_
 
 .ce
@@ -283,6 +283,7 @@ Author's Address
 
 .nf
 David Arnold
+Ian Lister
 
 Distributed Systems Technology Centre
 Level7, General Purpose South
