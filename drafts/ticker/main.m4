@@ -4,7 +4,7 @@ m4_dnl
 m4_dnl              Tickertape Message Format Specification
 m4_dnl
 m4_dnl File:        $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/ticker/main.m4,v $
-m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.6 $
+m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.7 $
 m4_dnl Copyright:   (C) 2001-2002, David Arnold.
 m4_dnl
 m4_dnl This specification may be reproduced or transmitted in any form or by
@@ -77,7 +77,7 @@ Expires: aa bbb cccc                                         dd mmm yyyy
 .ce
 Tickertape Chat Protocol
 .ce
-draft-arnold-ticker-chat-v3-prelim00.txt
+draft-arnold-ticker-chat-v3-prelim01.txt
 
 m4_heading(1, Status of this Memo)
 
