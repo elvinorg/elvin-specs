@@ -1,2 +1,2 @@
 #! /bin/sh
-a2ps -m main.txt --center-title="Elvin Discovery Protocol" -o main.ps
+a2ps -m main.txt --center-title="Elvin Router Discovery Protocol"
