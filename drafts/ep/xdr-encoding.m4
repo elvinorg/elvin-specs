@@ -72,9 +72,9 @@ The Elvin protocol relies on seven basic types used to construct each
 packet: boolean, uint8, int32, int64, real64, string, byte[].
 
 Below is a summary of how these types are represented when using XDR
-encoding.Each datatype used in the abstract descriptions of the
-packets has a one-to-one mapping to a corresponsing XDR data type as
-defined in [RFC1832].
+encoding.  Each datatype used in the abstract descriptions of the
+packets has a mapping to a corresponsing XDR data type as defined in
+[RFC1832].
 
 .KS
 .nf
