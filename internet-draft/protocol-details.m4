@@ -372,7 +372,7 @@ successful.
 Client libraries SHOULD not send SubModRqst's with all of expression,
 add_prime_keys and del_prime_keys as empty.  Server implementations,
 however, MUST still handle such packets by sending a SubRply with the
-subscription_id set to the same value of the subscription_id in the
+xid and subscription_id set to the same corresponding values in the
 SubModRqst.
 
 ***
