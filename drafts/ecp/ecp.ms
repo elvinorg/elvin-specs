@@ -416,22 +416,12 @@ The master is responsible for responding to further ClstJoinRqst's and
 also to client Elvin router discovery requests on behalf of the
 cluster.
 
-m4_remark(
-*** dealing with changes in the set of protocols or their options
-*** offered by an Elvin router during its membership of the cluster is an
-*** open issue.  do we forbid this?  is it controlled by the cluster
-*** mgmt and so we know anyway?  or do we introduce an update packet?
-*** or something else entirely?
-
-*** this is related to the elvind.conf issue of specifying protocol
-*** options.  the current URL-based scheme is bogus, and should go
-*** away ASAP.  at that time, we should revisit this packet format.)
-
 m4_heading(3, Cluster Join Reply)
 
 Multicast reply from the master node in a cluster.  Includes the Elvin
-router's newly allocated unique identifier and the current
-subscription database of the cluster.
+router's newly allocated unique identifier, the current
+subscription database of the cluster and the list of participating
+routers in the cluster with their management URLs.
 
 m4_pre(
 struct ClstJoinRply {
@@ -569,7 +559,7 @@ multicast.
 
 Regardless of whether the operation was requested directly, or via
 multicast from another Elvin router in the cluster, the affected Elvin
-router(s) MUST multicast an Elvin Router Report packet describing
+router(s) MUST multicast an Server Report packet describing
 their new state.
 
 m4_remark(
@@ -585,12 +575,12 @@ m4_remark(
 *** active Elvin router been told to go active) but don't see one?  do we
 *** need a ConfigQuery?  or should we abort?  eek ...)
 
-m4_heading(3, Elvin Router Negative Acknowledge)
+m4_heading(3, Server Negative Acknowledge)
 
 Return an error result to a requested operation.
 
 m4_pre(
-struct Elvin RouterNack {
+struct ServerNack {
   id32 xid;
   id32 error_code;
   string default_template;
@@ -644,7 +634,7 @@ struct ClstRedir {
 };)m4_dnl
 
 The Elvin router identifiers list the Elvin routers in the cluster
-which this redirection is directed at.  Elvin Router who's cluster ID
+which this redirection is directed at.  Elvin router who's cluster ID
 is not in the list MUST ignore the packet.
 
 The client identifiers are full, 64bit identifiers, containing both a
@@ -663,7 +653,7 @@ approximately evenly using a pseudo-random selection method.
 The Elvin router SHOULD redirect each client to a randomly selected
 URL from the list.
 
-m4_heading(3, Elvin Router Statistics Report)
+m4_heading(3, Server Statistics Report)
 
 In order share the work in a cluster, router nodes share statistical
 information.  Each Elvin router publishes details about is recent load
@@ -867,6 +857,18 @@ The control provided by the management protocol is not very detailed.??
 *** distribution of configuration information (eg scope)
 
 *** Use of multiple RLM groups.
+
+m4_remark(
+*** dealing with changes in the set of protocols or their options
+*** offered by an Elvin router during its membership of the cluster is an
+*** open issue.  do we forbid this?  is it controlled by the cluster
+*** mgmt and so we know anyway?  or do we introduce an update packet?
+*** or something else entirely?
+
+*** this is related to the elvind.conf issue of specifying protocol
+*** options.  the current URL-based scheme is bogus, and should go
+*** away ASAP.  at that time, we should revisit this packet format.)
+
 
 m4_heading(1, `Security Considerations')
 
