@@ -137,9 +137,9 @@ seen.
 
 m4_heading(3, Leaving a Group)m4_dnl
 
-A member may leave the groups at any time by sending a LEAVE message
-to the sequencer, which multicasts it to the group.  The member must
-wait until the multicast LEAVE is received before closing the group
+A member may leave a group at any time by sending a LEAVE message to
+the sequencer, which multicasts it to the group.  The member must wait
+until the multicast LEAVE is received before closing the group
 endpoint.  The LEAVE packet should be resent up to 10 times before
 assuming that the sequencer is dead.
 
@@ -280,13 +280,13 @@ message seen by the member.
 
 m4_heading(3, `Data')m4_dnl
 
-The member_id is set to that of the sending member, and the packet_id
-should be sequentially allocated by the member.
+The member number is set to that of the sending member, and the
+fragment number should be sequentially allocated by the member.
 
-The member's last sequence should be the highest, contiguous sequence
-number seen so far by the sending member.
+The sequence number should be the highest, contiguous sequence number
+seen so far by the sending member.
 
-The reserved field must be zero.
+The reserved field MUST be zero.
 
 Packets from the user application may be up to 4 Gbytes in length.
 The sending member must fragment the packet, and fills in the total
