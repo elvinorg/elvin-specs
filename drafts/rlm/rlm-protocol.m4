@@ -264,26 +264,44 @@ m4_heading(3, `Data')m4_dnl
 The member_id is set to that of the sending member, and the packet_id
 should be sequentially allocated by the member.
 
-The last number should be the highest, contiguous sequence number seen
-so far by the sending member.
+The member's last sequence should be the highest, contiguous sequence
+number seen so far by the sending member.
+
+The reserved field must be zero.
+
+Packets from the user application may be up to 4 Gbytes in length.
+The sending member must fragment the packet, and fills in the total
+length, fragment length and fragment offset fields appropriately.
+
+The data field must be packed to a 4 byte boundary with NUL
+(zero-valued) bytes.  The total and (last) fragment length fields must
+specify that actual length, not the packed length.
+
 m4_pre(`
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
 | Ver |   Type  |     Flags     |          Incarnation          |
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
 |            Member Id          |            Packet Id          |
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
-|                          Last Sequence                        |
+|                     Member's Last Sequence                    |
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
-|                             Length                            |
+|                            Reserved                           |
+|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
+|                         Total Length                          |
+|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
+|                        Fragment Length                        |
+|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
+|                        Fragment Offset                        |
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
 X                              Data                             X
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|')m4_dnl
 
 m4_heading(3, `Accept')m4_dnl
 
-The member_id and packet_id should be set from the triggering DATA
-packet.  The last sequence should be set from the DATA packet, and the
-message sequence allocated sequentially by the sequencer.
+The member_id, packet_id, member's last sequence, total length,
+fragment length, fragment offset and data fields should be set from
+the triggering DATA packet.  The message sequence should be allocated
+sequentially by the sequencer.
 
 m4_pre(`
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
@@ -291,11 +309,15 @@ m4_pre(`
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
 |            Member Id          |            Packet Id          |
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
-|                          Last Sequence                        |
+|                     Member's Last Sequence                    |
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
 |                        Message Sequence                       |
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
-|                             Length                            |
+|                         Total Length                          |
+|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
+|                        Fragment Length                        |
+|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
+|                        Fragment Offset                        |
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
 X                              Data                             X
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
