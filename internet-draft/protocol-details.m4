@@ -318,10 +318,16 @@ struct SecRply {
 
 m4_heading(3, Notification Emit)
 
-Sent by client to the Elvin server. 
+Sent by client to the Elvin server.  There are two possible delivery
+modes, determining how the server should match supplied security keys.
+Delivery can be specified as requiring the consumer to have a matching
+key (deliver_insecure is not set).  Alternatively, the producer can
+not require that the consumer have a key, but if one or more are
+supplied, then at least one must match (deliver_insecure is set).
 
 m4_pre(
 struct NotifyEmit {
+   boolean   deliver_insecure;
    NameValue attributes[];
    opaque    raw_keys[];
 };)m4_dnl
