@@ -4,7 +4,7 @@ m4_dnl
 m4_dnl              Tickertape Message Format Specification
 m4_dnl
 m4_dnl File:        $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/ticker/main.m4,v $
-m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.9 $
+m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.10 $
 m4_dnl Copyright:   (C) 2001-2002, David Arnold.
 m4_dnl
 m4_dnl This specification may be reproduced or transmitted in any form or by
@@ -77,7 +77,7 @@ Expires: aa bbb cccc                                         dd mmm yyyy
 .ce
 Tickertape Chat Protocol
 .ce
-draft-arnold-ticker-chat-v3-prelim01.txt
+PUBLISHED
 
 m4_heading(1, Status of this Memo)
 
@@ -320,13 +320,20 @@ interpretation are possible.
 Future standardisation of the semantics of this attribute is likely.
 T}
 
-MIME-Attachment;opaque;T{
+MIME-Attachment;string;T{
 A MIME-encoded addition to the message.  Multiple attached objects
 SHOULD be encoded using the multipart/mixed MIME type.
 
-Note that this field is an opaque type, and thus an array of bytes.
-therefore, it is not necessary to transform attachments (using, for
-example, base64) as is the usual practice for email.
+Note that this field is a string type, and thus must be legitimate
+UTF-8.  The MIME specification provides various options for encoding
+data which is is not pure 7 bit ASCII (ie. base 64 encoding).  These
+mechanisms should be used to ensure binary content is safely
+transported.
+
+In choosing to use a string type for this attribute, our major
+motivation was to enable subscription to the attached information
+(where it is in un-encoded form).  This includes things like MIME
+content types, etc.  
 T}
 
 Replaces;string;T{
@@ -344,7 +351,7 @@ A consumer application that wishes to allow update of currently
 displayed messages should compare the value of an arriving message's
 Replaces field with those of existing messages.  The attributes of the
 arriving message should replace those of any previous message(s) with
-matching values.
+matching Replaces value(s).
 
 If no currently displayed message's Replaces field matches this value,
 the arriving message is presented as usual.
@@ -564,33 +571,23 @@ Group: "Chat"
 Message: "check this out!"
 From: "Spammeister"
 Timeout: 5
-MIME-Attachment: [4d 49 4d 45 2d 56 65 72 73 69 6f 6e 3a 20 31 2e 30
-                  0a 43 6f 6e 74 65 6e 74 2d 74 79 70 65 3a 20 74 65
-                  78 74 2f 75 72 69 2d 6c 69 73 74 0a 0a 68 74 74 70
-                  3a 2f 2f 77 77 77 2e 73 70 61 6d 72 61 64 69 6f 2e
-                  6e 65 74 0a]
+MIME-Attachment: "MIME-Version: 1.0\\r\\n" \\
+                 "Content-type:text/uri-list\\r\\n" \\
+                 "\\r\\n" \\
+                 "http://www.spamradio.net\\r\\n"
 User-Agent: "Example Ticker v1.0"
 .fi
 
-The MIME-Attachment field is the most changed.  Obviously, it is now
-an opaque rather than a string -- in this example, the string value is
-
-.nf
-MIME-Version: 1.0
-Content-type: text/uri-list
-
-http://www.spamradio.net
-.fi
-
-Note especially that the format has changed to include all the MIME
-headers within the value of the MIME-Attachment field, rather than
-putting the content type and encoding as separate attributes.
+The MIME-Attachment field is the most changed.  It has been renamed,
+and is now a proper MIME document, rather than putting the content
+type and encoding as separate attributes.
 
 This makes for simpler handling using standard library facilities, and
 enables the proper use of all features from the MIME standards.
 
 Note also the recommended change from the experimental "x-elvin/url"
-content type, to the standard type "text/uri-list".
+content type, to the standard type "text/uri-list" when attaching a
+URL to a message.
 
 .bp
 em4_unnumbered(`Appendix B \- Previous Versions')

@@ -26,7 +26,7 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/ticker/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.3 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.4 $
 #
 ################################################################
 
@@ -39,7 +39,7 @@ yyyy=$(shell date +%Y)
 exp=$(shell date -d "6 months" "+%d %b %Y")
 
 FILENAME := draft-arnold-ticker-chat-v3
-VERSION := 00
+VERSION := 01
 PUBLISHED := $(FILENAME)-$(VERSION).txt
 
 
@@ -54,7 +54,7 @@ outline.txt: main.ms
 main.txt: main.ms
 
 main.ms: *.m4 ../macros.m4 Makefile
-	m4 -I.. -P main.m4 > $@
+	m4 -I.. -DPUBLISHED=$(PUBLISHED) -P main.m4 > $@
 
 clean:
 	rm -f main.txt main.ms
