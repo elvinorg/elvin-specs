@@ -48,7 +48,7 @@ http://www.ietf.org/shadow.html
 m4_heading(1, Abstract)
 
 This document describes a protocol for forwarding message traffic
-between Elvin servers.  It provide administrative filtering of both
+between Elvin servers.  It provides administrative filtering of both
 incoming and outgoing traffic.
 
 It has no effect on the protocol used for Elvin client to server
@@ -114,7 +114,44 @@ m4_heading(1, Abstract Protocol)
 
 m4_heading(2, Protocol Overview)
 
-An Elvin server may be statically configured 
+An Elvin server may be statically configured with an initial state.
+This state may include directions to initiate federation relationships
+with other routers or to accept federation relationships with other
+routers.
+
+Federation relationships consist of a reliable one-to-one connection
+between two routers and may optionally include administrative filters
+at each end.  Two federated routers share information about their own
+registered subscriptions in order to forward matching Elvin
+notification traffic to each other.  The subscription information is
+shared in the form of an abstract syntax tree of a single aggregate
+Elvin subscription expression representing the union of all
+subscriptions registered at a router (excluding that registered by the
+other router in the federation relationship).
+
+Incoming notifications are evaluated for forwarding to connected
+routers in addition to any connected clients.  Handling of a
+notification received from a federated router is largely the same as
+handling a notification received from a client, with the exception
+that the notification is not sent back to the router from which it was
+received.
+
+.KS
+.nf
+                                  +--------------+ Elvin
+   +----------+                   | +----------+ | Federation
+   | Producer | ---NotifyEmit------>| Router 1 | |
+   +----------+                   | +----------+ |
+                                  |      |       |
+                                  |      |       |
+                                  |      V       |
+   +----------+                   | +----------+ |
+   | Consumer | <--NotifyDeliver--- | Router 2 | |
+   +----------+                   | +----------+ |
+                                  +--------------+
+                                                   NOTIFICATION PATH
+.fi
+.KE
 
 m4_heading(2, Packet Types)
 
@@ -161,7 +198,12 @@ struct FedConnRqst {
   string server_domain;
 };)m4_dnl
 
-The server_domain parameter is a unqiue UTF-8 string identifying the
+The xid field is a number identifying this request.  It must be unique
+among all outstanding requests on any one connection at any one time.
+Successive requests SHOULD use an xid that increments by one for each
+request.
+
+The server_domain parameter is a unique UTF-8 string identifying the
 local server or cluster.  It is used to prevent importation of traffic
 which has previously been exported from the local domain.  This means
 that it MUST be globally unique for each single server or cluster, but
@@ -183,15 +225,25 @@ represented in text form as 1.0.
 
 m4_heading(3, Federation Connection Reply)
 
-A server, having received a FedConnRqst, responds with either a Nack (if
-the request was unsuccessful) or a FedConnRply (if the request was
-successful).
+A server, having received a FedConnRqst, responds with either a Nack
+(if the request was unsuccessful) or a FedConnRply (if the request was
+successful).  If the local_domain in the received FedConnRqst is the
+same as the local_domain of any other known directly connected server
+or the same as the receiving server's own local_domain, the server
+must respond with a Nack.
 
 m4_pre(
 struct FedConnRply {
   id32 xid;
   string server_domain;
 };)m4_dnl
+
+The xid field MUST be set to the same value as that in the FedConnRqst
+being responded to.  A FedConnRply MUST NOT be sent other than in
+response to a FedConnRqst.
+
+The server_domain field contains a unique identifier for the local
+server or cluster, equivalent to the local_domain sent in a FedConnRqst.
 
 m4_heading(3, Federation Subscription Modify)
 
@@ -307,7 +359,7 @@ Email:  support@mantara.com
 .bp
 m4_heading(1, `Full Copyright Statement')
 
-Copyright (C) 2000-__yr Mantara Software
+Copyright (C) 2000, __yr Mantara Software
 All Rights Reserved.
 
 This specification may be reproduced or transmitted in any form or by
