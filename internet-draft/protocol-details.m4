@@ -394,43 +394,56 @@ Receiving a reserved error code SHOULD be handled as a protocol error.
 
 .KS
 .nf
-   Error Code  |  Meaning / Action
-  -------------+-----------------------------------------------------
-      0        |  Undefined error establishing a connection
-      1        |  Protocol version mismatch in ConnRqst
-      2        |  Authorisation failure
-      3        |  Authentication failure
-      4-  499  |  (Reserved)
-    500-  999  |  (Impl-specific connection establishment error)
-   1000        |  Undefined protocol error; requires connection abort
-   1001        |  Protocol error
-   1002        |  No such subscription
-   1003        |  No such quench
-   1004        |  Bad keys scheme
-   1005        |  Bad keyset index
-   1006- 1499  |  (Reserved)
-   1500- 1999  |  (Impl-specific error, requires connection abort)
-   2000        |  Undefined error with request
-   2001        |  No such key
-   2002        |  Key exists
-   2003        |  Bad key
-   2004        |  Nothing to do
-   2005- 2100  |  (Reserved)
-   2101        |  Subscription parse error
-   2102        |  Subscription invalid token
-   2103        |  Subscription unterminated string
-   2104        |  Subscription unknown function
-   2105        |  Subscription overflow
-   2106        |  Subscription type mismatch
-   2107        |  Subscription too few arguments
-   2108        |  Subscription too many arguments
-   2109        |  Subscription invalid regular expression
-   2110- 2499  |  (Reserved)
-   2500- 2999  |  (Implementation-specific operation failure)
-   3000-65535  |  (Reserved)
+Error Code  |  Meaning / Action                    |  Arguments
+------------+--------------------------------------+------------
+   0        |  Undefined error opening connection  |    none
+   1        |  ConnRqst version mismatch           |    none
+   2        |  Authorisation failure               |    none
+   3        |  Authentication failure              |    none
+   4-  499  |  ( Reserved )                        |  undefined
+ 500-  999  |  ( Implementation-specific           |  undefined
+            |    connection establishment error )  |
+1000        |  Undefined protocol error. Requires  |    none
+            |     connection abort                 |
+1001        |  Protocol error                      |    none
+1002        |  No such subscription                |  sub_id, id64
+1003        |  No such quench                      |  quench_id, id64
+1004        |  Bad keys scheme                     |  scheme_id, id32
+1005        |  Bad keyset index                    |  scheme_id, id32
+            |                                      |  index, int32
+1006- 1499  |  ( Reserved )                        |  undefined
+1500- 1999  |  ( Implementation-specific error     |  undefined
+            |    requiring connection abort )      |
+2000        |  Undefined error with request        |    none
+2001        |  No such key                         |    none
+2002        |  Key exists                          |    none
+2003        |  Bad key                             |    none
+2004        |  Nothing to do                       |    none
+2005- 2100  |  (Reserved)                          |  undefined
+2101        |  Parse error                         |  offset, int32
+            |                                      |  token, string
+2102        |  Invalid token                       |  offset, int32
+            |                                      |  token, string
+2103        |  Unterminated string                 |  offset, int32
+2104        |  Unknown function                    |  offset, int32
+            |                                      |  name, string
+2105        |  Overflow                            |  offset, int32
+            |                                      |  token, string
+2106        |  Type mismatch                       |  offset, int32
+            |                                      |  expr, string
+            |                                      |  type, string
+2107        |  Too few arguments                   |  offset, int32
+            |                                      |  function, string
+2108        |  Too many arguments                  |  offset, int32
+            |                                      |  function, string
+2109        |  Invalid regular expression          |  offset, int32
+            |                                      |  regexp, string
+2110- 2499  |  ( Reserved )                        |  undefined
+2500- 2999  |  ( Implementation-specific           |  undefined
+            |    operation failure )               |
+3000-65535  |  ( Reserved )                        |  undefined   
 .fi
 .KE
-
 
 The message field is a Unicode string template containing embedded
 tokens of the form %n, where n is an index into the args array.  When
@@ -438,9 +451,10 @@ preparing the error message for presentation to the user, each %n
 should be replaced by the appropriately formatted value from the args
 array.
 
-Servers MAY support error messages in multiple languages.  The
-language in which the message template is returned SHOULD be
-negotiated during connection.
+The language in which the Nack message is sent by a server MAY be
+negotiated during connection establishment.  Alternatively, clients
+MAY provide local templates to be used for generating the formatted
+text for presentation to the application.
 
 m4_heading(3, Connect Request)
 
