@@ -26,7 +26,7 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/ticker/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.2 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.3 $
 #
 ################################################################
 
@@ -38,9 +38,11 @@ mmm=$(shell date +%b)
 yyyy=$(shell date +%Y)
 exp=$(shell date -d "6 months" "+%d %b %Y")
 
-FILENAME := draft-arnold-elvin-uri
-VERSION := prelim-01
+FILENAME := draft-arnold-ticker-chat-v3
+VERSION := 00
 PUBLISHED := $(FILENAME)-$(VERSION).txt
+
+
 
 all: main.txt
 
@@ -61,7 +63,7 @@ clean:
 publish: $(PUBLISHED)
 
 $(PUBLISHED): main.txt
-	sed -e 's/aa bbb cccc/${EXP}/g' $^ > $@
+	sed -e 's/aa bbb cccc/${exp}/g' $^ > $@
 
 ################################################################
 

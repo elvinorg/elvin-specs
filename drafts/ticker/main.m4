@@ -4,7 +4,7 @@ m4_dnl
 m4_dnl              Tickertape Message Format Specification
 m4_dnl
 m4_dnl File:        $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/ticker/main.m4,v $
-m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.2 $
+m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.3 $
 m4_dnl Copyright:   (C) 2001, David Arnold.
 m4_dnl
 m4_dnl This specification may be reproduced or transmitted in any form or by
@@ -104,7 +104,7 @@ Tickertape family of applications.  It supports group-oriented instant
 messaging and provides a simple, consistent interface for
 presentation of a variety of interactive-time data.
 
-The for`'mat is derived from a series of earlier formats, as
+The for`'mat is derived from a series of earlier for`'mats, as
 documented in the appendix.
 
 m4_heading(1, Terminology)
@@ -174,8 +174,7 @@ this revision, the value MUST be an Elvin int32, with a value of 3000.
 T}
 
 Group;string;T{
-The name of the group to which this message is sent.  Group names may
-be any UTF-8 string.
+The name of the group to which this message is sent.
 T}
 
 From;string;T{
@@ -207,11 +206,11 @@ T}
 _
 .TE
 .\"
-Messages SHOULD provide the following attributes to enable their
-involvement in threaded conversations.  All thread-capable messages
-contain a unique message identifier.  A message that is intended as a
-reply to a previous message identifies its antecedent using this
-identifier.
+m4_heading(2, `Replies and Intra-group Threads')
+
+When sending a message as a reply to a previously received message,
+implementations SHOULD identify that message as a means of supporting
+presentation of threaded conversations.
 .\"
 .TS
 tab(;);
@@ -222,7 +221,28 @@ _
 In-Reply-To;string;T{
 The Message-Id of a previous message to which this is a reply.
 T}
+_
+.TE
+.\"
+m4_heading(2, `Private or Extra-group Threads')
 
+It is possible to send messages directed to a group for which the
+sender is not subscribed.  This is commonly used when the sender wants
+to initiate a convesation with the user(s) of the channel, but does
+not want to see traffic on that channel from other threads.
+
+The sender includes a Thread-Id attribute in the initial message, and
+subscribes to all messages with a matching Thread-Id value.
+Responding clients copy the received Thread-Id value into any replies
+made to that message, and thus the responses are visible to the
+original poster.
+.\"
+.TS
+tab(;);
+lb lb lb
+l l lw(42).
+Name;Type;Description
+_
 Thread-Id;string;T{
 When sending a message to a group to which the sender is not
 subscribed, but wishes to see any replies, this field should be set
@@ -237,6 +257,8 @@ recommendations.
 T}
 _
 .TE
+.\"
+m4_heading(2, `Optional Attributes')
 .\"
 The following attributes may optionally be provided
 .\"
@@ -261,12 +283,12 @@ administrative boundaries, describing restrictions on the distribution
 of this message.
 
 No constraints are set on the value of this field, but examples might
-inc`'lude "local", "company_name", etc.
+inc`'lude "local", "company_name", "unclassified", etc.
 
 Note that no global interpretation is placed on the values of this
-field.  Its meaning is defined within an administrative boundary, to
-be interpreted at that boundary.  Multiple levels of such
-interpretation are possible.
+field.  Its meaning is defined within an administrative domain, to be
+interpreted at its administrative boundaries.  Multiple levels of such
+interpretation are possible.  
 T}
 
 Attachment;opaque;T{
@@ -280,86 +302,65 @@ T}
 _
 .TE
 
+m4_heading(1, `Access Control')
 
-m4_pre(
-elvin_opaque_part = [ version ] "/" protocol "/" endpoint options
-)m4_dnl
-m4_dnl
+Elvin supports the use of keys to control visibility of both messages
+and subscriptions [EP].  This specification does not mandate the use
+of a particular key scheme, or a method of applying the general Elvin
+access control facilities to Tickertape Chat messages.
 
-
-m4_heading(1, `Interoperability Considerations')
-
-The ``elvin'' scheme has several features designed to promote
-interoperability between implementations of the Elvin protocols.
-
-The inclusion of the protocol version number as a distinct syntactic
-element allows future revisions of the scheme to alter the definition
-of the scheme's opaque component while ensuring continued correct
-operation of previous versions' implementations.
-
-Compatibility between different protocol versions can be determined
-using the algorithm specified in [EP].
-
-The scheme's protocol component allows multiple implementations of the
-abstract protocol.  This enables different protocol properties to be
-selected by users and administrators within the scheme definition.
-
+It is likely that a companion document, or a future revision of this
+document, will describe such a method.
+.\"
+.\"
 m4_heading(1, `Security Considerations')
+.\"
+m4_heading(2, `Access Control')
 
-Multiple concrete implementations of the abstract protocol mean that
-the Elvin protocol endpoint described by an ``elvin'' URI can have
-many different properties, depending upon the protocol stack(s)
-offered.
+Unless a Tickertape client uses a proprietry method to constrain the
+visibility of Tickertape messages using Elvin access control, all
+messages and subscriptions should be considered exposed to any user
+with access to the supporting Elvin router infrastructure.
+.\"
+m4_heading(2, `Sender Identity')
 
-Elvin clients should be careful to select only endpoints offered using
-protocols with the desired properties, especially those providing
-appropriate security.
+The presented user identity, obtained from the `From' attribute of the
+message, can be either empty or misleading.  
+.\"
+m4_heading(2, `Attachments')
 
-Similarly, administrators of Elvin routers should be careful to ensure
-that only appropriate combinations of protocols are offered by their
-routers.
+The optional use of the `Attachment' attribute to deliver a
+MIME-encoded object allows arbitrary data to be present on the
+receiver's machine.  This data can be interpreted by the client
+program, and this interpretation could involve the execution of
+arbitrary code.
 
-The ability of client programs to specify both the protocol modules to
-be used, and the address at which that protocol is expected gives
-wide-ranging ability to reach an offered host, but does not provide
-access beyond that which is already available.
+Client application developers and end-users should ensure that the
+interpretation of MIME data occurs within appropriate safeguards.
 
+Some user agents also provide a facility to automatically invoke the
+interpretation of MIME attachments.  This practice introduces an
+additional risk, precluding a manual vetting of the data before
+interpretation.
+.\"
+m4_heading(2, `Denial of Service')
+
+It is possible to attack either an Tickertape individual client, or
+the Elvin routing network, by sending a large number of Tickertape
+messages.  
+
+This type of attack could impact local network bandwidth, Elvin router
+latency and CPU usage, and Tickertape client host CPU usage.
+
+The combination of many messages and automatically invoked attachment
+interpretation has particularly high risk of substantial impact.
+.\"
+.\"
 m4_heading(1, `IANA Considerations')
-m4_heading(2, `Elvin URI Scheme')
 
-The ``elvin'' scheme is not yet registered with IANA, despite its use
-of the IETF tree, as defined in [RFC2717].
-
-It is intended that the scheme be registered as part of the
-publication of the Elvin protocols.  Registration of a scheme via an
-Informational RFC requires "wide usage" and "demonstrated utility",
-both of which are subject to the discretion of the IESG.
-
-m4_heading(2, `Protocol Modules')
-
-This scheme defines a registry of ``protocol'' module names,
-representing network transport, security, marshaling or other
-functionality able to be used within an Elvin protocol stack, as
-defined in [EP].
-
-This registry is currently maintained by DSTC Pty Ltd.  Procedures for
-registration of new protocol module names can be obtained from the
-contact address in section CONTACT_DETAILS.
-
-An unmanaged, experimental protocol name registry allows development
-and testing of protocols prior to formal registration.  Experimental
-registry names MUST use a "x-" prefix to distinguish them from
-official names.
-
-m4_heading(2, Future)
-
-It is intended that the Elvin protocol specifications be contributed
-to the IETF community, possibly as input to a future working group in
-the area of content-based routing.  One possible outcome of this
-contribution is that a future specification, derived or influenced by
-this document, could require that the registry functions currently
-performed by DSTC Pty Ltd be transferred to the IANA.
-
+This specification places no requirements on the IANA.
+.\"
+.\"
 m4_heading(1, `Relevant Publications')
 
 The Elvin client protocol [EP] defines an abstract protocol for
@@ -372,11 +373,13 @@ is defined in [ERDP].
 Inter-router protocols for clustering [ERCP] and wide-area routing
 [ERFP] are also available.  Elvin router implementations MAY support
 clustering and SHOULD support federation.
-
+.\"
+.\"
 m4_heading(1, `Contact for further information')
 
 See section CONTACT_DETAILS for full contact details.
-
+.\"
+.\"
 m4_heading(1, `Author/Change controller')
 
 This specification is a component of the Elvin protocol suite.  Elvin
@@ -388,9 +391,7 @@ to DSTC, at the address listed in section CONTACT_DETAILS.
 
 
 m4_dnl  bibliography
-m4_dnl
-m4_dnl  -*-nroff-mode-*-
-m4_dnl
+
 .bp
 m4_heading(1, REFERENCES)
 
@@ -473,6 +474,31 @@ the specification) to the address below:
 
 Elvin is a trademark of DSTC Pty Ltd.  All other trademarks and
 registered marks belong to their respective owners.
+.\"
+.\"
+.bp
+em4_unnumbered(`Appendix A \- Previous Versions')
+
+The protocol specified by this document has undergone several years of
+evolutionary development.  Several dozen implementations exist, with
+varying levels of functionality and compatibility.
+
+The naming for attributes in this specification is deliberately
+different from previous versions, in an attempt to both enable
+backward compatibility and to encourage migration to current best
+practice for Elvin applications.
+
+\fBBasic Attributes\fR
+
+.B `Replacement'
+
+.B `Threads'
+
+.B `Attachments'
+
+
+
+
 
 m4_dnl
 m4_dnl ########################################################################
