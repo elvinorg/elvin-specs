@@ -1,6 +1,6 @@
 dnl  architecture.m4
 dnl
-include(macros.m4)
+m4_include(macros.m4)
 dnl
 heading(1, ARCHITECTURE)
 dnl

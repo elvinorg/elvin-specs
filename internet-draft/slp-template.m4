@@ -2,7 +2,7 @@ dnl  slp-template.m4
 dnl
 dnl  this is the SLP service: URL template for Elvin4
 
-include(macros.m4)
+m4_include(macros.m4)
 heading(1, APPENDIX B -- Service Scheme Template)
 .LP
 Elvin 4 will use the Service Location Protocol (SLPv2) to enable

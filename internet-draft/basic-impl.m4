@@ -1,7 +1,7 @@
 dnl  basic-impl
 dnl
 dnl  this is the basic implementation details
-include(macros.m4)dnl
+m4_include(macros.m4)dnl
 dnl
 heading(1, IMPLEMENTATION)
 .LP

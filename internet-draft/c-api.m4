@@ -1,4 +1,4 @@
 dnl  C api
-include(macros.m4)dnl
+m4_include(macros.m4)dnl
 .bp
 heading(1, APPENDIX B - C LANGUAGE INTERFACE)

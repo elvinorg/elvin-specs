@@ -1,6 +1,6 @@
 dnl  abstract-protocol
 dnl
-include(macros.m4)
+m4_include(macros.m4)
 dnl
 heading(2, Abstract Protocol)
 

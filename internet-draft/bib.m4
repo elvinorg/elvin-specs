@@ -2,7 +2,7 @@ dnl  bibliography
 dnl
 dnl  -*-nroff-mode-*-
 dnl
-include(macros.m4)dnl
+m4_include(macros.m4)dnl
 .bp
 heading(1, REFERENCES)
 

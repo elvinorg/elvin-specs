@@ -1,4 +1,4 @@
-include(macros.m4)
+m4_include(macros.m4)
 .pl 10.0i
 .po 0
 .ll 7.2i
@@ -130,11 +130,11 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
 document are to be interpreted as described in RFC 2119.
 
 
-include(architecture.m4)
-include(basic-impl.m4)
-include(slp.m4)
+m4_include(architecture.m4)
+m4_include(basic-impl.m4)
+m4_include(slp.m4)
 
-include(abstract-protocol.m4)
+m4_include(abstract-protocol.m4)
 
 
 
@@ -168,7 +168,7 @@ separate specification.
 
 heading(4, Marshalling)
 
-include(xdr-encoding.m4)
+m4_include(xdr-encoding.m4)
 
 heading(4, Security)
 
@@ -216,12 +216,12 @@ registry
 
 heading(1, SECURITY CONSIDERATIONS)
 
-include(sub-syntax.m4)
-include(c-api.m4)
-include(java-api.m4)
-include(python-api.m4)
-include(slp-template.m4)
-include(bib.m4)
+m4_include(sub-syntax.m4)
+m4_include(c-api.m4)
+m4_include(java-api.m4)
+m4_include(python-api.m4)
+m4_include(slp-template.m4)
+m4_include(bib.m4)
 
 .KS
 heading(1, CONTACT)

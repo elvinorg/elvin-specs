@@ -1,4 +1,4 @@
-define(heading, `.ti 0
+m4_define(heading, `.ti 0
 .NH $1
 $2
 .ft

@@ -1,6 +1,6 @@
 dnl  slp
 dnl
-include(macros.m4)
+m4_include(macros.m4)
 heading(2, Service Location)
 .LP
 Elvin 4 will use the Service Location Protocol (SLPv2) to enable
