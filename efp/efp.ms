@@ -314,6 +314,10 @@ identifier, and supply its address for further operations.
 *** could have multiple, *different* scoped requests getting a reply
 *** to our unicast address at any one time?  to be really safe, i've
 *** left it in, but ...
+
+*** what we probably do need however is a version header, since this
+*** is likely to be the first packet sent by a server to the cluster
+*** and there could be protocol mismatches.
 .fi
 
 m4_pre(
