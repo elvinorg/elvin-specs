@@ -172,7 +172,7 @@ Possible values for the type field in a packet are:
   Disconnect Request            DisConRqst            2
   Disconnect	                DisCon                3
   Security Request              SecRqst               4
-  QoS Request                   QosRqst               5
+  QoS Request                   QosRqst               5  <removed>
   Subscription Add Request      SubAddRqst            6
   Subscription Modify Request   SubModRqst            7
   Subscription Delete Request   SubDelRqst            8
@@ -181,7 +181,7 @@ Possible values for the type field in a packet are:
   Quench Delete Request         QnchDelRqst          11
   Notification                  Notif                12
   Notification Deliver          NotifDel             13
-  <removed> Quench Deliver      QnchDel              14
+  Quench Deliver                QnchDel              14  <removed>
   Acknowledgement               Ack                  15
   Negative Acknowledgement      Nack                 16
   Subscription Reply            SubRply              17
@@ -189,7 +189,7 @@ Possible values for the type field in a packet are:
 
   Subscription Change Notify    SubModNotif          19
   Subscription Remove Notify    SubDelNotif          20
-  QoS Reply                     QosRply              21
+  QoS Reply                     QosRply              21  <removed>
 
   More ... ?
 
