@@ -167,8 +167,8 @@ of identifiers can be encoded using a single byte.
   Standby                       Standby                 129
   Restart                       Restart                 130
   Shutdown                      Shutdown                131
-  Server Config Notify          ServerConfigNotify      132
-  Negative Acknowledge          ServerNack              133
+  Server Report                 ServerReport            132
+  Server Negative Acknowledge   ServerNack              133
 
   Cluster Join Request          ClstJoinRqst            160
   Clister Join Reply            ClstJoinRply            161
@@ -203,7 +203,7 @@ the operation, the request MUST be multicast.
 
 Regardless of whether the operation was requested directly, or via
 multicast from another server in the cluster, the affected server(s)
-MUST multicast a ServerConfigNotify packet describing their new state.
+MUST multicast a Server Report packet describing their new state.
 
 .nf
 *** additional operations here could include: changing the log level,
@@ -219,19 +219,19 @@ MUST multicast a ServerConfigNotify packet describing their new state.
 *** need a ConfigQuery?  or should we abort?  eek ...
 .fi
 
-m4_heading(3, Server Config Notify)
+m4_heading(3, Server Report)
 
 Describe the status of a server.  Sent in response to a (successful)
 request to change a server's status.
 
 m4_pre(
-struct ServerConfigNotify {
+struct ServerReport {
   id32 xid;
   id16 server_id;
   id8  mode;
 };)m4_dnl
 
-m4_heading(3, Management Nack)
+m4_heading(3, Server Negative Acknowledge)
 
 Return an error result to a requested operation.
 
