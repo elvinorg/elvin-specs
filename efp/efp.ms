@@ -175,6 +175,42 @@ an IP network.
 
 m4_heading(2, Packet Types)
 
+The protocol is defined in terms of individual packet specifications.
+Each packet has two unique identifiers: a string name and a number.
+In a concrete protocol implementation, if packets are identified using
+a number or string, these values SHOULD be used.
+
+The numeric identifiers have been chosen such that they do not overlap
+with the identifiers used for the Elvin client protocol, and both sets
+of identifiers can be encoded using a single byte.
+
+.KS
+.nf 
+  ----------------------------------------------------------------
+  Packet Type                   Abbreviation	     Identifier
+  ----------------------------------------------------------------
+  Activatee                     Activate		128
+  Standby                       Standby			129
+  Restart                       Restart			130
+  Shutdown			Shutdown		131
+
+  Cluster Request		ClusterRqst		160
+  Cluster Reply			ClusterRply		161
+  Join Request			JoinRqst		162
+  Join Reply			JoinRply		163
+
+  Subscription Database Request	SubDBRqst		164
+  Subscription Database Reply	SubDBRply		165
+  Subscription Add		FedSubAdd		166
+  Subscription Modify		FedSubMod		167
+  Subscription Delete		FedSubDel		168
+
+  Notify Emit Forward		NotifyEmitFwd		169
+  Motify Deliver Forward	NotifyDeliverFwd	170
+
+  ----------------------------------------------------------------
+.fi
+.KE
 
 m4_heading(2, Management Packets)
 
