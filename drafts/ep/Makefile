@@ -26,7 +26,7 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/ep/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.2 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.3 $
 #
 ################################################################
 
@@ -69,7 +69,7 @@ outline.txt: main.ms
 main.txt: main.ms
 
 main.ms: *.m4
-	m4 -P $(M4FLAGS) main.m4 > $@
+	m4 -P -I ../ $(M4FLAGS) main.m4 > $@
 
 clean:
 	rm -f main.txt main.ms

@@ -14,19 +14,16 @@ transport, security and marshalling options.  An implementation SHOULD
 provide the standard protocol, and MAY provide alternatives better
 suited to other application domains.
 
-Clients use the standard protocol to locate a suitable server.
-Establishment of a connection can involve negotiation of the server's
-capabilities, including underlying protocol options, supported limits
-on notification content, and available qualities of service.
-m4_dnl
+Clients MAY use the Elvin Router Discovery Protocol [ERDP] to locate
+a suitable server.  Establishment of a connection can involve
+negotiation of the server's capabilities, including underlying
+protocol options, supported limits on notification content, and
+available qualities of service.
+
 m4_heading(3, Protocol Layers)
-m4_dnl
 m4_heading(4, Marshalling)
-m4_dnl
 m4_heading(4, Security)
-m4_dnl
-m4_heading(4, Transport)
-m4_dnl
+m4_heading(4, Transport) 
 m4_heading(2, Security)
 
 Security of Elvin traffic is optional.  If required, the client can

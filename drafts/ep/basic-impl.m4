@@ -19,15 +19,43 @@ otherwise, it it not delivered.
 m4_dnl
 m4_heading(2, Subscription Expressions)
 
-The subscription language uses a ternary logic when evaluating
-expressions; this is then resolves to a binary result.  During
-evaluation, the value `bottom' is added to represent undefined values.
-For example, a comparison involving an attribute which is not present
-in a notification evaluates to bottom.
+m4_heading(3, Logic)
 
-With respect to boolean operations, the behaviour of bottom is quite
-similar to that of false with the notable exception that the negation
-of bottom (! bottom) is still bottom.
+The evaluation of a subscription uses Lukasiewicz's tri-state logic
+that adds the value bottom (which represents "undecideable" or
+"indefinite") to the familiar true and false.
+
+.nf
+.KS
+ ---------------------------------------------------------
+           Lukasiewicz tri\-state logic table
+ ---------------------------------------------------------
+    A       B    |  ! A       A && B    A || B    A ^^ B
+ ----------------+----------------------------------------
+ true     true   |  false     true      true      false 
+ true     bottom |  false     bottom    true      bottom 
+ true     false  |  false     false     true      true  
+ bottom   true   |  bottom    bottom    true      bottom 
+ bottom   bottom |  bottom    bottom    bottom    bottom 
+ bottom   false  |  bottom    false     bottom    bottom 
+ false    true   |  true      false     true      true  
+ false    bottom |  true      false     bottom    bottom 
+ false    false  |  true      false     false     false
+ ----------------+----------------------------------------
+.KE
+.fi
+
+Any subscription expression that refers to a name that is not present in the
+notification being evaluated results in bottom.
+
+In addition, many of the functions in Elvin have constraints on their
+parameters (ie. data type) and an undefined result should these constraints not
+be met. For example, where a string parameter is expected but the type of the
+actual parameter is a 32 bit integer, the result of the function begins-with()
+is bottom.
+
+Notifications are delivered only if the result of subscription evaluation is
+true.
 
 It should be emphasized that:
 .QP
