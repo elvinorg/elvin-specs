@@ -5,7 +5,7 @@ m4_include(macros.m4)
 .lt 7.2i
 .nr LL 7.2i
 .nr LT 7.2i
-.ds LF Arnold, Boot & Segall
+.ds LF Arnold
 .ds RF PUTFFHERE[Page %]
 .ds CF Expires in 6 months
 .ds LH Internet Draft
@@ -15,15 +15,11 @@ m4_include(macros.m4)
 .ad l
 .in 0
 XXX Working Group                                              D. Arnold
-Internet Draft                                                   J. Boot
-Category: Standards Track                                   M. Henderson
-                                                               T. Phelps
-                                                               B. Segall
-                                                                    DSTC
-                                                            dd mmmm _yr_
+Internet Draft                                                      DSTC
+Category: Standards Track                                   dd mmmm _yr_
 
 .ce
-Elvin Server Federation Protocol
+Elvin Wide-area Federation Protocol
 
 .ti 0
 Status of this Memo
@@ -46,13 +42,12 @@ Copyright (C) The Internet Society (_yr_).  All Rights Reserved.
 ABSTRACT
 
 .in 3
-This document describes a protocol for federation of Elvin []
-servers.  It enables exchange of message traffic, load-balancing
-across local clusters and wide-area links between administrative
-domains.
+This document describes a protocol for forwarding message traffic
+between Elvin servers.  It provide administrative filtering of both
+incoming and outgoing traffic.
 
 It has no effect on the protocol used for Elvin client to server
-communications.
+communications, or between server nodes in an Elvin cluster.
 
 .ti 0
 TABLE OF CONTENTS
@@ -64,8 +59,6 @@ m4_heading(1, INTRODUCTION)
 m4_heading(1, TERMINOLOGY)
 
 Wide-area federation
-
-Local-area federation
 
 Clustering
 
@@ -97,85 +90,17 @@ clustering of local servers for scaling or reliability
 linking servers to form wide-area routing networks
 
 
-m4_heading(2, Server Management)
-
-
-m4_heading(2, Clustering)
-
-Clustering is used to link multiple local servers into a single
-address space or subscription scope.
-
-Where an address space has a large number of clients, it can be
-necessary to share the evaluation of their subscriptions over multiple
-host nodes to achieve adequate performance.  This is analagous to a
-web server farm, for example.
-
-Alternatively, where performance is not an issue, it can still be
-desirable to have multiple local servers for an address space to
-continue service in the face of a server (daemon, node, network)
-failure.
-
-At a logical level, the cluster of Elvin servers must appear to
-implement a single address space; effectively a virtual server
-providing the same service semantics as a single server daemon with
-better performance or reliability.
-
 m4_heading(2, Wide-area Federation)
 
 Wide-area federation (in future referred to simply as federation) is
 used to link islands of Elvin address spaces together into a single
 routing network.  
 
-
-
 m4_heading(1, ABSTRACT PROTOCOL)
 
 m4_heading(2, Protocol Overview)
 
-An Elvin server is statically configured with an initial state,
-including one or more scope names which it is to provide.  The server
-advertises these scope names (together with other information) via a
-well-known multicast address as described in [ELVIN].
-
-If other servers are found providing the same scopes, the server
-contacts them to obtain the (dynamically allocated) multicast address
-used for communication within that scope.
-
-[[[
-      this is bogus because we could get multiple copies of a
-      message, and we could end up sending it out on multiple mcast
-      channels.  if we have just one for the domain however, how do we
-      figure what a domain is?  ie. all works fine until a server
-      starts that has two configured scopes which join two previously
-      independent domains.
-
-      i *think* that i need to change scopes back to having less
-      significance.  they are simply a way of controlling clients'
-      connectivity to servers, including the ability to partition a
-      cluster from a client's POV.
-
-      the principle concept from a clustering POV is the address space
-      or domain, which shares a multicast channel, and is orthogonal
-      to scopes.  the important thing then is defining a domain.  how
-      do we ensure that clients cannot find multiple domains unless we
-      want them too.
-
-      or maybe in other words, how do we make all the servers in a
-      domain are equally visible to any client (esp wrt server
-      discovery).
-]]]
-
-
-
-
-Clustered servers communicate using a reliable multicast protocol over
-an IP network.  
-
-
-The Elvin server protocol performs three separate functions:
-individual server management, local area clustering and wide-area
-federation.
-
+An Elvin server may be statically configured 
 
 m4_heading(2, Packet Types)
 
@@ -193,407 +118,80 @@ of identifiers can be encoded using a single byte.
   ----------------------------------------------------------------
   Packet Type                   Abbreviation         Identifier
   ----------------------------------------------------------------
-  Activate                      Activate                128
-  Standby                       Standby                 129
-  Restart                       Restart                 130
-  Shutdown                      Shutdown                131
+  WAF Request                   WAFRqst                 192
+  WAF Reply                     WAFRply                 192
+  WAF Modify                    WAFMod                  193
 
-  Cluster Request               ClusterRqst             160
-  Cluster Reply                 ClusterRply             161
-  Join Request                  JoinRqst                162
-  Join Reply                    JoinRply                163
-
-  Subscription Database Request SubDBRqst               164
-  Subscription Database Reply   SubDBRply               165
-  Subscription Add              FedSubAdd               166
-  Subscription Modify           FedSubMod               167
-  Subscription Delete           FedSubDel               168
-
-  Federated Notify Emit         FedNotifyEmit           169
-  Federated Notify Deliver      FedNotifyDeliver        170
+  Disconnect Request            DisconnRqst             xxx
+  Disconnect                    Disconn                 xxx
+  Acknowledge                   Ack                     xxx
+  Negative Acknowledge          Nack                    xxx
+  
+  Notify Deliver                Notify                  xxx
 
   ----------------------------------------------------------------
 .fi
 .KE
 
-m4_heading(2, Management Packets)
 
-Remote management of an Elvin server is implemented using a secure
-connection to the server in question.  
+m4_heading(3, WAF Request)
 
-.nf
-*** Is this true?  do we want all mgmt operations to be
-*** point-to-point, or should they be multicast?  If they are
-*** multicast, can they affect multiple servers at once?  how?
-
-*** i'm assuming for the moment that these packets are unicast, and
-*** generate an Ack/Nack reply.
-.fi
-
-The management protocol provides a number of operations.
-
-m4_heading(3, Activate)
-
-A standby server process may be made active by sending this message.
-The server begins to accept client connections.
+A server, configured with filters and addressing information for a
+remote server, initiates a connection using this request.
 
 m4_pre(
-struct Activate {
-  id32 xid;
-};)m4_dnl
-
-m4_heading(3, Standby)
-
-A server process operates in two modes: active, or standby.  A standby
-server remains an active process, and continues to process management
-requests, but it suspends any activity via the Elvin client protocol.
-This is used to provision servers for periods of greater activity, in
-a hot-standby role for reliability, etc.
-
-The Go Standby message forces a server from active into standby mode.
-Any clients currently connected to the server are disconnected and no
-further connections are accepted.
-
-The Go Standby packet MAY include a redirection specification,
-allowing the server to direct connected clients to a specific
-alternative server.  If the redirection string is zero-length, clients
-MUST NOT be redirected
-
-m4_pre(
-struct Standby {
-  id32  xid;
-  string redirection;
-};)m4_dnl
-
-m4_heading(3, Restart)
-
-Restart the server with the current configuration.  Used to reclaim
-virtual memory space used by a previously busy server process.  This
-spawns a new process from the current process before shutting down the
-current process.
-
-m4_pre(
-struct Restart {
-  id32 xid;
-};)m4_dnl
-
-m4_heading(3, Shutdown)
-
-Shut down the server.  Once a server has been shut down, it cannot be
-restarted by a cluster controller.
-
-m4_pre(
-struct Shutdown {
-  id32 xid;
-};)m4_dnl
-
-
-
-m4_heading(3, Cluster Request)
-
-On startup, a server's configuration file can direct it to attempt
-connection to a cluster.  If this directive is present, the server
-MUST NOT accept client connections unless it has successfully joined
-the specified cluster.
-
-Clusters are identified by a string scope name.  The scope name is a
-UTF8 string, with a maximum length of 255 bytes.
-
-The server uses this packet, multicast to the cluster discovery
-address, to find the cluster controller.
-
-.nf
-*** this must be changed for drop 3
-.fi
-
-The packet requests that the cluster controller allocate the server an
-identifier, and supply its address for further operations.
-
-.nf
-*** i'm not sure whether we need to xid here.  is it possible that we
-*** could have multiple, *different* scoped requests getting a reply
-*** to our unicast address at any one time?  to be really safe, i've
-*** left it in, but ...
-
-*** what we probably do need however is a version header, since this
-*** is likely to be the first packet sent by a server to the cluster
-*** and there could be protocol mismatches.
-.fi
-
-m4_pre(
-struct ClusterRqst {
+struct WAFRqst {
   id32 xid;  
-  string scope;
+  string server_domain;
+  SubAST pull_filter;
 };)m4_dnl
 
-The cluster controller MUST respond with a unicast Cluster Reply or no
-reply at all.
+The server_domain parameter is a unqiue UTF-8 string identifying the
+local server or cluster.  It is used to prevent importation of traffic
+which has previously been exported from the local domain.  This means
+that it MUST be globally unique for a single server, or for all
+servers in a cluster.  It is RECOMMENDED that this name be based on
+the DNS domain name or IP address of the server's host machine(s).
 
-m4_heading(3, Cluster Reply)
+The pull_filter is a compiled Elvin subscription expression describing
+the traffic requested by clients of the local server.  This expression
+MAY be simplified to minimise updates caused by minor changes to the
+local subscription base.
 
-A unicast response from the cluster controller to a server.  Includes
-the cluster controller's preferred unicast address for further
-interaction.
+m4_heading(3, WAF Reply)
+
+A server, having received a WAFRqst, responds with either a Nack (if
+the request was unsuccessful) or a WAFRply.
 
 m4_pre(
-struct ClusterRply {
+struct WAFRply {
   id32 xid;
-  string address;
+  string server_domain;
+  SubAST pull_filter;
 };)m4_dnl
 
-m4_heading(3, Join Request)
+The local server has already authenticated the remote server sending
+the reply, and MUST accept the requested pull_filter.  If it is unable
+to do so, it MUST send a Disconn and terminate the transport-layer
+connection.
 
-Unicast request to the cluster controller to join its managed cluster.
-The server and urls fields match the information sent in SvrAdvt
-packets by the server, and are used to allow the cluster to take over
-the role of advertising server endpoints to client programs.
+m4_heading(3, WAF Modify)
 
-m4_pre(
-struct JoinRqst {
-  id32 xid; 
-  string server;        /* unique name for server */
-  string urls[];        /* set of URLs for server */
-};)m4_dnl
-
-.nf
-*** dealing with changes in the set of protocols or their options
-*** offered by a server during its membership of the cluster is an
-*** open issue.  do we forbid this?  is it controlled by the cluster
-*** mgmt and so we know anyway?  or do we introduce an update packet?
-*** or something else entirely?
-.fi
-
-m4_heading(3, Join Reply)
-
-Unicast reply to a server requesting entry to a cluster.  Includes the
-server's unique identifier.
+Either of the linked servers may modify their registered pull_filter
+at any time during the life of the connection.  
 
 m4_pre(
-struct JoinRply {
+struct WAFMod {
   id32 xid;
-  id32 server_id;
+  SubAST pull_filter;
 };)m4_dnl
 
-m4_heading(3, Leave Request)
-
-Unicast request to the cluster controller to leave a previously joined
-cluster.  This can result from either a local fault at the server
-(ie. process interrupted) or following a Restart or Shutdown request.
-
-The cluster controller will reply with a Leave Reply.
-
-m4_pre(
-struct LeaveRqst {
-  id32 xid;
-};)m4_dnl
-
-m4_heading(3, Leave Reply)
-
-Unicast response from cluster controller.  Indicates a set of
-alternative server to use for client redirect (via Disconn).
-
-m4_pre(
-struct LeaveRply {
-  id32 xid;
-  string urls[];
-};)m4_dnl
-
-m4_heading(3, Subscription Database Request)
-
-Unicast request to the cluster controller for a copy of the current
-subscription database for the cluster.
-
-m4_pre(
-struct SubDBRqst {
-  id32 xid;
-};)m4_dnl
-
-m4_heading(3, Subscription Database Reply)
-
-Unicast reply to a server from the cluster controller.  This is a
-complete copy of the cluster's subscription database at the time it is
-sent.  The client_id and sub_id values include a 32bit server
-identifier prefix.
-
-m4_pre(
-struct SubDBRply {
-  id32 xid;
-  struct {
-    int64 sub_id;
-    SubAST sub_expr;
-    boolean accept_insecure;
-    Keys keys[];    
-  }  subscriptions[];
-};)m4_dnl
-
-
-m4_heading(3, FedNotifyEmit)
-
-m4_pre(
-struct FedNotifyEmit {
-  NameValue attributes[];
-  boolean deliver_insecure;
-  Keys keys;
-};)m4_dnl
-
-m4_heading(3, FedNotifyDeliver)
-
-m4_pre(
-struct FedNotifyDeliver {
-  XXX;
-  NameValue attributes[];
-  boolean deliver_insecure;
-  Keys keys;
-};)m4_dnl
-
-m4_heading(3, FedSubAdd)
-
-m4_pre(
-struct FedSubAdd {
-  id32 client_id;
-  id64 sub_id;
-  SubAST expr;
-  boolean accept_insecure;
-  Keys keys;
-};)m4_dnl
-  
-m4_heading(3, FedSubMod)
-
-m4_pre(
-struct FedSubMod {
-  id64 sub_id;
-  SubAST expr;
-  boolean accept_insecure;
-  Keys add_keys;
-  Keys del_keys;
-};)m4_dnl
-  
-m4_heading(3, FedSubDel)
-
-m4_pre(
-struct FedSubDel {
-  id64 sub_id;
-};)m4_dnl
-  
-
-.nf
-*** from here on is a bit crap
-.fi
+The receiving server MUST process the request, and return either an
+Ack or a Nack, depending on the validity of the SubAST.
 
 
 
 
-m4_heading(3, Client Information Request)
-
-Request of client information from the server uses the ClientInfoRqst
-packet.  It includes a summary of all the server's current clients.
-
-m4_pre(
-struct ClientInfoRqst {
-  int32 xid;
-  string server;
-  int64 clients[];
-};)m4_dnl
-
-
-m4_pre(
-struct ClientInfoRply {
-  int32 xid;
-  struct {
-    int64 client;
-    string protocol;
-    opaque peer_address;
-    etc ...
-  } clients[];
-};)m4_dnl
-
-
-
-
-m4_heading(3, Transfer Client)
-
-m4_pre(
-struct TransferClients {
-  int32 xid;
-  string server;
-  string redirection;
-  int64 clients[];
-};)m4_dnl
-
-
-
-
-
-
-m4_heading(3, Add Scope)
-
-Instructs the server to add the specified scope name to the set it
-offers.  A server may host any number of scopes; if configured with no
-scopes, it is not visible for server discovery.
-
-m4_pre(
-struct AddScope {
-  int32  xid;
-  string name;
-};)m4_dnl
-
-If the specified scope is already offered by the server, a Nack reply
-is generated.
-
-Note that the addition of a scope will require the server to increment
-the advertisement version number for SvrAdvt packets in the client
-protocol.
-
-FIXME: what implications on clustering ????
-
-m4_heading(3, Remove Scope)
-
-Instructs the server to stop offering the specified scope.
-
-m4_pre(
-struct RemoveScope {
-  int32  xid;
-  string name;
-};)m4_dnl
-
-If the specified name is not offered by the server, a Nack reply is
-generated.
-
-Similarly to Add Scope, the removal of a scope from a server requires
-that the advertisement version be incremented.
-
-FIXME: what implications on clustering ????
-
-
-m4_heading(3, Add Protocol)
-m4_heading(3, Remove Protocol)
-m4_heading(3, Zero Stats)
-
-per subscription:
-
-- notifications/second, average and peak
-- bytes/second, average and peak
-- terms/subscription, average and peak
-- percentage of terms that are exists()
-- percentage of terms that are integer ops
-- percentage of terms that are simple string ops
-- percentage of terms that are regexps
-- average length of string elements in notifications
-- average length of element names in notifications
-
-per server:
-
-- number of producers, average and peak
-- delta producer, average and peak (ie. producer-only
-  connect/disconnects per second)
-- number of consumers, average and peak
-- delta consumer, average and peak (ie. consumer-only
-  connect/disconnects per second)
-- server load average
-- network load ????
-
-
-m4_heading(3, Get Stats)
 
 
 
@@ -609,10 +207,6 @@ Author's Address
 
 .nf
 David Arnold
-Julian Boot
-Michael Henderson
-Ted Phelps
-Bill Segall
 
 Distributed Systems Technology Centre
 Level7, General Purpose South
