@@ -4,7 +4,7 @@ m4_dnl
 m4_dnl              Tickertape Message Format Specification
 m4_dnl
 m4_dnl File:        $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/ticker/main.m4,v $
-m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.1 $
+m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.2 $
 m4_dnl Copyright:   (C) 2001, David Arnold.
 m4_dnl
 m4_dnl This specification may be reproduced or transmitted in any form or by
@@ -197,6 +197,13 @@ message should be scrolled once only.  A negative value suggests that
 it not be scrolled at all, but displayed only in a threaded or
 historical view.
 T}
+
+Message-Id;string;T{
+Globally unique identifier for this message.  The use of a UUID (or
+GUID), optionally hashed (using SHA.1, MD5, etc) to ensure anonymity
+(since the UUID includes the MAC address of the generating machine) is
+RECOMMENDED.
+T}
 _
 .TE
 .\"
@@ -212,13 +219,6 @@ lb lb lb
 l l lw(42).
 Name;Type;Description
 _
-Message-Id;string;T{
-Globally unique identifier for this message.  We recommend the use of
-a UUID (or GUID), optionally hashed (using SHA.1, MD5, etc) to ensure
-anonymity (since the UUID includes the MAC address of the generating
-machine).
-T}
-
 In-Reply-To;string;T{
 The Message-Id of a previous message to which this is a reply.
 T}
