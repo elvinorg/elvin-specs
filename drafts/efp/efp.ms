@@ -135,9 +135,9 @@ client protocol, so the same identifiers are used.
   Packet Type                     Abbreviation         Identifier
   ----------------------------------------------------------------
   Federation Connection Request   FedConnRqst             192
-  Federation Connection Reply     FedConnRply             192
-  Federation Subscription Modify  FedModify               193
-  Federation Notify               FedNotify               194
+  Federation Connection Reply     FedConnRply             193
+  Federation Subscription Modify  FedModify               194
+  Federation Notify               FedNotify               195
 
   Disconnect                      Disconn                  53
   Acknowledge                     Ack                      65
