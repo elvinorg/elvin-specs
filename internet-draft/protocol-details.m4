@@ -573,9 +573,10 @@ struct DropWarn {
 m4_heading(3, Test Connection)
 
 A client's connection to the Elvin server can be inactive for long
-periods.  This is especially the case for subscribers for whom matching
-messages are seldom generated.  Clients MAY implement Test Connection
-and Confirm Connection packets to verify connectivity.
+periods.  This is especially the case for subscribers for whom
+matching messages are seldom generated.  Clients and servers MUST
+implement Test Connection and Confirm Connection packets to allow
+verification of connectivity.
 
 This application-level functionality is an alternative to a protocol
 level connectivity-loss reporting mechanism.  If an Elvin transport
@@ -585,23 +586,22 @@ lack of wide support for the TCP_KEEPALIVE socket option used to
 control the interval of inactivity that triggers a keep-alive exchange
 in TCP/IP.
 
-Clients MAY and servers MUST implement support for TestConn.
-
 m4_pre(
 struct TestConn {
 };)m4_dnl
 
-A Test Connection packet MAY be sent by a client to verify that it is
-still connected to the Elvin server after a period where no packets
-have been received from the server.  This period MUST NOT be less than
-30 seconds, MUST be configurable and able to be disabled, and the use
-of TestConn SHOULD be disabled by default.  These restrictions serve
-to limit the load on servers servicing TestConn requests.
+A Test Connection packet MAY be sent by either client or server to
+verify that it is still connected after a period where no packets have
+been received.  After a TestConn has been sent, but no traffic has
+been received from the peer within the standard synchronous operation
+timeout period, the connection is assumed dead, and MUST be closed as
+for a protocol error.
 
-If a client sends a TestConn but does not receive any traffic from the
-server within the standard synchronous operation timeout period, it
-can assume that the connection is dead, and MUST close the connection
-as for a protocol error.
+For clients, a TestConn MUST NOT be sent within 30 seconds of
+receiving other traffic from the server.  This delay period MUST be
+configurable, sending MUST be able to be disabled, and SHOULD be
+disabled by default.  These restrictions serve to limit the load on
+servers servicing TestConn requests.
 
 m4_heading(3, Confirm Connection)
 
@@ -609,10 +609,7 @@ m4_pre(
 struct ConfConn {
 };)m4_dnl
 
-Clients MAY and servers MUST implement support for ConfConn.  Clients
-SHOULD ignore spurious ConfConn packets. A server MUST NOT send a
-ConfConn on a client connection without having received a TestConn
-from that connection.
+Clients and servers MUST implement support for ConfConn.
 
 A server receiving a TestConn packet MUST queue a ConfConn response if
 there are no other packets waiting for the client to read.  If other
@@ -623,6 +620,9 @@ other packets will indicate that its connection is active).
 Servers MAY drop ConfConn packets queued for delivery to a client.
 The DropWarn packet will serve to indicate to the client that the
 connection is active. 
+
+Clients MUST send a ConfConn in response to a TestConn from the
+server.
 
 m4_heading(3, Notification Emit)
 
