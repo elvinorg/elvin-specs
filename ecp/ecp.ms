@@ -352,7 +352,7 @@ Unicast request to the cluster controller to leave a previously joined
 cluster.  This SHOULD be generated when the server is locally
 terminated (ie. SIGINT).
 
-The cluster will normally respond with a series of ClusterRedirect
+The cluster will normally respond with a series of Cluster Redirect
 packets, followed by a Shutdown.  The server should send a
 ServerStatusNotify before the process terminates.
 
