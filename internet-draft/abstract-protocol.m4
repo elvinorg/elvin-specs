@@ -30,9 +30,9 @@ interactions between clients and the server.
   Connect Request               ConnRqst	C -> S	 2
   Connect Reply                 ConnRply	S -> C	 2
 
-  Disconnect Request            DisConnRqst	C -> S	 2
-  Disconnect Reply		DisConnRply	S -> C	 2
-  Disconnect	                DisConn		S -> C	 2
+  Disconnect Request            DisconnRqst	C -> S	 2
+  Disconnect Reply		DisconnRply	S -> C	 2
+  Disconnect	                Disconn		S -> C	 2
 
   Security Request              SecRqst		C -> S	 2
   Security Reply		SecRply		S -> C	 2

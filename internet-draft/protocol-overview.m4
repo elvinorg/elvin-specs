@@ -31,7 +31,7 @@ server?  if not, how long until it may?
   +-------------+ --ConnRqst--> +---------+
   | Producer or |               |  Elvin  |
   |  Consumer   |               |  Server |    REDIRECTED CONNECTION
-  +-------------+ <--DisConn--- +---------+
+  +-------------+ <--Disconn--- +---------+
 .KE
 
 If the Elvin server cannot accept the connection, it MUST send a
@@ -193,14 +193,14 @@ subscription is removed.
 .KE
 
 At any time after a successful Connection Reply, the server can inform
-the client that it is to be disconnected.  The DisConn packet includes
+the client that it is to be disconnected.  The Disconn packet includes
 an explanation for the disconnection, and optionally, directs the
 client to reconnect to an alternative server.
 
 .KS
   +-------------+                  +---------+
   |  Producer   |                  |         |  
-  |     or      | <----DisConn---- |  Server |
+  |     or      | <----Disconn---- |  Server |
   |  Consumer   |                  |         |        DISCONNECTION 
   +-------------+                  +---------+
 .KE
@@ -213,10 +213,10 @@ flushed.
 The server MUST NOT refuse to disconnect a client (ie. using a Nack).
 
 .KS
-  +-------------+ ---DisConnRqst--> +---------+
+  +-------------+ ---DisconnRqst--> +---------+
   | Producer or |                   |  Elvin  |  
   |  Consumer   |                   |  Server |       DISCONNECTION 
-  +-------------+ <--DisConnRply--- +---------+
+  +-------------+ <--DisconnRply--- +---------+
 .KE
 
 

@@ -196,7 +196,7 @@ m4_heading(3, Disconnect Request)
 Sent by client to the Elvin server.  Requests disconnection.
 
 m4_pre(
-struct DisConnRqst {
+struct DisconnRqst {
   int32 xid;
 };)m4_dnl
 
@@ -206,14 +206,14 @@ library MUST NOT send any further messages to the server once this
 message has been sent.  The client library MUST continue to read from
 the server connection until a Disconnect packet is received.
 
-A server receiving a DisConnRqst should suspend further evaluation of
+A server receiving a DisconnRqst should suspend further evaluation of
 subscriptions and notification of subscription changes for this
 client.  A Disconnect packet should be appended to the client's output
 buffer, and finally, the output buffer flushed before the connection
 is closed.
 
 It is a protocol violation for a client to close its connection
-without sending a DisConnRqst (see protocol violations below).
+without sending a DisconnRqst (see protocol violations below).
 
 m4_dnl 
 m4_heading(3, Disconnect Reply)
@@ -222,7 +222,7 @@ Sent by the Elvin server to a client.  This packet is sent in response
 to a Disconnect Request, prior to breaking the connection.
 
 m4_pre(
-struct DisConnRply {
+struct DisconnRply {
   int32  xid;
 };)m4_dnl
 
@@ -238,7 +238,7 @@ different circumstances: to direct the client to reconnect to another
 server, or to inform that client that the server is shutting down.
 
 m4_pre(
-struct DisConn {
+struct Disconn {
   int32  reason;
   string args;
 };)m4_dnl
@@ -265,12 +265,12 @@ underlying (transport) link MUST be closed immediately after this
 packet has been successfully delivered to the client.
 
 The client connection MUST NOT be closed without sending either a
-DisConnRply or DisConn packet except in the case of a protocol
+DisconnRply or Disconn packet except in the case of a protocol
 violation.  If a client detects that the server connection has been
 closed without receiving one of these packets, it should assume
 network or server failure.
 
-A client receiving a redirection via a DisConn MUST attempt to connect
+A client receiving a redirection via a Disconn MUST attempt to connect
 to the specified server before attempting any other servers for which
 it has address information.  If the connection is fails or is refused
 (via ConnRply), the default server selection process SHOULD be

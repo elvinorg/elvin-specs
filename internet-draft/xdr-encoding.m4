@@ -34,8 +34,8 @@ m4_pre(
 `enum {
     UNotify        = 1,    Nack           = 2,
     ConnRqst       = 3,    ConnRply       = 4,
-    DisConnRqst    = 5,    DisConnRply    = 6,
-    DisConn        = 7,    SecRqst        = 8,
+    DisconnRqst    = 5,    DisconnRply    = 6,
+    Disconn        = 7,    SecRqst        = 8,
     SecRply        = 9,    NotifyEmit     = 10,
     NotifyDeliver  = 11,   SubAddRqst     = 12,
     SubModRqst     = 13,   SubDelRqst     = 14,
