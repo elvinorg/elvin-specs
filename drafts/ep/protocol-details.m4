@@ -305,10 +305,10 @@ that requested, the client MUST either use the returned value, or
 request closure of the connection.  Unrecognised options MUST NOT be
 returned by the server.
 
-Option values not requested by the client are dictated by the server.
-If an option has the specified default value, it SHOULD NOT be sent to
-the client.  Where the server implementation uses a non-default value,
-it MUST be sent to the client.
+Option values not requested by the client are dictated by the server.  If
+an option has the specified default value, it MAY be sent to the client.
+Where the server implementation uses a non-default value, it MUST be sent
+to the client.
 
 m4_heading(3, Disconnect Request)
 
