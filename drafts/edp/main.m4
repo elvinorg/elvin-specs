@@ -3,7 +3,7 @@ m4_dnl
 m4_dnl              Elvin Router Disoovery Protocol
 m4_dnl
 m4_dnl File:        $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/edp/main.m4,v $
-m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.4 $
+m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.5 $
 m4_dnl Copyright:   (C) 2000-2001, DSTC Pty Ltd.
 m4_dnl
 m4_dnl This specification may be reproduced or transmitted in any form or by
@@ -475,76 +475,56 @@ struct SvrAdvtClose {
   string   server;
 }
 
-Clients and routers MUST discard SvrAdvtClose packets with
-incompatible protocol version numbers.  Routers that have sent SvrAdvt
-messages using multiple protocol versions SHOULD send a SvrAdvtClose
-in each of those protocol versions.
+Clients and routers MUST ignore SvrAdvtClose packets with incompatible
+protocol version numbers.  Clients using active discovery only (ie. no
+caching of router advertisements) SHOULD ignore all SvrAdvtClose
+packets.
 
-The protocol-specific locality limit of the SvrAdvtClose packet MUST be
-set to the highest value sent in a SvrAdvt during the lifetime of the
-router process.  This ensures that the withdrawal notice reaches all
-passive discovery clients that might have a cached copy of the
+Clients using passive discovery MUST monitor such messages and remove
+all advertised URI for the specified router (as determined by the
+router identification string) from their cache.
+
+Routers that have sent SvrAdvt messages using multiple protocol
+versions SHOULD send a SvrAdvtClose in each of those protocol
+versions.
+
+The protocol-specific locality limit of the SvrAdvtClose packet MUST
+be set to the highest value sent in a SvrAdvt during the lifetime of
+the router process.  This ensures that the withdrawal notice reaches
+all passive discovery clients that might have a cached copy of the
 router's advertisement.
-
-Passive discovery clients MUST monitor such messages and remove all
-advertisements for the specified router (as determined by the router
-identification string) from their cache.
-
-
-
-
-
-
-
-
-
-
-
-When using IPv4 multicast, the client MUST use the hop limit setting
-to set the IP header TTL field.  For IPv6 multicast, the client MUST
-use the following table to translate hop limit values to multicast
-scopes.
-
-.KS
-.nf
-  Hop Limit  |  IPv6 Scope (and Name)
-  -----------+---------------------------------
-        0    |      1      (node)
-        1    |      2      (link-local)
-     2-15    |      5      (site-local)
-    16-31    |      8      (organisation-local)
-   32-255    |     14      (global)
-.fi
-.KE
-
-Other protocols SHOULD interpret this value as appropriate.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 m4_dnl
 m4_dnl  UDP/XDR implementation
 m4_dnl
-
 m4_heading(1, Protocol Implementation)
+
+The router discovery protocol can be implemented using different
+lower-layer protocols.  These concrete protocol implementations map
+the abstract specification from the preceding section onto the
+facility of a network layer protocol.
+
+Currently, mappings are defined for IPv4 and IPv6 protocols. 
 
 m4_heading(2, Use of IPv4)
 
+The implementation of ERDP on IPv4 uses IP any-source multicast as the
+basic transport, and the XDR marshalling protocol for packet data.
+
+m4_heading(3, Multicast Transport)
+
+Clients and routers MUST use the EDRP IP address and port for all of
+the discovery packets.  The IPv4 multicast address is 224.4.0.1 and
+the Elvin client port number 2917.
+
+Packets MUST be sent using a direct mapping of the locality value, to
+the IPv4 TTL field.
+
 m4_heading(3, Marshalling)
 
-The standard Elvin 4 marshalling uses XDR [RFC1832] to encode data.
-Messages sent between the a client and and Elvin router are encoded as
-a sequence of encoded XDR types.
+The Elvin client protocol uses XDR [RFC1832] to encode data.  All
+messages sent between the a client and and Elvin router are encoded as
+a sequence of encoded XDR types.  The ERDP IPv4 concrete protocol
+follows this lead.
 
 This section uses diagrams to illustrate clearly certain segment and
 packet layouts.  In most illustrations, each box (delimited by a plus
@@ -576,10 +556,10 @@ m4_pre(
     SvrAdvtClose   = 18,
 } pkt_id;')
 
-In XDR, enumerations are marshalled as 32 bit integral values.  For
-Elvin, each packet marshalled using XDR starts with a value from
-the above pkt_id enumeration.  The format for the remainder of the
-packet is then specific to the value of the packet identifer.
+In XDR, enumerations are marshalled as 32 bit integral values.  Each
+packet starts with a value from the above pkt_id enumeration.  The
+format for the remainder of the packet is then specific to the value
+of the packet identifer.
 
        0   1   2   3    
      +---+---+---+---+---+---+---+...+---+---+---+
@@ -587,21 +567,18 @@ packet is then specific to the value of the packet identifer.
      +---+---+---+---+---+---+---+...+---+---+---+
      |<---header---->|<-----------data---------->|
 
-Note that the XDR marshalling layer does NOT indicate the length of the
-packet.  This is left to the underlying transport layer being used. For
-example, a UDP transport could use the fact that a datagram contains the
-length of data in the packet.
+Note that the XDR marshalling layer does not provide packet
+framing. This is left to the underlying UDP layer.
 
 m4_heading(4, Base Types)
 
-The Elvin protocol relies on seven basic types used to construct each
-packet: boolean, uint8, int32, int64, real64, string, byte[].
+The protocol relies on four basic types used to construct each packet:
+boolean, uint8, id32, string.
 
 Below is a summary of how these types are represented when using XDR
-encoding.Each datatype used in the abstract descriptions of the
+encoding.  Each datatype used in the abstract descriptions of the
 packets has a one-to-one mapping to a corresponsing XDR data type as
 defined in [RFC1832].
-
 .KS
 .nf
   -------------------------------------------------------------------
@@ -611,180 +588,93 @@ defined in [RFC1832].
 
   uint8       unsigned int   4 bytes, last byte has value
 
-  int32       int            4 bytes, MSB first
+  id32        int            4 bytes, MSB first
 
-  int64       hyper          8 bytes, MSB first
-
-  real64      double         64-bit double precision float
-
-  string      string         4 byte length, UTF8 encoded string, zero 
+  string      string         4 byte length, UTF-8 encoded string, zero 
                              padded to next four byte boundary
-
-  byte[]      variable-      4 byte length, data, zero padded to next
-              length opaque  four byte boundary
   -------------------------------------------------------------------
 .fi
 .KE
-
-When the type of following data needs to be described in a packet (eg,
-the value in a name-value pair used in NotifyEmit packets), one of the
-base type ID's is encoded as an XDR enumeration.  This is often needed
-when a value in a packet is one of a number of possible types.  In these
-cases, the encoded value is preceded a type code from the following
-enumeration:
-
-m4_pre(
-`enum {
-    int32_tc  = 1,
-    int64_tc  = 2,
-    real64_tc = 3,
-    string_tc = 4,
-    opaque_tc = 5
-} value_typecode;')
-
-Note that the above enumeration does not include all of the datatypes
-used in the protocol.  It only describes data which can be contained
-in the abstract Value segment of a packet.  A Value in an encoded
-packet is thus typed by prepending four bytes which encode the type
-code:
-    
-.KS
-.nf
-       0  1  2  3 
-     +--+--+--+--+--+--+--+--+...+--+--+--+--+
-     | typecode  |          value            |        TYPED VALUE
-     +--+--+--+--+--+--+--+--+...+--+--+--+--+
-     |<--enum--->|<--format depends on enum-->
-.fi
-.KE
-
-For illustration, if an int64 of value 1024L is preceded by its type
-for marshalling, it would be sent as four bytes for the type id of 1
-and eight bytes for the value.
-
-.KS
-.nf
-       0  1  2  3  4  5  6  7  8  9 10 11  
-     +--+--+--+--+--+--+--+--+--+--+--+--+
-     |    0x02   |        0x0400         |           INT64 EXAMPLE
-     +--+--+--+--+--+--+--+--+--+----+---+
-     |<--enum--->|<--------hyper-------->|
-.fi
-.KE
-
-m4_heading(4, Encoding Arrays)
-
-All arrays in the abstract protocol are of variable length.  Arrays of
-objects are encoded by prepending the length of the array as an int32
-- the items are in the array are then each encoded in sequence
-starting at item 0.  The 32bit length places a theoretical limit of
-(2**32) - 1 items per list.  In practice, implementations are expected
-to have much lower maximums for the number of items in a list
-transmitted per packet.  For example, an implemenation may restrict
-the number of fields in a notification to 1024.  Such limitations
-SHOULD be documented for each implemenation.  Service offers and
-connection replys SHOULD also provide such limitations.  See the
-section X on Connection Establishment.
-
-.KS
-.nf
-       0  1  2  3  
-     +--+--+--+--+--+--+--+--+--+--+--+--+...+--+--+--+--+
-     |     n     |  item 0   |  item 1   |...| item n-1  |  ARRAY
-     +--+--+--+--+--+--+--+--+--+--+--+--+...+--+--+--+--+
-     |<--int32-->|<----------------n items-------------->|
-                                                          
-.fi
-.KE
-
-For illustration, *** FIXME *** ....
-
-.KS
-.nf
-      0           4           8          12
-     +--+--+--+--+--+--+--+--+--+--+--+--+
-     |    0x01   |        0x400          |           ARRAY EXAMPLE
-     +--+--+--+--+--+--+--+--+--+----+---+
-     |<--enum--->|<--------hyper-------->|
-.fi
-.KE
-m4_heading(4, Packet Encoding Example)
-
-An Elvin notification is a list of name-value pairs, where
-the value is one of the five base types of int32, int64, real64,
-string and opaque.  The encoding of these pairs must also include
-the data type for the value.  For both the Notif and the NotifDel
-packets, we introduce a name-type-value (NTV) block used to encode
-a notification attribute.
-
-The name of an attribute is always encoded as an XDR string. The type
-is an enumeration of five different values indicating one of int32,
-int64, real64, string or opaque (byte array).  The value, encoded as a
-standard XDR type, is determined by the preceding type.
-
-On the wire, a name-value is laid out as follows:
-
-.KS
-.nf
-  +------+...+------+------+------+...+------+
-  |      name       | type |      value      |       NAME-TYPE-VALUE
-  +------+...+------+------+------+...+------+
-
-   name      (string)  name of this attribute
-   type      (enum)    type of the encoded value. 0ne of int32, int64,
-                       real64, string or opaque
-   value     -         the encoded value for this attribute.
-.fi
-.KE
-
-Notifications begin with the number of attributes as an
-int32.  
-
-.KS
-.nf
-  0      4      8     12      ...
- +------+------+------+------+...+------+...+------+...+------+
- |pkt id| xid  |len n |       ntv 0     |   |      ntv n-1    | >>>>
- +------+------+------+------+...+------+...+------+...+------+
-                      |<----------n name-type-values--------->|
-
-           +------+------+...+------+...+------+...+------+
-      <<<< |len m |      key 0      |   |     key m-1     |
-           +------+------+...+------+...+------+...+------+
-                  |<----------------m keys--------------->|
-                                                        NOTIFICATION
-.fi
-.KE
-.KS
-   pkt id        (enum)   packet type for Notif
-   xid           (uint32) transaction number for this packet
-   len n         (int32)  number of name-type-value triples in the 
-                          notification. n MUST be greater than zero.
-   ntv x         [block]  encoded as a name-type-value triple, 
-                          described above. There MUST be n 
-                          name-type-value blocks where n > 0.
-   len m         (int32)  number of security keys in the notification
-   key x         (opaque) uninterpreted bytes of a security key. There
-                          MUST be m keys where m >= 0.
-.fi
-.KE
-
-m4_heading(3, Framing)
-
 m4_heading(2, Use of IPv6)
+
+The protocol mapping to IPv6 is imcomplete.
+
+For IPv6 multicast, the client MUST use the following table to
+translate locality values to multicast scopes.
+
+.KS
+.nf
+  Hop Limit  |  IPv6 Scope (and Name)
+  -----------+---------------------------------
+        0    |      1      (node)
+        1    |      2      (link-local)
+     2-15    |      5      (site-local)
+    16-31    |      8      (organisation-local)
+   32-255    |     14      (global)
+.fi
+.KE
 
 m4_heading(1, Security Considerations)
 
+There are several possible attacks against the abstract discovery
+protocol.  Additional weaknesses might be introduced by a concrete
+protocol implementation.
+
+m4_heading(2, Attacks)
+
+This section discusses attacks against the abstract protocol which
+will transcend concrete implementations.
+
+m4_heading(3, Router Advertisement Solicitation)
+
+An attacker could send a constant stream of SvrRqst packets to an ERDP
+multicast group.  Aside from the loss of network bandwidth and
+consumption of CPU in processing these requests, the protcol requires
+that routers advertise no more often than once every two seconds,
+preventing a packet storm.
+
+Additionally, the SvrRqst packet could be initialised with a high
+locality value, forcing router responses to be broadly distributed.
+
+m4_heading(3, Router Advertisement)
+
+This protocol provides no means of authenticating packets.  Thus, it
+is a simple matter for an attacker to forge Elvin router
+advertisements, and ``steal'' clients, directing them to an imposter
+router.
+
+More subtly, an attacker could alter the URI list in the
+advertisement, and/or increase the revision number to force improper
+URI into passive discovery client caches.
+
+Clients SHOULD authenticate the router's identity on connection,
+leaving this avenue only as a denial of service attack.
+
+m4_heading(3, Router Advertisement Withdrawal)
+
+Again, since packets are not authenticated, an attacker could send
+fake withdrawal packets for a router, causing a denial of service for
+its clients.  The effect would be limited to delaying reconnection to
+a router, because the client's solicitation would generate a new
+advertisement from the router.
+
+m4_heading(2, Preventative Measures)
+
+The are no novel preventation measures effective against these
+attacks.  Most measures will rely on the underlying concrete protocol
+implementation, but as an example, IP firewalling technology will
+reduce the ability of an attacker to inject the false packets required
+for the above attacks.
+
+
 m4_heading(1, IANA Considerations)
 
-protocol module names
+The abstract protocol requires no support from the IANA registry.
 
-key mechanism identifiers
+The IPv4 concrete protocol currently uses an unofficial IP multicast
+address.  An official address allocation is being pursued.  The UDP
+port number used is officially allocated for Elvin by the IANA.
 
-m4_dnl  bibliography
-m4_dnl
-m4_dnl  -*-nroff-mode-*-
-m4_dnl
 .bp
 m4_heading(1, References)
 
