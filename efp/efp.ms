@@ -172,6 +172,10 @@ Clustered servers communicate using a reliable multicast protocol over
 an IP network.  
 
 
+The Elvin server protocol performs three separate functions:
+individual server management, local area clustering and wide-area
+federation.
+
 
 m4_heading(2, Packet Types)
 
@@ -283,11 +287,19 @@ struct Shutdown {
   int32 xid;
 };)m4_dnl
 
+
+
 m4_heading(3, Cluster Request)
 
 On startup, a server's configuration file can direct it to attempt
-connection to a cluster.  Clusters are identified by a string scope
-name.  The server uses this packet, multicast to the server discovery
+connection to a cluster.  If this directive is present, the server
+MUST NOT accept client connections unless it has successfully joined
+the specified cluster.
+
+Clusters are identified by a string scope name.  The scope name is a
+UTF8 string, with a maximum length of 255 bytes.
+
+The server uses this packet, multicast to the cluster discovery
 address, to find the cluster controller.
 
 .nf
