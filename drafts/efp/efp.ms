@@ -140,6 +140,8 @@ remote server, initiates a connection using this request.
 
 m4_pre(
 struct WAFRqst {
+  uint8 major_version;
+  uint8 minor_version;
   id32 xid;  
   string server_domain;
   SubAST pull_filter;
@@ -164,6 +166,8 @@ the request was unsuccessful) or a WAFRply.
 
 m4_pre(
 struct WAFRply {
+  uint8 major_version;
+  uint8 minor_version;
   id32 xid;
   string server_domain;
   SubAST pull_filter;
