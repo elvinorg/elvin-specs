@@ -330,9 +330,9 @@ Sent by the Elvin server to a client.
 
 m4_pre(
 struct NotifyDeliver {
-   int64     insecure_matches[];
-   int64     secure_matches[];
    NameValue attributes[];
+   int64     secure_matches[];
+   int64     insecure_matches[];
 };)m4_dnl
 
 m4_heading(3, Subscription Add Request)
