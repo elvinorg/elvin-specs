@@ -267,6 +267,24 @@ to travel from one server to the other.
 Future revisions of the protocol may provide for automatic detection
 or configuration.
 
+m4_heading(1, `Security Considerations')
+
+Multiple concrete implementations of the abstract protocol mean that
+the federation links can have many different properties, depending
+upon the protocol stack(s) used.
+
+The Elvin federation protocol relies on any necessary authentication
+being performed by the underlying transport protocols, for example by
+verification of SSL certificates.
+
+Administrators of Elvin routers should be careful to ensure that only
+appropriate combinations of protocols are offered by their routers.
+
+m4_heading(1, `IANA Considerations')
+
+The TCP port 2916 has been reserved by the IANA for the Elvin
+federation protocol using the concrete XDR marshalling protocol.
+
 .KS
 m4_heading(Contact)
 
