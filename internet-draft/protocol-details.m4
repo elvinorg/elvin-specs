@@ -212,17 +212,16 @@ from the base value MUST be determined randomly for each packet sent.
 
 .KS
 .nf
-  Hop Limit  |  Pre-Request Interval
-  -----------------------------------
-    initial  |     0.0 seconds
-       0     |     0.4 +/- 0.2
-       1     |     2.0 +/- 1.0
-       2     |     2.0 +/- 1.0
-       4     |     2.0 +/- 1.0
-       8     |     4.0 +/- 2.0
-      16     |     4.0 +/- 2.0
-      32     |     4.0 +/- 2.0
-      64     |     8.0 +/- 4.0
+  Pre-Request Interval  |  Hop Limit
+  ----------------------+-----------
+       0.0 seconds      |      0
+       0.4 +/- 0.2      |      1
+       2.0 +/- 1.0      |      2
+       2.0 +/- 1.0      |      4
+       2.0 +/- 1.0      |      8
+       4.0 +/- 2.0      |     16
+       4.0 +/- 2.0      |     32
+       8.0 +/- 4.0      |     64
 .fi
 .KE
 
