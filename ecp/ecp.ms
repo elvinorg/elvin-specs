@@ -390,6 +390,8 @@ struct ClstNotify {
   id32 server_id;
   id32 client_id;
   NameValue attributes[];
+  id64 secure_matches[];
+  id64 insecure_matches[];
   boolean deliver_insecure;
   Keys nfn_keys;
 };)m4_dnl
