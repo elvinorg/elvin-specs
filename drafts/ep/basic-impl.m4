@@ -296,24 +296,20 @@ and return the resulting string value.
 m4_dnl
 m4_heading(4, Comparison Strength)
 .LP
-There are four "strengths" of comparison defined for Unicode
-characters: identical, primary, secondary and tertiary.  Three string
-functions are defined to perform conversions to the non-default
-strengths prior to comparison (the default strength is identical):
-.IP "primary(string)" 4
-Return a string value containing the primary characteristics of the
-supplied string.  The primary characteristic of a Unicode character
-is its base character, stripped of case and accents.
-.IP "secondary(string)" 4
-Return a string value containing the secondary characteristics of the
-supplied string.  Secondary characteristics retain accents, but strip
-case.
-.IP "tertiary(string)" 4
-Return a string value containing the tertiary characteristics of the
-supplied string.  Strings which differ only in tertiary
-characteristics, are identical save for their bitwise representation:
-they have the same base character, case and accents.  Importantly,
-embedded control characters are stripped during tertiary conversion.
+Unicode defines four levels of comparison, in which equivalence of any
+two strings depends on the comparison level and the locale, as well as
+the strings themselves [UNICODE]. Because the locale of a notification
+is not available to an Elvin router, locale-dependent comparisons are
+not appropriate.
+
+Unicode also defines a mapping from each character to a form of that
+same character in a canonical case, known as folded case, which is
+typically the same as lower case for characters with case (note that
+most characters have only one case form). Folded case is largely
+independent of locale, with only a very small number of exceptions.
+
+The string function "fold-case(string)" is provided to transform strings
+to folded case and allow case-insensitive string comparison.
 m4_dnl
 m4_heading(3, Numeric predicates)
 
