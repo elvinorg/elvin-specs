@@ -12,6 +12,8 @@ All packets in the protocol share a common packet header, which is
 extended by some packet types to hold additional data.
 
 m4_pre(`
+ 0                   1                   2                 3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 0 1 2
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
 | Ver |   Type  |     Flags     |          Incarnation          |
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
@@ -295,6 +297,8 @@ specify that actual length, not the packed length.
 
 m4_changequote([,])m4_dnl
 m4_pre([
+ 0                   1                   2                 3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 0 1 2
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
 | Ver |   Type  |     Flags     |          Incarnation          |
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
@@ -323,6 +327,8 @@ sequentially by the sequencer.
 
 m4_changequote([,])m4_dnl
 m4_pre([
+ 0                   1                   2                 3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 0 1 2
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
 | Ver |   Type  |     Flags     |          Incarnation          |
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
@@ -381,6 +387,8 @@ members, on 16 bit boundaries, packed to 32 bits.
 
 m4_changequote([,])m4_dnl
 m4_pre([
+ 0                   1                   2                 3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 0 1 2
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
 | Ver |   Type  |     Flags     |          Incarnation          |
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
