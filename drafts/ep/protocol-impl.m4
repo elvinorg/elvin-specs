@@ -1,14 +1,20 @@
 m4_heading(1, PROTOCOL IMPLEMENTATION)
 
-m4_heading(2, Layering and Modules)
-m4_heading(3, Marshalling)
-m4_heading(3, Security)
-m4_heading(3, Transport)
+The abstract protocol described in the previous section may be
+implemented by multiple concrete protocols.  The concrete protocols
+used to establish a connection can be specified at run time, and
+selected from the intersection of those offered by the client and
+server-side implementations.
 
-m4_heading(2, Interoperability)
-m4_heading(3, Server Discovery)
-m4_heading(3, Protocol Selection)
-m4_heading(3, Server Features)
+m4_heading(2, Layering and Modules)
+
+A connection supporting the Elvin protocol can be comprised of
+multiple, layered components, referred to as protocol modules.  These
+modules are layered to form a protocol stack, providing a connection
+over which the abstract protocol packets are carried.
+
+The combined stack must provide marshalling, security and data
+transport facilities.
 
 m4_heading(2, Standard Protocol)
 
