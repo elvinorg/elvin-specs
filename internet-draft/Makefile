@@ -1,5 +1,5 @@
 ################################################################
-# Copyright (C) DSTC Pty Ltd (ACN 052 372 577) 1998
+# Copyright (C) DSTC Pty Ltd (ACN 052 372 577) 1998-1999.
 # All Rights Reserved.
 #
 # The software contained on this media is the property of the
@@ -26,7 +26,7 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/internet-draft/Attic/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.1 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.2 $
 #
 ################################################################
 
@@ -45,6 +45,6 @@ macros: macros.m4
 	nroff -ms $< | ./fix.pl | sed 's/_//g'  > $@
 
 %.ms : %.m4
-	m4 $< > $@
+	m4 -P $< > $@
 
 ################################################################
