@@ -3,6 +3,8 @@ m4_include(rlm-header.m4)m4_dnl
 
 .ce
 Reliable Local Multicast
+.ce
+__file
 
 .ti 0
 Status of this Memo
@@ -15,22 +17,10 @@ Official Protocol Standards" (STD 1) for the standardization state and
 status of this protocol.  Distribution of this memo is unlimited.
 
 .ti 0
-Copyright Notice
-
-.in 3
-Copyright (C) The Internet Society (yyyy).  All Rights Reserved.
-
-
-.ti 0
 ABSTRACT
 
 .in 3
 This document describes the a reliable local-area multicast protocol.
-
-.ti 0
-TABLE OF CONTENTS
-
-(tdb) (probably last ;-)
 
 .bp
 
@@ -60,33 +50,38 @@ Fax:    +617 3365 4311
 Email:  elvin@dstc.edu.au
 .fi
 .KE
+.bp
 
-.KS
-m4_heading(1, FULL COPYRIGHT STATEMENT)
+m4_heading(1, Full Copyright Statement)
 
-Copyright (C) The Internet Society (yyyy).  All Rights Reserved.
+Copyright (C) 2000-__yr DSTC Pty Ltd, Brisbane, Australia.
 
-This document and translations of it may be copied and furnished to
-others, and derivative works that comment on or otherwise explain it
-or assist in its implmentation may be prepared, copied, published and
-distributed, in whole or in part, without restriction of any kind,
-provided that the above copyright notice and this paragraph are
-included on all such copies and derivative works.  However, this
-document itself may not be modified in any way, such as by removing
-the copyright notice or references to the Internet Society or other
-Internet organizations, except as needed for the purpose of
-developing Internet standards in which case the procedures for
-copyrights defined in the Internet Standards process must be
-followed, or as required to translate it into languages other than
-English.
+All Rights Reserved.
 
-The limited permissions granted above are perpetual and will not be
-revoked by the Internet Society or its successors or assigns.
+This specification may be reproduced or transmitted in any form or by
+any means, electronic or mechanical, including photocopying,
+recording, or by any information storage or retrieval system,
+providing that the content remains unaltered, and that such
+distribution is under the terms of this licence.
 
-This document and the information contained herein is provided on an
-"AS IS" basis and THE INTERNET SOCIETY AND THE INTERNET ENGINEERING
-TASK FORCE DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING
-BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE INFORMATION
-HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES OF
-MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE."
-.KE
+While every precaution has been taken in the preparation of this
+specification, DSTC Pty Ltd assumes no responsibility for errors or
+omissions, or for damages resulting from the use of the information
+herein.
+
+DSTC Pty Ltd welcomes comments on this specification.  Please address
+any queries, comments or fixes (please include the name and version of
+the specification) to the address below:
+
+.nf
+    DSTC Pty Ltd
+    Level 7, General Purpose South
+    University of Queensland
+    St Lucia, 4072
+    Tel: +61 7 3365 4310
+    Fax: +61 7 3365 4311
+    Email: elvin@dstc.com
+.fi
+
+Elvin is a trademark of DSTC Pty Ltd.  All other trademarks and
+registered marks belong to their respective owners.

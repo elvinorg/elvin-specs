@@ -13,7 +13,8 @@
 .hy 0
 .ad l
 .in 0
-Network Working Group                                          D. Arnold
-Internet Draft                                                   J. Boot
-Category: Informational                                             DSTC
-                                                             dd mmm yyyy
+Elvin Project                                                  D. Arnold
+Preliminary INTERNET-DRAFT                                       J. Boot
+                                                                    DSTC
+Expires: aa bbb cccc                                         _d __m __yr  
+                                                             

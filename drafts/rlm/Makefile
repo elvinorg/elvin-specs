@@ -26,16 +26,32 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/rlm/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.1 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.2 $
 #
 ################################################################
 
 .PHONY: all macros outline
 
-#  create date string
-mmm=$(shell date | cut -b5-7)
-dd=$(shell date | cut -b9-10)
-yyyy=2001
+FILENAME := draft-arnold-reliable-local-multicast
+VERSION := prelim-01
+
+SOURCE_FILES:= $(wildcard *.ms)
+
+PUBLISHED := $(FILENAME)-$(VERSION).txt
+
+DATE := $(shell date +"%B %Y")
+YEAR := $(shell date +"%Y")
+MTH := $(shell date +"%b")
+DAY := $(shell date +"%e")
+
+EXP=$(shell date -d "6 months" "+%d %b %Y")
+
+M4FLAGS := \
+	-D__file="$(PUBLISHED)" \
+	-D__yr="$(YEAR)" \
+	-D__date="$(DATE)" \
+	-D__m="$(MTH)" \
+	-D_d="$(DAY)"
 
 all: main.txt
 
@@ -47,23 +63,22 @@ outline.txt: main.ms
 main.txt: main.ms
 
 main.ms: *.m4
-	m4 -I.. -P main.m4 > $@
+	m4 $(M4FLAGS) -I.. -P main.m4 > $@
 
 clean:
 	rm -f main.txt main.ms
 
+publish: $(PUBLISHED)
+
+$(PUBLISHED): main.txt
+	sed -e 's/aa bbb cccc/${EXP}/g' $^ > $@
+
 ################################################################
 
 %.txt : %.ms
-	nroff -ms $< | ../fix.pl | sed -e 's/_//g' -e 's/.//g' -e 's/dd mmm/${dd} ${mmm}/g' -e 's/yyyy/${yyyy}/g'  > $@
+	nroff -ms $< | ../fix.pl | sed -e 's/_//g' -e 's/.//g'  > $@
 
 %.ms : %.m4
 	m4 -P $< > $@
-
-################################################################
-
-install: main.txt
-	cp main.txt ../draft-arnold-reliable-local-multicast-00.txt
-
 
 ################################################################
