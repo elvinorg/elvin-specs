@@ -11,7 +11,6 @@ is defined in this section.  The subscription language syntax and
 semantics are considered part of the protocol: all servers supporting
 a particular protocol version will understand the same subscription
 language.  There is no provision for alternative languages.
-.KE
 
 A consumer client registers a subscription expression that the server
 evaluates on its behalf for each message delivered to the server. If
