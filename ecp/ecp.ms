@@ -346,7 +346,7 @@ struct JoinRply {
   }  subscriptions[];
 };)m4_dnl
 
-m4_heading(3, Leave Request)
+m4_heading(3, Leave )
 
 Unicast request to the cluster controller to leave a previously joined
 cluster.  This SHOULD be generated when the server is locally
@@ -357,7 +357,7 @@ packets, followed by a Shutdown.  The server should send a
 ServerStatusNotify before the process terminates.
 
 m4_pre(
-struct LeaveRqst {
+struct Leave {
   id32 server_id;
 };)m4_dnl
 
