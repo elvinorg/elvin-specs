@@ -22,17 +22,72 @@ union Value {
     opaque  blob;  // binary data sequence
 };
 
-struct NameValue{
-    String  name;
+struct NameValue {
+    string  name;
     Value   value;
 };
 
-struct SubAST {
-   int32  type;
-   union {
-       SubAST[] children;
-       Value    leaf;
-   };
+struct SubASTNode {
+    SubAST[] children;
+};
+
+struct SubASTName {
+    int32 flags;
+    string name;
+};
+
+union SubAST {
+    int32 i32;
+    int64 i64;
+    real64 r64;
+    string str;
+    string regular_expression;
+
+    SubASTName name;
+    SubASTNode equals;
+    SubASTNode not_equals;
+    SubASTNode less_than;
+    SubASTNode less_than_equals;
+    SubASTNode greater_than;
+    SubASTNode greater_than_equals;
+
+    SubASTNode or;
+    SubASTNode xor;
+    SubASTNode and;
+    SubASTNode not;
+
+    SubASTNode unary_plus;
+    SubASTNode unary_minus;
+    SubASTNode times;
+    SubASTNode divide;
+    SubASTNode modulo;
+    SubASTNode plus;
+    SubASTNode minus;
+
+    SubASTNode shift_left;
+    SubASTNode shift_right;
+    SubASTNode logical_shift_right;
+    SubASTNode bit_and;
+    SubASTNode bit_xor;
+    SubASTNode bit_or;
+    SubASTNode bit_negate;
+
+    SubASTNode is_int32;
+    SubASTNode is_int64;
+    SubASTNode is_real64;
+    SubASTNode is_string;
+    SubASTNode is_opaque;
+    SubASTNode is_nan;
+
+    SubASTNode begins_with;
+    SubASTNode contains;
+    SubASTNode ends_with;
+    SubASTNode wildcard;
+    SubASTNode regex;
+
+    SubASTNode exists;
+    SubASTNode equals;
+    SubASTNode size;
 };')m4_dnl
 
 .KE
