@@ -475,6 +475,15 @@ m4_heading(3, Quench Add Request)
 Sent by clients to the Elvin server.  Requests notification of
 subscriptions referring to the specified attributes.
 
+
+m4_pre(
+struct DropWarn {
+};)m4_dnl
+
+Sent by servers to clients to indicate that notification packets have
+been dropped.
+
+
 m4_pre(
 struct QnchAddRqst {
     id32 xid;

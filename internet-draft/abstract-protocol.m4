@@ -38,6 +38,7 @@ Subscription Add Request      SubAddRqst      C -> S    U    B
 Subscription Modify Request   SubModRqst      C -> S    U    B
 Subscription Delete Request   SubDelRqst      C -> S    U    B
 Subscription Reply            SubRply         S -> C    U    B
+Dropped Packet Warning        DropWarn        S -> C    U    B
 Quench Add Request            QnchAddRqst     C -> S    U    C
 Quench Modify Request         QnchModRqst     C -> S    U    C
 Quench Delete Request         QnchDelRqst     C -> S    U    C

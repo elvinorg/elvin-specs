@@ -248,6 +248,18 @@ subscription is removed.
                                    SUBSCRIPTION DELETE NOTIFICATION
 .KE
 
+The server may choose to drop notification packets (NotifyEmit, SubAddNotify,
+SubModNotify, SubDelNotify) packets if a client is not receiving them
+quickly enough.  If this happens, the server is obliged to send a
+DropWarn packet to the client in place of the notification, indicating
+that one or more notification packets were dropped.
+
+.KS
+   +----------+                 +--------+
+   | Consumer | <---DropWarn--- | Server |   DROPPED PACKET WARNING
+   +----------+                 +--------+
+.KE
+
 At any time after a successful Connection Reply, the server can inform
 the client that it is to be disconnected.  The Disconn packet includes
 an explanation for the disconnection, and optionally, directs the
