@@ -1,5 +1,24 @@
 m4_heading(1, INTRODUCTION)
 
+
+- undirected
+  - sometimes unicast, sometimes multicast
+    - adaptive overlay routing
+- routed by subscription to content
+  - structured content
+  - no transparent encryption
+
+- app/router protocol
+- router/router protocol
+- app api
+  - assumption of app, not host, will need justification
+
+
+- coordination of decoupled components
+- descriptive, not communicative
+
+
+
 Undirected communication, where the sender is unaware of the identity,
 location or even existence of the receiver, is not currently provided
 by the Internet protocol suite.  This style of messaging, also called
@@ -63,10 +82,4 @@ match criteria supplied by the quencher.
 
 Clients MAY take any number of the producer, consumer and quencher
 roles concurrently.
-m4_dnl
-m4_heading(2, Notation Conventions)
-
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
-"SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
-document are to be interpreted as described in RFC 2119.
 
