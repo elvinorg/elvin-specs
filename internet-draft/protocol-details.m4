@@ -365,7 +365,7 @@ struct UNotify {
 
 m4_heading(3, Negative Acknowledgement)
 
-Within the context of a session, most requests MAY return a Negative
+Within the context of a session, many requests can return a Negative
 Acknowledgement to indicate that although the server understood the
 request, there was an error encountered performing the requested
 operation.
@@ -373,30 +373,64 @@ operation.
 m4_pre(
 struct Nack {
     id32 xid;
-    id32 error;
+    int16 error;
     string message;
     Value args[]
 };)m4_dnl
 
-The error value is structured in two components: a general category
-that indicates what action should be taken by the client, and a
-specific error number that identifies the problem.
+The error field is a decimal value structured into ranges with a
+general category that indicates what action should be taken by the
+client, and a specific error number that identifies the problem.
+Clients MUST handle error values according to their category, and
+SHOULD present meaningful information to the application derived from
+the defined error values.
 
-Three categories of action are defined:
+Clients MAY interpret implementation specific error codes, on the
+basis of server identity determined during connection negotiation.
+Unrecognised codes MUST be reported using the undefined category error
+(ie. value x000).
+
+Receiving a reserved error code SHOULD be handled as a protocol error.
 
 .KS
 .nf
-  Error  |  Action Required
-  -------+---------------------------------------
-   0xxx  |  Handle a failed connection attempt
-   1xxx  |  Handle closure of existing connection
-   2xxx  |  Handle failure of requested operation
+   Error Code  |  Meaning / Action
+  -------------+-----------------------------------------------------
+      0        |  Undefined error establishing a connection
+      1        |  Protocol version mismatch in ConnRqst
+      2        |  Authorisation failure
+      3        |  Authentication failure
+      4-  499  |  (Reserved)
+    500-  999  |  (Impl-specific connection establishment error)
+   1000        |  Undefined protocol error; requires connection abort
+   1001        |  Protocol error
+   1002        |  No such subscription
+   1003        |  No such quench
+   1004        |  Bad keys scheme
+   1005        |  Bad keyset index
+   1006- 1499  |  (Reserved)
+   1500- 1999  |  (Impl-specific error, requires connection abort)
+   2000        |  Undefined error with request
+   2001        |  No such key
+   2002        |  Key exists
+   2003        |  Bad key
+   2004        |  Nothing to do
+   2005- 2100  |  (Reserved)
+   2101        |  Subscription parse error
+   2102        |  Subscription invalid token
+   2103        |  Subscription unterminated string
+   2104        |  Subscription unknown function
+   2105        |  Subscription overflow
+   2106        |  Subscription type mismatch
+   2107        |  Subscription too few arguments
+   2108        |  Subscription too many arguments
+   2109        |  Subscription invalid regular expression
+   2110- 2499  |  (Reserved)
+   2500- 2999  |  (Implementation-specific operation failure)
+   3000-65535  |  (Reserved)
 .fi
 .KE
 
-An error value outside these ranges MUST be treated as a protocol
-error.  An implementation MAY define specific error codes within these
-categories, specifying in more detail the nature of the problem.
 
 The message field is a Unicode string template containing embedded
 tokens of the form %n, where n is an index into the args array.  When
