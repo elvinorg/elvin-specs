@@ -228,7 +228,17 @@ connection to the server in question.
 
 The management protocol provides a number of operations.
 
-m4_heading(3, Go Standby)
+m4_heading(3, Activate)
+
+A standby server process may be made active by sending this message.
+The server begins to accept client connections.
+
+m4_pre(
+struct Activate {
+  int32 xid;
+};)m4_dnl
+
+m4_heading(3, Standby)
 
 A server process operates in two modes: active, or standby.  A standby
 server remains an active process, and continues to process management
@@ -246,19 +256,9 @@ alternative server.  If the redirection string is zero-length, clients
 MUST NOT be redirected
 
 m4_pre(
-struct GoStandby {
+struct Standby {
   int32  xid;
   string redirection;
-};)m4_dnl
-
-m4_heading(3, Go Active)
-
-A standby server process may be made active by sending this message.
-The server begins to accept client connections.
-
-m4_pre(
-struct GoActive {
-  int32 xid;
 };)m4_dnl
 
 m4_heading(3, Restart)
