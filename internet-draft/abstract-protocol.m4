@@ -500,7 +500,8 @@ struct SecRply {
 
 m4_heading(3, Notification Emit)
 
-Sent by client to the Elvin server. 
+Sent by client to the Elvin server.  The attributes array MUST NOT be
+empty; an empty attributes array is a protocol error.
 
 m4_pre(
 struct NotifyEmit {
