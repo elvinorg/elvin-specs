@@ -179,43 +179,51 @@ m4_heading(2, Packet Types)
 m4_heading(2, Management Packets)
 
 Remote management of an Elvin server is implemented using a secure
-connection to the server in question.  The management protocol
-provides a number of operations.
+connection to the server in question.  
 
-m4_heading(3, Go Idle)
+.nf
+*** Is this true?  do we want all mgmt operations to be
+*** point-to-point, or should they be multicast?  If they are
+*** multicast, can they affect multiple servers at once?  how?
 
-A server process operates in two modes: active, or idle.  An idle
+*** i'm assuming for the moment that these packets are unicast, and
+*** generate an Ack/Nack reply.
+.fi
+
+The management protocol provides a number of operations.
+
+m4_heading(3, Go Standby)
+
+A server process operates in two modes: active, or standby.  A standby
 server remains an active process, and continues to process management
 requests, but it suspends any activity via the Elvin client protocol.
 This is used to provision servers for periods of greater activity, in
 a hot-standby role for reliability, etc.
 
-The Go Idle message forces a server from active, into idle mode.  Any
-clients currently connected to the server are disconnected and no
+The Go Standby message forces a server from active into standby mode.
+Any clients currently connected to the server are disconnected and no
 further connections are accepted.
 
-The Go Idle packet MAY include a redirection specification, allowing
-the server to direct connected clients to a specific alternative
-server.  If the redirection string is zero-length, clients MUST NOT be
-redirected
+The Go Standby packet MAY include a redirection specification,
+allowing the server to direct connected clients to a specific
+alternative server.  If the redirection string is zero-length, clients
+MUST NOT be redirected
 
 m4_pre(
-struct GoIdle {
+struct GoStandby {
   int32  xid;
-  string server;
   string redirection;
 };)m4_dnl
 
 m4_heading(3, Go Active)
 
-An idle server process may be made active by sending this message.
+A standby server process may be made active by sending this message.
+The server begins to accept client connections.
 
 m4_pre(
 struct GoActive {
   int32 xid;
-  string server;
 };)m4_dnl
-
 
 m4_heading(3, Restart)
 
@@ -227,20 +235,121 @@ current process.
 m4_pre(
 struct Restart {
   int32 xid;
-  string server;
 };)m4_dnl
-
 
 m4_heading(3, Shutdown)
 
 Shut down the server.  Once a server has been shut down, it cannot be
-restarted by the cluster controller.
+restarted by a cluster controller.
 
 m4_pre(
 struct Shutdown {
   int32 xid;
-  string server;
 };)m4_dnl
+
+m4_heading(3, Cluster Request)
+
+On startup, a server's configuration file can direct it to attempt
+connection to a cluster.  Clusters are identified by a string scope
+name.  The server uses this packet, multicast to the server discovery
+address, to find the cluster controller.
+
+.nf
+*** this must be changed for drop 3
+.fi
+
+The packet requests that the cluster controller allocate the server an
+identifier, and supply its address for further operations.
+
+.nf
+*** i'm not sure whether we need to xid here.  is it possible that we
+*** could have multiple, *different* scoped requests getting a reply
+*** to our unicast address at any one time?  to be really safe, i've
+*** left it in, but ...
+.fi
+
+m4_pre(
+struct ClusterRqst {
+  int32 xid;  
+  string scope;
+};)m4_dnl
+
+The cluster controller MUST respond with a unicast Cluster Reply or no
+reply at all.
+
+m4_heading(3, Cluster Reply)
+
+A unicast response from the cluster controller to a server.  Includes
+the cluster controller's preferred unicast address for further
+interaction.
+
+m4_pre(
+struct ClusterRply {
+  int32 xid;
+  string address;
+};)m4_dnl
+
+m4_heading(3, Join Request)
+
+Unicast request to the cluster controller to join its managed cluster.
+
+m4_pre(
+struct JoinRqst {
+  int32 xid; 
+};)m4_dnl
+
+m4_heading(3, Join Reply)
+
+Unicast reply to a server requesting entry to a cluster.  Includes the
+server's unique identifier.
+
+m4_pre(
+struct JoinRply {
+  int32 xid;
+  int32 server_id;
+};)m4_dnl
+
+m4_heading(3, Subscription Database Request)
+
+Unicast request to the cluster controller for a copy of the current
+subscription database for the cluster.
+
+m4_pre(
+struct SubDBRqst {
+  int32 xid;
+};)m4_dnl
+
+m4_heading(3, Subscription Database Reply)
+
+Unicast reply to a server from the cluster controller.
+
+m4_pre(
+struct SubDBRply {
+  int32 xid;
+  struct {
+    int32 client_id;
+    opaque keys[];
+    struct {
+      int64 sub_id;
+      string sub_expr;
+      int32 accept_insecure;
+      opaque keys[];    
+    }  subscriptions[];
+  }  clients[];
+};)m4_dnl
+
+
+m4_heading(3, FedNotifyEmit)
+m4_heading(3, FedNotifyDeliver)
+m4_heading(3, FedSubAdd)
+m4_heading(3, FedSubMod)
+m4_heading(3, FedSubDel)
+
+
+.nf
+*** from here on is a bit crap
+.fi
+
 
 
 
