@@ -1,7 +1,7 @@
 m4_dnl
 m4_dnl macros for easier nroff editting
 m4_dnl
-m4_dnl $Id: macros.m4,v 1.5 2001/06/28 13:07:19 julian Exp $
+m4_dnl $Id: macros.m4,v 1.6 2001/12/31 04:51:22 arnold Exp $
 m4_dnl
 m4_dnl MACRO FOR THE DEFAULT INDENTATION
 m4_dnl
@@ -36,4 +36,3 @@ $*
 .fi
 </FIXME>')m4_dnl
 m4_dnl m4_define(m4_remark, `')m4_dnl
-
