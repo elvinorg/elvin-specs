@@ -144,32 +144,125 @@ NOT be used.
 .KE
 m4_heading(3, Server Request)
 
+Clients MAY and servers SHOULD implement this automatic server
+discovery mechanism.
+
+The client-side of the discovery protocol has two modes of operation:
+passive and active.  During passive discovery, a client caches, for
+possible future use, server advertisements as observed on the
+multicast channel(s).  During active discovery, clients publicly
+solict advertisements from servers.  Clients SHOULD implement active
+discovery and MAY add passive discovery for better performance and
+network utilisation.
+
 A client MAY request that servers advertise their available endpoints
-by multicasting a Server Request.  
-
-All attempts to send a Sever Request MUST be delayed by a random
-period of between zero (0) and five (5) seconds.  If any Server
-Request packets (from other clients) are observed during this time,
-the client MUST cancel its own pending request.
-
-If a client observes any Server Advertisements during the startup
-period, it SHOULD attempt to connect to them immediately.
-
-A client MUST NOT send a Server Request more than once in any twenty
-(20) second period.
+by multicasting a ServerRequest.  This is called active discovery.  A
+client program SHOULD NOT commence active discovery unless it is
+necessary to satisfy a connection request from the application.
 
 m4_pre(
 struct SvrRqst {
   uint8  major;
   uint8  minor;
-  uint8  initial_ttl;    
+  uint8  hop_limit;
 };)m4_dnl
+
+Clients and servers MUST discard SvrRqst packets with incompatible
+protocol version numbers.  Protocols are compatible when major version
+numbers are the same, and the client's minor version is equal to or
+less than the minor version of the advertisement.
+
+To control the propagation of SvrRqst packets, the scoping mechanism
+of the underlying protocol SHOULD be used.  This is expressed as a hop
+limit whose range of values are mapped onto the underlying multicast
+protocol.  
+
+IPv4 multicast MUST use the hop limit setting directly to set the IP
+header TTL field.  IPv6 multicast MUST use the following table to
+translate hop limit values to multicast scope:
+
+.KS
+.nf
+  Hop Limit  |  IPv6 Scope (and Name)
+  -----------+---------------------------------
+       0     |      1      (node)
+       1     |      2      (link-local)
+     2-15    |      5      (site-local)
+    16-32    |      8      (organisation-local)
+   33-255    |     14      (global)
+.fi
+.KE
+
+Other protocols SHOULD interpret this value as appropriate.
+
+SvrRqst packets MUST have an initial hop limit between 0 and 15, and
+SHOULD default to zero.  Values used SHOULD come from the set defined
+below.
+
+.KS
+.nf
+  Hop Limit  |  Minimum Interval
+  ------------------------------------
+       0     |     0.4 +/- 0.2 seconds
+       1     |     2.0 +/- 1.0
+       2     |     2.0 +/- 1.0
+       4     |     2.0 +/- 1.0
+       8     |     4.0 +/- 2.0
+      16     |     4.0 +/- 2.0
+      32     |     4.0 +/- 2.0
+      64     |     8.0 +/- 4.0
+.fi
+.KE
+
+For a given hop limit, the waiting period before sending the next
+SvrAdvt MUST NOT be less than the intervals defined above, and the
+variation from the base value MUST be determined randomly for each
+packet sent.
+
+This serves to reduce the number of SvrRqst/SvrAdvt packets sent
+following loss of a server.  Note that the interval prior to the
+initial packet can be zero.
+
+If a compatible SvrRqst from another client with equal or greater hop
+limit than that to be used for the next SvrRqst is observed during the
+inter-request interval, at the expiry of the current interval, sending
+of the SvrRqst MUST be suppressed. The timer for the subsequent
+interval MUST be started as normal.
+
+If one or more compatible SvrAdvt packets are received in the interval
+following a SvrRqst, sending subsequent SvrRqst packets MUST be
+suppressed, but the next interval timer MUST be started.  If the
+client fails to connect to these server endpoints, discovery MUST
+recommence at the next hop limit and interval at the expiry of the
+timer or when this failure is determined, whichever occurs later.
+
+If the client succeeds in connecting, the hop limit and interval MUST
+be reset to their initial values.
+
+A single discovery agent MAY be shared by multiple Elvin protocol
+clients.  In this case, active discovery MAY continue when one client
+has connected, but one (or more) others still require a compatible
+server.  However, the hop limit and interval timing MUST continue to
+follow the normal pattern; an external observer MUST NOT be able to
+determine that multiple connections are being sought.
+
+Note that a SvrRqst from a downstream client can cause the suppression
+of a client's own SvrRqst with the same hop limit, even though the
+downstream SvrRqst's hop limit is exhausted, thus preventing the
+client's SvrRqst from reaching an upstream server that is within that
+hop limit.  However, either of the two client's next SvrRqst (with
+higher hop limit) will reach the server, and while the immediate
+client loses one interval period, it has no permanent impact.  This
+could be avoided by allowing the client to compare the hop limit with
+the current hop count in the packet, but this is even more
+protocol-specific, and not supported by IPv4 APIs anyway.
 
 m4_heading(3, Server Advertisement)
 
-Servers MUST respond to a SvrRqst with a multicast Server
-Advertisement, but MUST NOT send SvrAdvt more often than once every
-five (5) seconds.
+Servers SHOULD implement server discovery.  A Server Advertisement
+packet SHOULD be sent when the server is started, and MUST be sent
+response to SvrRqst packets received from clients, but MUST NOT be
+sent more often than once every five seconds.
 
 m4_pre(
 struct SvrAdvt {
@@ -180,22 +273,35 @@ struct SvrAdvt {
   string   scope;
   boolean  default;
   string   urls[];
-};)m4_dnl
+};)m4_pre
 
-The returned major and minor version numbers MUST reflect the protocol
-version of the reply packet.  Where a server is capable of using
-multiple protocol versions, this MUST be reflected in the endpoint
-URLs, and the SvrAdvt message MUST use the client's protocol version.
+Server Advertisements specify the version of the Elvin protocol which
+defines their content.  A SvrAdvt sent in response to a SvrRqst MUST
+use a compatible protocol version.  Where a server is capable of using
+multiple protocol versions, this can be reflected in the endpoint
+URLs.  Clients and servers MUST discard SvrAdvt packets with
+incompatible protocol versions.
 
-The SvrAdvt includes a server name that MUST be globally unique.  It
-is RECOMMENDED that the fully-qualified DNS host name, server process
-number and a random integer value be used to prevent collisions.
+The advertising server is identified by a string name.  Servers MUST
+ensure this name is universally unique over time.  It is RECOMMENDED
+that the combination of the Elvin server's process identifier,
+fully-qualified domain name and starting timestamp are used.  
 
-The revision number distinguishes between advertisements from the same
-server reflecting changes in the available protocols.  As a server's
-configuration is altered (at runtime), the advertisement version
-number MUST be incremented.  This allows clients to discard duplicate
-advertisements quickly.
+Clients can identify subsequent advertisements from the same server
+using the value of this string.  The comparison MUST use bitwise
+identity: although the value is Unicode text, character
+characteristics or composition MUST NOT be used in the comparison.
+After the first observed SvrAdvt from a server, additional
+advertisements SHOULD be discarded unless the revision number has
+changed.
+
+The revision number distinguishes advertisements from the same server,
+reflecting changes in the available protocols.  A server MAY change
+the URLs supplied in the advertisement without modifying the revision
+number as a means of influencing the endpoints used by connecting
+clients.  However, if an endpoint is withdrawn, the server's supported
+scope or the value of is_default are altered, the revision number
+SHOULD be increased to update client's caches.
 
 The scope name must be the string scope name for the server.  An empty
 scope name is allowed.  If this scope has been configured to be the
@@ -207,28 +313,43 @@ Where the limitations of the underlying concrete protocol prevent
 this, the server cannot advertise all its endpoints.  Each SvrAdvt
 MUST contain at least one URL.
 
-Clients SHOULD maintain a cached list of all endpoint URLs it has seen
-announced.  If available, this list MUST be used to attempt connection
-before sending a SvrRqst.  Cached URLs MUST be replaced by those in a
-subsequent advertisement with higher version number from the same
-server.  URLs cached for a given server SHOULD be flushed after eight
-(8) observed SvrRqst/SvrAdvt cycles that have not included a SvrAdvt
-from that server.
+Note that the URLs included in a SvrAdvt MAY specify multiple protocol
+versions if the advertising server is capable of supporting this.  The
+version information in the SvrAdvt body does not imply that the server
+necessarily supports that protocol version alone, or indeed at all.
 
+The protocol-specific scope limit of the initial SvrAdvt packet SHOULD
+be configured in the server configuration parameters and MUST NOT
+exceed 64.  SvrAdvt packets sent in response to a SvrRqst MUST set the
+protocol-specific scope limit to the hop limit in the received
+SvrRqst.  A server MUST remember the highest hop limit value it has
+sent for use when withdrawing its advertisement.
+ 
 m4_heading(3, Server Advertisement Close)
 
 A server shutting down SHOULD send a Server Advertisement Close
 message.
 
-m4_pre(
 struct SvrAdvtClose {
   uint8    major;
   uint8    minor;
   string   server;
-};)m4_dnl
+}
 
-Caching clients MUST monitor such messages and remove all endpoints for
-the specified server from their cache.
+Clients and servers MUST discard SvrAdvtClose packets with
+incompatible protocol version numbers.  Servers that have sent SvrAdvt
+messages using multiple protocol versions SHOULD send a SvrAdvtClose
+in each of those protocol versions.
+
+The protocol-specific scope limit of the SvrAdvtClose packet MUST be
+set to the highest value sent in a SvrAdvt during the lifetime of the
+server process.  This ensures that the withdrawal notice reaches all
+passive discovery clients that might have a cached copy of the
+server's advertisement.
+
+Passive discovery clients MUST monitor such messages and remove all
+advertisements for the specified server (as determined by the server
+identification string) from their cache.
 
 m4_heading(3, Unreliable Notification)
 
