@@ -19,11 +19,11 @@ concrete implementation for IP-based networks (section x.x)
 A client MAY request that servers advertise their available endpoints
 prior to establishing a connection, by multicasting a Server Request.
 Attempts to send a SvrRqst MUST be delayed by a random time of between
-zero (0) and five (5) seconds after process startup.  If any SrvRqst
+zero (0) and five (5) seconds after process startup.  If any SvrRqst
 packets (from other clients) are observed during this time, the client
 MUST cancel its own pending request.
 
-If a client observes any Server Advertisments during the startup
+If a client observes any Server Advertisements during the startup
 period, it SHOULD attempt to connect to them immediately.
 
 A SvrRqst MUST NOT be sent more than once in any twenty (20) second
@@ -43,7 +43,7 @@ struct SvrAdvt {
   uint8    major;        /* major version for *this packet* */
   uint8    minor;        /* minor version for *this packet* */
   string   server;       /* unique name for server */
-  uint32   version;      /* version of configuration advertised */
+  uint32   revision;     /* revision of configuration advertised */
   string   urls[];       /* set of URLs for server (with properties) */
 };)m4_dnl
 
@@ -56,7 +56,7 @@ The SvrAdvt includes a server name that MUST be globally unique.  It
 is RECOMMENDED that the fully-qualified DNS host name, server process
 number and starting time-of-day be used to prevent collisions.
 
-The version number distinguishes between advertisements from the same
+The revision number distinguishes between advertisements from the same
 server reflecting changes in the available protocols.  As a server's
 configuration is altered (at runtime), the advertisement version
 number MUST be incremented.  This allows clients to discard duplicate
