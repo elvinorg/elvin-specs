@@ -4,7 +4,7 @@ m4_dnl
 m4_dnl              Tickertape Message Format Specification
 m4_dnl
 m4_dnl File:        $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/ticker/main.m4,v $
-m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.8 $
+m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.9 $
 m4_dnl Copyright:   (C) 2001-2002, David Arnold.
 m4_dnl
 m4_dnl This specification may be reproduced or transmitted in any form or by
@@ -320,7 +320,7 @@ interpretation are possible.
 Future standardisation of the semantics of this attribute is likely.
 T}
 
-Attachment;opaque;T{
+MIME-Attachment;opaque;T{
 A MIME-encoded addition to the message.  Multiple attached objects
 SHOULD be encoded using the multipart/mixed MIME type.
 
@@ -379,7 +379,7 @@ message, can be either empty or misleading.
 .\"
 m4_heading(2, `Attachments')
 
-The optional use of the 'Attachment' attribute to deliver a
+The optional use of the 'MIME-Attachment' attribute to deliver a
 MIME-encoded object allows arbitrary data to be present on the
 receiver's machine.  This data can be interpreted by the client
 program, and this interpretation could involve the execution of
@@ -459,7 +459,7 @@ Work in progress
 .IP [RFC2119] 12
 S. Bradner,
 "Key words for use in RFCs to Indicate Requirement Levels"
-RFC2119, March 1997
+RFC2119, March 1997.
 
 .IP [RFC2234] 12
 D. Crocker, P. Overell, 
@@ -470,6 +470,11 @@ RFC 2234, November 1997.
 F. Yergeau,
 "UTF-8, a transformation format of ISO 10646",
 RFC 2279, January 1998.
+
+.IP [RFC2483] 12
+M. Mealling, R. Daniel, Jr,
+"URI Resolution Services Necessary for URN Resolution",
+RFC 2483, January 1999.
 
 .IP [UNICODE] 12
 Unicode Consortium, The,
@@ -559,15 +564,16 @@ Group: "Chat"
 Message: "check this out!"
 From: "Spammeister"
 Timeout: 5
-Attachment: [4d 49 4d 45 2d 56 65 72 73 69 6f 6e 3a 20 31 2e 30 0a 43
-             6f 6e 74 65 6e 74 2d 74 79 70 65 3a 20 74 65 78 74 2f 75
-             72 69 2d 6c 69 73 74 0a 0a 68 74 74 70 3a 2f 2f 77 77 77
-             2e 73 70 61 6d 72 61 64 69 6f 2e 6e 65 74 0a]
+MIME-Attachment: [4d 49 4d 45 2d 56 65 72 73 69 6f 6e 3a 20 31 2e 30
+                  0a 43 6f 6e 74 65 6e 74 2d 74 79 70 65 3a 20 74 65
+                  78 74 2f 75 72 69 2d 6c 69 73 74 0a 0a 68 74 74 70
+                  3a 2f 2f 77 77 77 2e 73 70 61 6d 72 61 64 69 6f 2e
+                  6e 65 74 0a]
 User-Agent: "Example Ticker v1.0"
 .fi
 
-The Attachment field is the most changed.  Obviously, it is now an
-opaque rather than a string -- in this example, the string value is
+The MIME-Attachment field is the most changed.  Obviously, it is now
+an opaque rather than a string -- in this example, the string value is
 
 .nf
 MIME-Version: 1.0
@@ -577,8 +583,8 @@ http://www.spamradio.net
 .fi
 
 Note especially that the format has changed to include all the MIME
-headers within the value of the Attachment field, rather than putting
-the content type and encoding as separate attributes.
+headers within the value of the MIME-Attachment field, rather than
+putting the content type and encoding as separate attributes.
 
 This makes for simpler handling using standard library facilities, and
 enables the proper use of all features from the MIME standards.
@@ -633,8 +639,8 @@ _
 .B `Attachments'
 
 The attachment of URLs to Tickertape messages was popularised using a
-form of MIME-style encoding.  Few clients supported MIME types other
-than the informal 'x-elvin/url' type.
+debased form of MIME-style encoding.  Few clients supported MIME types
+other than the informal 'x-elvin/url' type.
 .\"
 .TS 
 tab(;); 
