@@ -557,7 +557,7 @@ URL from the list.
 m4_heading(3, Elvin Router Statistics Report)
 
 m4_pre(
-struct Elvin RouterStatsReport {
+struct Elvin ServerStatsReport {
   id16 Elvin router_id;
   uint32 timestamp;
 
@@ -644,11 +644,59 @@ multicast to other Elvin routers in the cluster.
 
 m4_heading(2, Packet Encoding)
 
+m4_heading(3, Data Types)
+
 Elvin cluster packets are encoded using XDR [RFC1832] for each element
 in the packet.  This mapping is as for the standard Elvin
-client-router XDR encoding.
+client-router XDR encoding.  The following rules are used to map
+the data types used in the protocol to XDR buffers: 
 
-do some examples - the whole lot?
+.KS
+.nf
+  ---------------------------------------------------------------------
+  Elvin Type  XDR Type         Encoding Summary
+  ---------------------------------------------------------------------
+  boolean     bool             4 bytes, last byte is 0 or 1
+
+  uint8       unsigned int     4 bytes, last byte has value
+
+  id16        unsigned int     4 bytes, MSB first
+
+  id32        unsigned int     4 bytes, MSB first
+
+  id64        unsigned hyper   8 bytes, MSB first
+
+  int32       int              4 bytes, MSB first
+
+  string      string           4 byte length, UTF8 encoded string, zero 
+                               padded to next four byte boundary
+
+  byte[]      variable-        4 byte length, data, zero padded to next
+              length opaque    four byte boundary
+  ---------------------------------------------------------------------
+.fi
+.KE
+
+m4_heading(3, Encoding Arrays)
+
+All arrays in the  protocol are of variable length.  Arrays of
+objects are encoded by prepending the length of the array as an int32
+- the items are in the array are then each encoded in sequence
+starting at item 0.  The 32bit length places a theoretical limit of
+(2**32) - 1 items per list.  In practice, implementations are expected
+to have much lower maximums for the number of items in a list
+transmitted per packet.
+
+.KS
+.nf
+       0  1  2  3  
+     +--+--+--+--+--+--+--+--+--+--+--+--+...+--+--+--+--+
+     |     n     |  item 0   |  item 1   |...| item n-1  |  ARRAY
+     +--+--+--+--+--+--+--+--+--+--+--+--+...+--+--+--+--+
+     |<--int32-->|<----------------n items-------------->|
+                                                          
+.fi
+.KE
 
 m4_heading(1, Limitations)
 
