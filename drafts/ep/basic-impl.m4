@@ -102,7 +102,8 @@ fractional part.
 .KS
 Character Strings
 .IP string 10
-A UTF-8 encoded Unicode string of known length.
+A UTF-8 encoded Unicode string of known length, with no NUL (0x00)
+bytes.
 .LP
 String literals must be quoted using either the UTF-8 single or double
 quote characters.  Within the (un-escaped) quotes, a backslash

@@ -31,7 +31,7 @@ union Value {
     int32 i32;     // 4 byte signed integer
     int64 i64;     // 8 byte signed integer
     real64 r64;    // 8 byte double precision float
-    string str;    // length encoded UTF-8 Unicode string
+    string str;    // length encoded UTF-8 Unicode string; no NUL bytes
     opaque bytes;  // binary data sequence
 };
 

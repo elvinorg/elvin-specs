@@ -104,8 +104,8 @@ magic-char		= backslash DQUOTE /
 			  backslash quote /
 			  backslash backslash
 
-safe-utf8-char		= %x00-21 / %x23-26 / %x28-5b / %x5d-ff
-			; not single quote, double quote and backslash
+safe-utf8-char		= %x01-21 / %x23-26 / %x28-5b / %x5d-fd
+			; not single quote, double quote or backslash
 
 
 num-literal		= int32-literal / int64-literal / real64-literal
