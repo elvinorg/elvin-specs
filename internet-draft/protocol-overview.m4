@@ -13,8 +13,8 @@ Reply, containing the agreed parameters of the connection.
 
 .KS
   +-------------+ ---ConnRqst--> +---------+
-  | Producer or |               |  Elvin  |  
-  |  Consumer   |               |  Server |    SUCCESSFUL CONNECTION 
+  | Producer or |                |  Elvin  |  
+  |  Consumer   |                |  Server |   SUCCESSFUL CONNECTION 
   +-------------+ <---ConnRply-- +---------+
 .KE
 
@@ -165,9 +165,9 @@ subscription is removed.
    +----------+ <----SubRply------ |        |
                                    | Server |
    +----------+                    |        |
-   | Producer | <--QnchAddNotify-- |        |
+   | Producer | <--SubAddNotify--- |        |
    +----------+                    +--------+
-                                QUENCH SUBSCRIPTION ADD NOTIFICATION
+                                       SUBSCRIPTION ADD NOTIFICATION
 .KE
 
 .KS
@@ -176,9 +176,9 @@ subscription is removed.
    +----------+ <----SubRply------ |        |
                                    | Server |
    +----------+                    |        |
-   | Producer | <--QnchModNotify-- |        |
+   | Producer | <--SubModNotify--- |        |
    +----------+                    +--------+
-                            QUENCH SUBSCRIPTION MODIFY NOTIFICATION
+                                    SUBSCRIPTION MODIFY NOTIFICATION
 .KE
 
 .KS
@@ -187,12 +187,40 @@ subscription is removed.
    +----------+ <----SubRply------ |        |
                                    | Server |
    +----------+                    |        |
-   | Producer | <--QnchDelNotify-- |        |
+   | Producer | <--SubDelNotify--- |        |
    +----------+                    +--------+
-                           QUENCH SUBSCRIPTION DELETE NOTIFICATION
+                                   SUBSCRIPTION DELETE NOTIFICATION
 .KE
 
-The following sections describes in detail the content of each packet
+At any time after a successful Connection Reply, the server can inform
+the client that it is to be disconnected.  The DisConn packet includes
+an explanation for the disconnection, and optionally, directs the
+client to reconnect to an alternative server.
+
+.KS
+  +-------------+                  +---------+
+  |  Producer   |                  |         |  
+  |     or      | <----DisConn---- |  Server |
+  |  Consumer   |                  |         |        DISCONNECTION 
+  +-------------+                  +---------+
+.KE
+
+To disconnect from the server, the client sends a Disconnect Request.
+It SHOULD then wait for the server's response Disconnect Reply, which
+ensures that both directions of the communication channel have been
+flushed. 
+
+The server MUST NOT refuse to disconnect a client (ie. using a Nack).
+
+.KS
+  +-------------+ ---DisConnRqst--> +---------+
+  | Producer or |                   |  Elvin  |  
+  |  Consumer   |                   |  Server |       DISCONNECTION 
+  +-------------+ <--DisConnRply--- +---------+
+.KE
+
+
+The following sections describe in detail the content of each packet
 in protocol and the requirements of both the server and the client
 library.
 

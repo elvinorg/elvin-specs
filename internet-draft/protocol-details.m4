@@ -270,6 +270,18 @@ violation.  If a client detects that the server connection has been
 closed without receiving one of these packets, it should assume
 network or server failure.
 
+A client receiving a redirection via a DisConn MUST attempt to connect
+to the specified server before attempting any other servers for which
+it has address information.  If the connection is fails or is refused
+(via ConnRply), the default server selection process SHOULD be
+performed.
+
+A client MAY perform loop detection for redirection to cater for a
+misconfiguration of servers redirecting a client indefinitely.  If a
+loop is detected, the default server selection process SHOULD be
+performed.
+
+
 m4_dnl
 m4_heading(3, Security Request)
 
@@ -457,59 +469,66 @@ struct QnchDelRqst {
   int64 quench_id;
 };)m4_dnl
 
-
-m4_heading(3, Quench Add Notification)
-
-Sent from server to clients to inform them of a new subscription
-predicate component matching their registered quench attribute name
-list.
-
-If the insecure flag is set, it indicates that the matching
-subscription has no associated keys.
-
-m4_pre(
-struct QnchAddNotify {
-  int64   quench_id;
-  int64   term_id;
-  boolean insecure;
-  SubAST  sub_expr;
-};)m4_dnl
-
-m4_heading(3, Quench Modify Notification)
-
-This packet indicates that a subscription predicate component matching
-their registered quench attribute name list changed. 
-
-If the insecure flag is set, it indicates that the matching
-subscription has no associated keys.
-
-m4_pre(
-struct QnchModNotify {
-  int64   quench_id;
-  int64   term_id;
-  boolean insecure;
-  SubAST  sub_expr;
-};)m4_dnl
-
-m4_heading(3, Quench Delete Notification)
-
-Sent from server to clients to inform them of the removal of a
-subscription predicate component that had matched their registered
-attribute name list.
-
-m4_pre(
-struct QnchDelNotify {
-  int64   quench_id;
-  int64   term_id;
-};)m4_dnl
-
 m4_heading(3, Quench Reply)
 
 Sent from the Elvin server to the client as acknowledgement of a successful
-quench requirements change:
+quench requirements change (QnchAddRqst, QnchModRqst, QnchDelRqst):
 
 m4_pre(
 struct QnchRply {
   int32   xid;
   int64   quench_id;
 };)m4_dnl
+
+m4_heading(3, Subscription Add Notification)
+
+Sent from server to clients to inform them of a new subscription
+predicate component matching the registered quench attribute name
+list for each of the identified quench registrations.
+
+If the insecure flag is set, it indicates that the matching
+subscription has no associated keys.
+
+m4_pre(
+struct SubAddNotify {
+  int64   quench_ids[];
+  int64   term_id;
+  boolean insecure;
+  SubAST  sub_expr;
+};)m4_dnl
+
+m4_heading(3, Subscription Modify Notification)
+
+This packet indicates that a subscription predicate component matching
+their registered quench attribute name list changed for each of the
+identified quench registrations.
+
+If the insecure flag is set, it indicates that the matching
+subscription has no associated keys.
+
+Note that a subscription term that had a key replaced might no longer
+match a particular quench registeration.  This is notified using a
+SubDelNotify.  Similarly a key replacement might cause a SubAddNotify
+if its key list now intersects with that of a registered quench
+request.
+
+m4_pre(
+struct SubModNotify {
+  int64   quench_ids[];
+  int64   term_id;
+  boolean insecure;
+  SubAST  sub_expr;
+};)m4_dnl
+
+m4_heading(3, Subscription Delete Notification)
+
+Sent from server to clients to inform them of the removal of a
+subscription predicate component that had matched their registered
+attribute name list for each of the identified quench registrations.
+
+m4_pre(
+struct SubDelNotify {
+  int64   quench_ids[];
+  int64   term_id;
+};)m4_dnl
+

@@ -50,9 +50,9 @@ interactions between clients and the server.
   Quench Delete Request         QnchDelRqst	C -> S	 3
   Quench Reply                  QnchRply	S -> C	 3
 
-  Quench Add Notify		QnchAddNotify	S -> C	 3
-  Quench Change Notify		QnchModNotify	S -> C	 3
-  Quench Delete Notify		QnchDelNotify	S -> C	 3
+  Subscription Add Notify	SubAddNotify	S -> C	 3
+  Subscription Change Notify	SubModNotify	S -> C	 3
+  Subscription Delete Notify	SubDelNotify	S -> C	 3
 
   ---------------------------------------------------------------
 .fi
@@ -63,7 +63,7 @@ method for distinguishing packet types.  If a packet type number or
 enumeration is used, it SHOULD reflect the above ordering.
 
 The subset numbers in the above table reflect capabilities of an
-implementation.  An implementation MUST implements all or none of the
+implementation.  An implementation MUST implement all or none of the
 packet types in a subset.
 
 m4_include(protocol-overview.m4)

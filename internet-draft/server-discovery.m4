@@ -4,7 +4,9 @@ m4_dnl  server-discovery
 
 m4_heading(2, Server Discovery)
 
-Server discovery SHOULD be implemented by client libraries.
+Server discovery SHOULD be implemented by client libraries.  In
+addition, a client library MAY implement a cache of discovered server
+addresses.
 
 Clients multicast a request for server URLs; servers respond with a
 list of URLs describing their available endpoints.  Multicast is not
@@ -17,8 +19,15 @@ concrete implementation for IP-based networks (section x.x)
 A client MAY request that servers advertise their available endpoints
 prior to establishing a connection, by multicasting a Server Request.
 Attempts to send a SvrRqst MUST be delayed by a random time of between
-zero (0) and five (5) seconds after process startup.  SvrRqst MUST NOT
-be sent more than once in any twenty (20) second period.
+zero (0) and five (5) seconds after process startup.  If any SrvRqst
+packets (from other clients) are observed during this time, the client
+MUST cancel its own pending request.
+
+If a client observes any Server Advertisments during the startup
+period, it SHOULD attempt to connect to them immediately.
+
+A SvrRqst MUST NOT be sent more than once in any twenty (20) second
+period.
 
 m4_pre(
 struct SvrRqst {
@@ -43,14 +52,14 @@ multiple protocol versions, this MUST be reflected in the endpoint
 URLs, and the SvrAdvt message MUST use the client's protocol version.
 
 The SvrAdvt includes a server name that MUST be globally unique.  It
-is suggested the fully-qualified DNS host name and process number of
-the server be used.
+is suggested the fully-qualified DNS host name, server process number
+and current time-of-day be used.
 
 The set of URLs reflect the endpoints available from the server.  A
 SvrAdvt message SHOULD include all endpoints offered by the server.
 Where the limitations of the underlying concrete protocol prevent
-this, the server cannot advertise all its endpoints. Each SvrAdvt MUST
-contain at least one URL.
+this, the server cannot advertise all its endpoints.  Each SvrAdvt
+MUST contain at least one URL.
 
 A server MUST NOT send SvrAdvt more often than once every five (5)
 seconds.
@@ -70,5 +79,5 @@ struct SvrAdvtClose {
   string   server;       /* unique name for server */
 };)m4_dnl
 
-Caching lients MUST monitor such messages and remove all endpoints for
+Caching clients MUST monitor such messages and remove all endpoints for
 the specified server from their cache.
