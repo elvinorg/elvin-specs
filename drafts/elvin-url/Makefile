@@ -26,7 +26,7 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/elvin-url/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.4 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.5 $
 #
 ################################################################
 
@@ -65,7 +65,7 @@ clean:
 ################################################################
 
 install: main.txt
-	cp main.txt ../draft-arnold-elvin-url-00.txt
+	cp main.txt ../draft-arnold-elvin-url-01.txt
 
 
 ################################################################
