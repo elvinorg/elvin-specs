@@ -1,5 +1,5 @@
 ################################################################
-# Copyright (C) DSTC Pty Ltd (ACN 052 372 577) 2001.
+# Copyright (C) DSTC Pty Ltd (ACN 052 372 577) 2001-2003.
 # All Rights Reserved.
 #
 # The software contained on this media is the property of the
@@ -26,7 +26,7 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/ticker/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.4 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.5 $
 #
 ################################################################
 
@@ -39,7 +39,7 @@ yyyy=$(shell date +%Y)
 exp=$(shell date -d "6 months" "+%d %b %Y")
 
 FILENAME := draft-arnold-ticker-chat-v3
-VERSION := 01
+VERSION := 02
 PUBLISHED := $(FILENAME)-$(VERSION).txt
 
 
@@ -68,7 +68,7 @@ $(PUBLISHED): main.txt
 ################################################################
 
 %.txt : %.ms
-	gtbl $< | groff -Tascii -ms | ../fix.pl | sed -e 's/_//g' -e 's/.//g' -e 's/dd mmm/${dd} ${mmm}/g' -e 's/yyyy/${yyyy}/g' -e 's/aa bbb cccc/${exp}/g'  | tail +4  > $@
+	gtbl $< | groff -Tascii -P-c -P-b -P-u -ms | ../fix.pl | sed -e 's/dd mmm/${dd} ${mmm}/g' -e 's/yyyy/${yyyy}/g' -e 's/aa bbb cccc/${exp}/g'  | tail +4  > $@
 
 %.ms : %.m4
 	m4 -P $< > $@
