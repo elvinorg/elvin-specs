@@ -245,9 +245,9 @@ m4_heading(4, Packet Encoding Example)
 An Elvin notification is a list of name-value pairs, where
 the value is one of the five base types of int32, int64, real64,
 string and opaque.  The encoding of these pairs must also include
-the data type for the value.  For both the Notif and the NotifDel
-packets, we introduce a name-type-value (NTV) block used to encode
-a notification attribute.
+the data type for the value.  For both the NotifyEmit and the
+NotifyDeliver packets, we introduce a name-type-value (NTV) block
+used to encode a notification attribute.
 
 The name of an attribute is always encoded as an XDR string. The type
 is an enumeration of five different values indicating one of int32,
@@ -288,7 +288,7 @@ int32.
 .fi
 .KE
 .KS
-   pkt id        (enum)   packet type for Notif
+   pkt id        (enum)   packet type for NotifyEmit
    len n         (int32)  number of name-type-value triples in the 
                           notification. n MUST be greater than zero.
    ntv x         [block]  encoded as a name-type-value triple, 
