@@ -26,7 +26,7 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/internet-draft/Attic/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.4 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.5 $
 #
 ################################################################
 
@@ -57,5 +57,7 @@ clean:
 
 ################################################################
 
+billstall: main.txt
+	cp main.txt /home/bill/e4/web-public/download/internet-draft.txt
 
 
