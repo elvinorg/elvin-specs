@@ -457,10 +457,10 @@ sets as an atomic operation.
 m4_pre(
 struct SecRqst {
   int32  xid;
-  opaque raw_keys_add[];
-  opaque raw_keys_del[];
-  opaque prime_keys_add[];
-  opaque prime_keys_del[];
+  opaque add_raw_keys[];
+  opaque del_raw_keys[];
+  opaque add_prime_keys[];
+  opaque del_prime_keys[];
 };)m4_dnl
 
 It is a protocol error to request the addition of a key already
