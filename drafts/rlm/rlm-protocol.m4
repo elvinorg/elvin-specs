@@ -157,13 +157,23 @@ assuming that the sequencer is dead.
 On receiving a LEAVE message, a member should remove the indicated
 member from its local table of acknowledged messages.
 
-If the sequencer wishes to leave the group, it should multicast the
+If the sequencer wishes to leave the group, it should multicast a SYNC
+(see next section), and once all nodes are up to date, multicast a
 LEAVE.  On receiving a LEAVE from the current sequencer, the
-highest-numbered remaining member should adopt the sequencer role, and
-multicast a NSEQ packet, containing its unicast address.  The old
-sequencer must not disconnect until it has received the NSEQ packet.
-Other members should send an ACK packet to the new sequencer, which
-will continue to multicast NSEQ packets until it has received this.
+lowest-numbered remaining member should adopt the sequencer role, and
+multicast an NSEQ packet.  
+
+The old sequencer must not disconnect until it has received the NSEQ
+packet.  Other members should send an ACK packet to the new sequencer,
+which will continue to multicast NSEQ packets until it has received
+ACKs from all expected members.  Finally, the new sequencer should
+multicast FLUSH, and return to normal operation.
+
+A member, having sent its ACK in response to NSEQ, should wait for the
+FLUSH.  After timing out, it should resend its ACK.  If the sequencer
+is still collecting ACKs, the member will see a multicast FLUSH.  If
+the previous FLUSH has been lost, the member will see a multicast ACK
+from itself, and should in both cases return to normal operation.
 
 The last member remaining in a group will be the sequencer.  It can
 obviously leave at any time.
@@ -285,6 +295,9 @@ The sequencer's member number is included in the reponse, and MUST be
 saved by the new member.  It is used when the sequencer wishes to
 leave the group to determine that a new sequencer must be elected.
 
+Finally, the member count is the current number of members registered
+for the group, including the new member.
+
 The packet should be multicast to the group, and all existing members
 should allocate space in their history buffer for the new member.
 
@@ -299,7 +312,7 @@ m4_pre([
 |-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-|
 |                        Sequence Number                        |
 |-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-|
-|           Sequencer           |          Reserved             |
+|           Sequencer           |         Member Count          |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+])m4_dnl
 m4_changequote(`,')m4_dnl
 
@@ -461,25 +474,28 @@ the last message seen.
 
 
 
-m4_changequote({,})
-.KS
-                             ,-->     +---------+
-  +-------------+ ---SvrRqst-+-->   +---------+ |
-  | Producer or |            `--> +---------+ | |
-  |  Consumer   | <--.            |  Elvin  | |-+
-  +-------------+ <--+-SvrAdvt--- | Servers |-+     SOLICITATION and
-                  <--'            +---------+          ADVERTISEMENT
-.KE
+m4_dnl m4_changequote({,})
+m4_dnl .KS
+m4_dnl                              ,-->     +---------+
+m4_dnl   +-------------+ ---SvrRqst-+-->   +---------+ |
+m4_dnl   | Producer or |            `--> +---------+ | |
+m4_dnl   |  Consumer   | <--.            |  Elvin  | |-+
+m4_dnl   +-------------+ <--+-SvrAdvt--- | Servers |-+     SOLICITATION and
+m4_dnl                   <--'            +---------+          ADVERTISEMENT
+m4_dnl .KE
+m4_dnl 
+m4_dnl When a server is shutting down, it SHOULD multicast an announcement to
+m4_dnl all clients that its endpoints are no longer available.
+m4_dnl 
+m4_dnl .KS
+m4_dnl       +-------------+
+m4_dnl     +-------------+ |                     +---------+
+m4_dnl   +-------------+ | | <--.                |  Elvin  |
+m4_dnl   | Producers & | |-+ <--+-SvrAdvtClose-- |  Server |
+m4_dnl   |  Consumers  |-+   <--'                +---------+  ADVERTISEMENT
+m4_dnl   +-------------+                                         WITHDRAWAL
+m4_dnl .KE
+m4_dnl m4_changequote(`,')
 
-When a server is shutting down, it SHOULD multicast an announcement to
-all clients that its endpoints are no longer available.
 
-.KS
-      +-------------+
-    +-------------+ |                     +---------+
-  +-------------+ | | <--.                |  Elvin  |
-  | Producers & | |-+ <--+-SvrAdvtClose-- |  Server |
-  |  Consumers  |-+   <--'                +---------+  ADVERTISEMENT
-  +-------------+                                         WITHDRAWAL
-.KE
-m4_changequote(`,')
+
