@@ -5,22 +5,24 @@ m4_dnl  components and their basic relationships.
 m4_dnl
 m4_heading(1, ARCHITECTURE)
 
-describe the basic concepts of notification, subscription, evaluation
-of subscriptions, delivery. 
+Elvin is a network service providing messaging for connected clients.
+Software built using Elvin is comprised of communicating programs
+which access the functionality of the service through a client libray
+and share information via subscriptions and matching notifications.
 
-Elvin has two components: a client and a server.  Within an Elvin
-system, multiple clients may exist, supported by a single server.
-
-m4_remark(we need to update this section to reflect clustering and federation)
-
-An Elvin system is comprised of communicating programs which use the
-services of the system through a client library, Elvin servers which
-act as local routers and a network of inter-server tunnels which
-distribute messages beyond the domain of a single server.
+The Elvin service itself may be provided by a single stand-alone
+router, such as a daemon process on a workstation.  It may also be
+implemented by a number of co-operating routers acting as a cluster to
+provide a single Elvin service.  Finally, an Elvin service may be
+teired accross the Internet with local routers importing and exporting
+sets of information to and from other disperse routers.
 
 This specification describes the client/server protocol and semantic
 requirements for client libraries and the server daemon.  It does not
-describe the inter-server protocol.
+describe any inter-server protocol.  The Elvin Router Cluster Protocol
+[ERCP] describes how Elvin routers may be configured on a LAN as a cluster.
+The Elvin Router Federation Protocol [ERFP] describes how single routers
+or clusters may be linked accross the Internet.
 
 m4_include(operational-overview.m4)
 
