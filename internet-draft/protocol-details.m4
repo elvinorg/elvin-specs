@@ -37,13 +37,13 @@ struct SubASTName {
 };
 
 union SubAST {
+    SubASTName name;
     int32 i32;
     int64 i64;
     real64 r64;
     string str;
     string regular_expression;
 
-    SubASTName name;
     SubASTNode equals;
     SubASTNode not_equals;
     SubASTNode less_than;
@@ -58,11 +58,11 @@ union SubAST {
 
     SubASTNode unary_plus;
     SubASTNode unary_minus;
-    SubASTNode times;
+    SubASTNode multiply;
     SubASTNode divide;
     SubASTNode modulo;
-    SubASTNode plus;
-    SubASTNode minus;
+    SubASTNode add;
+    SubASTNode subtract;
 
     SubASTNode shift_left;
     SubASTNode shift_right;
