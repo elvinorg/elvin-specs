@@ -255,8 +255,9 @@ m4_pre(
 struct ClstJoinRply {
   id32 xid;
   string master_name;
-  id16 server_id;
-  id16 servers[];
+  id16 master_id;          /* id of master node */
+  id16 server_id;          /* newly allocated id for the requestor */
+  id16 servers[];          /* existing servers in cluster */
   struct {
     string attr_name;
     SubAST sub_expr;      /* not used at present - set to (int32)0 */
