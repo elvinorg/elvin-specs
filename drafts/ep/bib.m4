@@ -42,8 +42,8 @@ RFC 2279, January 1998.
 
 .IP [UNICODE] 12
 Unicode Consortium, The,
-"The Unicode Standard, Version 2.0",
-Addison-Wesley, February 1997.
+"The Unicode Standard, Version 3.0",
+Addison-Wesley, 2000.
 
 .IP [POSIX.1] 12
 IEEE,
