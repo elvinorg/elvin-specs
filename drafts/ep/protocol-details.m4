@@ -115,11 +115,7 @@ union SubAST {
     SubASTNode wildcard;
     SubASTNode regex;
 
-    SubASTNode to_lower;
-    SubASTNode to_upper;
-    SubASTNode primary;
-    SubASTNode secondary;
-    SubASTNode tertiary;
+    SubASTNode fold_case;
     SubASTNode decompose;
     SubASTNode decompose_compat;
 
