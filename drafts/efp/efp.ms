@@ -148,9 +148,10 @@ struct FedConnRqst {
 The server_domain parameter is a unqiue UTF-8 string identifying the
 local server or cluster.  It is used to prevent importation of traffic
 which has previously been exported from the local domain.  This means
-that it MUST be globally unique for a single server, or for all
-servers in a cluster.  It is RECOMMENDED that this name be based on
-the DNS domain name or IP address of the server's host machine(s).
+that it MUST be globally unique for each single server or cluster, but
+it MUST be identical for each server within a single cluster.  It is
+RECOMMENDED that this name be based on the DNS domain name or IP address
+of the server's host machine(s).
 
 m4_heading(3, Federation Connection Reply)
 
@@ -178,8 +179,11 @@ struct FedModify {
   SubAST pull_filter;
 };)m4_dnl
 
-The pull_filter MAY be simplified to minimise updates caused by minor
-changes to the local subscription base.
+The pull_filter MAY NOT exactly reflect the subscription database of the
+sender; for example it MAY be made more general to minimise updates caused
+by minor changes to the local subscription database, and/or it MAY be made
+more specific to prevent importation of notifications known to be unwanted
+(despite matching local subscriptions).
 
 The receiving server MUST process the request, and return either an
 Ack or a Nack, depending on the validity of the SubAST.
@@ -207,6 +211,14 @@ Before forwarding a FedNotify, a server MUST insert its own signature
 into the routing list to prevent it being delivered again.  However,
 if a notification is received where the routing list contains the
 signature of the receiving server, it MUST be silently dropped.
+
+A server SHOULD NOT forwarding a FedNotify to a server that has not
+requested it i.e. a notification that does not match the server's most
+recently positively acknowledged outgoing_filter.
+
+A server MAY NOT forward a FedNotify to a server that has requested it
+(i.e. a notification that matches the server's most recently positively
+acknowledged outgoing_filter).
 
 
 
