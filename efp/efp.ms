@@ -339,6 +339,14 @@ struct JoinRqst {
   string urls[];        /* set of URLs for server */
 };)m4_dnl
 
+.nf
+*** dealing with changes in the set of protocols or their options
+*** offered by a server during its membership of the cluster is an
+*** open issue.  do we forbid this?  is it controlled by the cluster
+*** mgmt and so we know anyway?  or do we introduce an update packet?
+*** or something else entirely?
+.fi
+
 m4_heading(3, Join Reply)
 
 Unicast reply to a server requesting entry to a cluster.  Includes the
