@@ -187,26 +187,26 @@ of identifiers can be encoded using a single byte.
 .KS
 .nf 
   ----------------------------------------------------------------
-  Packet Type                   Abbreviation	     Identifier
+  Packet Type                   Abbreviation         Identifier
   ----------------------------------------------------------------
-  Activate                      Activate		128
-  Standby                       Standby			129
-  Restart                       Restart			130
-  Shutdown			Shutdown		131
+  Activate                      Activate                128
+  Standby                       Standby                 129
+  Restart                       Restart                 130
+  Shutdown                      Shutdown                131
 
-  Cluster Request		ClusterRqst		160
-  Cluster Reply			ClusterRply		161
-  Join Request			JoinRqst		162
-  Join Reply			JoinRply		163
+  Cluster Request               ClusterRqst             160
+  Cluster Reply                 ClusterRply             161
+  Join Request                  JoinRqst                162
+  Join Reply                    JoinRply                163
 
-  Subscription Database Request	SubDBRqst		164
-  Subscription Database Reply	SubDBRply		165
-  Subscription Add		FedSubAdd		166
-  Subscription Modify		FedSubMod		167
-  Subscription Delete		FedSubDel		168
+  Subscription Database Request SubDBRqst               164
+  Subscription Database Reply   SubDBRply               165
+  Subscription Add              FedSubAdd               166
+  Subscription Modify           FedSubMod               167
+  Subscription Delete           FedSubDel               168
 
-  Notify Emit Forward		NotifyEmitFwd		169
-  Motify Deliver Forward	NotifyDeliverFwd	170
+  Federated Notify Emit         FedNotifyEmit           169
+  Federated Notify Deliver      FedNotifyDeliver        170
 
   ----------------------------------------------------------------
 .fi
