@@ -323,6 +323,8 @@ Why  Definition
  2   Server is closing this connection, in response to your 
      request (DisConnRqst) with sequence number matching 
      xid.
+ 3   Server is closing this connection in response to a protocol
+     violation. xid MUST be zero.
  4   Server is closing this connection, and requests that client
      makes new connection to server address in "args".  
      xid MUST be zero.
