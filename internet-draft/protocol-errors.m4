@@ -22,7 +22,7 @@ messages may be used by the client.
   ---------------------------------------------------------------
 .KE
 
-  *** fixme *** can 1,2,3 happen in a notif as well as sub?
+m4_remark(can 1,2,3 happen in a notif as well as sub?)
 
 .IP "Protocol Error"
 Non-specific error related to client-server communications.  This

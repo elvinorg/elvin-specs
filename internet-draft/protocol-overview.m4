@@ -94,9 +94,9 @@ If the Elvin server cannot accept the connection, it MUST send a
 Negative Acknowledge response and close the connection upon which the
 client made the request.
 
-*** fixme *** under what situations will the server nack a connection
+m4_remark(under what situations will the server nack a connection
 request.  This should be under the "Failures" at the end of the
-section, but one or two examples here may be used for illustration].
+section, but one or two examples here may be used for illustration.)
 
 .KS
   +-------------+ --ConnRqst--> +---------+

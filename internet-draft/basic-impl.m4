@@ -385,11 +385,9 @@ Division
 The following operators are defined only on the two integer types, int32 and
 int64: 
 .QP
-*** fixme ***
-
-Need to pin down 5- and 6-bit shifts (and different promotion
+m4_remark(Need to pin down 5- and 6-bit shifts (and different promotion
 rules?), as Java does.  Also modulus could be done for real64 too
-(Java does), but why?
+(Java does), but why?)
 .IP "%" 4
 Remainder (modulus)
 .IP "<<" 4
@@ -433,13 +431,13 @@ m4_heading(2, Subscription Errors)
 Elvin subscriptions are compiled by the server after submission at runtime.
 Various errors are possible; this section documents the error conditions.
 
-*** fixme *** I don't think we should have ANY lang specific stuff
+m4_remark(I don't think we should have ANY lang specific stuff
 here.  better to refer to a section on abstract errors independent of
 any particular naming conventions.  ie like the different packet types
 are current defined. Is this the Failures section in
-abstract-protocol.m4?  jb
+abstract-protocol.m4? jb)
 
-vErrors are reported as numbers so that language-specific error
+Errors are reported as numbers so that language-specific error
 messages may be used by the client. This section shows symbols from
 the C language binding; for the corresponding error numbers, please
 see <elvin4/errors.h> or documentation for your language binding.
@@ -476,11 +474,9 @@ Floating-point errors, including underflow, overflow and division by
 zero, are silently mapped to the appropriate IEEE 754 values.
 
 .QP
-*** fixme ***
-
-Do we want predicates for 754 values, e.g. isNan()?
+m4_remark(Do we want predicates for 754 values, e.g. isNan()?
 
 Need to check whether 754 defines all relationals to return FALSE if
 either argument is NaN. (What about other magic numbers, e.g.
 underflow?) Does 754 specify behaviour of != with NaN, and how does
-that compare to Elvin semantics?
+that compare to Elvin semantics?)

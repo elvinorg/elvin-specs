@@ -173,13 +173,9 @@ struct Nack {
     Value args[]
 };)m4_dnl
 
-*** fixme ***
-
-we need to refer to the definition of errors here.  we also need to
+m4_remark(we need to refer to the definition of errors here.  we also need to
 decide what to do wrt the error numbers, as discussed in jun00 design
-meetings.
-
-*** fixme ***
+meetings.)
 
 m4_heading(3, Connect Request)
 

@@ -12,11 +12,7 @@ of subscriptions, delivery.
 Elvin has two components: a client and a server.  Within an Elvin
 system, multiple clients may exist, supported by a single server.
 
-*** FIXME ***
-
-we need to update this section to reflect clustering and federation
-
-*** FIXME ***
+m4_remark(we need to update this section to reflect clustering and federation)
 
 An Elvin system is comprised of communicating programs which use the
 services of the system through a client library, Elvin servers which

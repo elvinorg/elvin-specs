@@ -67,6 +67,9 @@ Subsets A, B and D are independent.  An implementation MAY suport any
 or all of subsets A, B and D.  Subset C is dependent on subset B.  An
 implementation supporting subset C MUST support subset B.
 
+m4_remark(is subset C really depeneding on subset B?  i'd like the ability
+to have	quenching only clients. jb)
+
 m4_include(protocol-overview.m4)
 m4_include(protocol-details.m4)
 m4_include(connection-opts.m4)
