@@ -168,6 +168,15 @@ struct ConRqst {
 *** fixme *** whats the format of protocol_preferences strings? URLs
 perhaps.
 
+m4_pre(
+Some required QoS parameters:
+- max number of subscriptions per connection
+- max number of elements in notification
+- max byte size of notification
+- max byte size of string
+- max byte size of opaque
+)
+
 m4_heading(3, Connect Reply)
 
 Sent by the Elvin server to a client.  Confirms a connection request.
@@ -257,8 +266,8 @@ m4_heading(3, QoS Request)
 
 m4_heading(3, Subscription Add Request)
 
-Sent by client to the Elvin server.  if your are going to get a ack
-back, events may start arriving before the return of the sendSubscribe
+Sent by client to the Elvin server.  Requests delivery of
+notifications which match the supplied subscription expression.
 
 m4_pre(
 struct SubAddRqst {
@@ -267,10 +276,22 @@ struct SubAddRqst {
   opaque keys[];
 };)m4_dnl
 
+If successful, the server MUST respond with a SubRply.
+
+If the client has registered too many subscriptions, the server MUST
+return a Nack with error code X.
+
+If the server has too many registered subscriptions, it MUST return a
+Nack with error code X.
+
+If the subscription expression fails to parse, the server MUST return
+a Nack with errors codes 1, 2, 3 or 4.
+
 m4_heading(3, Subscription Modify Request)
 
-Sent by client to the Elvin server.  An Nack will be returned if the
-subscription id is not valid.
+Sent by client to the Elvin server.  Update the specified subscription
+to request notifications matching a different subscription expression,
+or to alter the security keys associated with the subscription.
 
 m4_pre(
 struct SubModRqst {
@@ -280,6 +301,27 @@ struct SubModRqst {
   opaque add_keys[];
   opaque del_keys[];
 };)m4_dnl
+
+Any (and all) of the expression, add_keys and del_keys field MAY be
+empty.  If all fields are empty, the modification SHALL be considered
+successful.
+
+A successful modification of the subscription MUST return a SubRply to
+the client.
+
+A Nack, with error code 5, MUST be returned if the subscription_id is
+not valid.
+
+If the subscription expression fails to parse, the server MUST return
+a Nack describing the error.  Allowed error codes are 1, 2, 3 or 4.
+An invalid expression MUST NOT alter the current state of the
+specified subscription.
+
+An attempt either to add a key already associated with the specified
+subscription or to remove a key not currently associated with the
+specified subscription MUST be ignored, and the remainder of the
+operation processed.  No indication that any part of the operation was
+ignored is returned to the client.
 
 m4_heading(3, Subscription Delete Request)
 
@@ -353,7 +395,7 @@ struct Nack {
 m4_heading(3, Subscription Reply)
 
 Sent from the Elvin server to the client as acknowledgement of a successful
-subscription change
+subscription change.
 
 m4_pre(
 struct SubRply {
@@ -375,12 +417,14 @@ messages may be used by the client.
 
 .KS
   -----------------------------------------------------------------
-  Error Type                           Abbreviation       Error ID 
+  Error Description                    Abbreviation       Error ID 
   -----------------------------------------------------------------
+  Reserved                                                   0
   Protocol Error                       ProtErr               1
   Syntax Error in Subscription         SynErr                2
   Identifier Too Long in Subscription  LongIdent             3
   Bad Identifier in Subscription       BadIdent              4
+  No such subscription for client      BadSub                5
   ---------------------------------------------------------------
 .KE
 
