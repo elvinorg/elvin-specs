@@ -122,7 +122,7 @@ union SubAST {
     SubASTNode decompose;
     SubASTNode decompose_compat;
 
-    SubASTNode exists;
+    SubASTNode require;
     SubASTNode equals;
     SubASTNode size;
 };')m4_dnl

@@ -148,7 +148,7 @@ boolean values.
 Any predicate may be applied to any attribute name. If the named attribute
 does not exist in the current notification, or exists but has an
 inappropriate type for the predicate, the predicate returns bottom.
-.IP exists(attribute) 4
+.IP require(attribute) 4
 Returns true if the notification contains an attribute whose name
 exactly matches that specified (even if the attribute's value is, say,
 an empty string or a zero-length opaque value).
