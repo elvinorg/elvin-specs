@@ -4,12 +4,12 @@ m4_dnl  protocol
 
 m4_heading(1, PROTOCOL)m4_dnl
 
-The protocol consists of several sections: normal operation,
-synchronisation, lost packet, loss-of-member and loss-of-sequencer.
+The protocol consists of several phases: normal operation,
+synchronisation, loss-of-packet, loss-of-member and loss-of-sequencer.
 Each of these is described in turn.
 
-All packets in the protocol share a common packet header, which is
-extended by some packet types to hold additional data.
+All packets in the protocol share a common header, which is extended
+by some packet types to hold additional data.
 
 m4_pre(`
  0                   1                   2                 3
@@ -24,8 +24,8 @@ m4_pre(`
 ')m4_dnl
 
 The version field is 3 bits, and for the protocol specified in this
-document, should be set to 1.  A value of 7 is reserved for expansion
-of the version field.
+document, MUST be set to 1.  A value of 7 is reserved for future
+expansion of the version field.
 
 The type field is 5 bits, and identifies the contents of the packet.
 The defined types are:
@@ -91,7 +91,8 @@ Multicast groups are identified by a 16 bit group number.  The lower 8
 bits of this number are used to select one of the 256 IP multicast
 addresses in the range 239.255.123.0/8.  The upper 8 bits of the group
 number select a UDP port to which the datagrams are sent, starting at
-a base port of 8000.
+a base port of 8000.  Group number 0 is reserved, and MUST NOT be
+used.
 
 m4_heading(3, Creating and Joining a Group)m4_dnl
 
