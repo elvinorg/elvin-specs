@@ -64,8 +64,12 @@ the event with out having to do any additional filtering.
 
 m4_heading(3, Setting Subscriptions)
 
-A Consumer describes the events in which it is interested by sending a
-predicate in the Elvin subscripton language (and its associated
+When a session is first established, the server MUST NOT send any
+Notify Deliver packets until at least one subscription has been added
+by the client.
+
+A Consumer client describes the events it is interested in by sending
+a predicate in the Elvin subscripton language (and its associated
 security keys) to the Elvin server.  The predicate is sent in a
 Subscription Add Request (SubAddRqst).  On receipt of the request, the
 server checks the syntactic correctness of the predicate. If valid, a
