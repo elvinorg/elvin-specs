@@ -150,19 +150,16 @@ of identifiers can be encoded using a single byte.
   Managment Status Notify       MgmtStsNotify           132
   Negative Acknowledge          MgmtNack                133
 
-  Cluster Request               ClstRqst                160
-  Cluster Reply                 ClstRply                161
-  Cluster Join Request          ClstJoinRqst            162
-  Clister Join Reply            ClstJoinRply            163
+  Cluster Join Request          ClstJoinRqst            160
+  Clister Join Reply            ClstJoinRply            161
 
-
-  Cluster Subscription Add      ClstSubAdd              166
-  Cluster Subscription Modify   ClstSubMod              167
-  Cluster Subscription Delete   ClstSubDel              168
-  Cluster Notify                ClstNotify              169
-  Cluster Redirect              ClstRedir               170
-  Cluster Client Notify         ClstCliNotify           171
-  Cluster Leave                 ClstLeave               172
+  Cluster Subscription Add      ClstSubAdd              162
+  Cluster Subscription Modify   ClstSubMod              163
+  Cluster Subscription Delete   ClstSubDel              164
+  Cluster Notify                ClstNotify              165
+  Cluster Redirect              ClstRedir               166
+  Cluster Client Notify         ClstCliNotify           167
+  Cluster Leave                 ClstLeave               168
   ----------------------------------------------------------------
 .fi
 .KE
@@ -270,42 +267,6 @@ struct Shutdown {
   id32 server_ids[];
 };)m4_dnl
 
-
-m4_heading(3, Cluster Request)
-
-On startup, a server's configuration file can direct it to attempt
-connection to a cluster.  If this directive is present, the server
-MUST NOT accept client connections until it has successfully joined
-the specified cluster and received an Activate packet.
-
-Clusters are identified by a string scope name.  The scope name is a
-UTF8 string, with a maximum length of 255 bytes.
-
-The server uses this packet, multicast to the cluster discovery
-address, to find the cluster management address.
-
-m4_pre(
-struct ClstRqst {
-  int8 ver_major;
-  int8 ver_minor;
-  id32 xid;  
-  string scope;
-};)m4_dnl
-
-The cluster MUST respond with a unicast Cluster Reply or no reply at
-all.
-
-m4_heading(3, Cluster Reply)
-
-A unicast response from the cluster to an enquiring server.  Includes
-the cluster's preferred address for further interaction.
-
-m4_pre(
-struct ClstRply {
-  id32 xid;
-  string address;
-};)m4_dnl
-
 m4_heading(3, Cluster Join Request)
 
 Multicast request to the cluster to join its managed cluster.
@@ -345,7 +306,6 @@ struct ClstJoinRply {
   id32 xid;
   id32 server_id;
   struct {
-    id64 term_id;
     string attr_name;
     SubAST sub_expr;      /* not used at present - set to (int32)0 */
   }  subscriptions[];
