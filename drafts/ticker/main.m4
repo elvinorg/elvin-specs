@@ -4,7 +4,7 @@ m4_dnl
 m4_dnl              Tickertape Message Format Specification
 m4_dnl
 m4_dnl File:        $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/ticker/main.m4,v $
-m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.4 $
+m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.5 $
 m4_dnl Copyright:   (C) 2001-2002, David Arnold.
 m4_dnl
 m4_dnl This specification may be reproduced or transmitted in any form or by
@@ -198,7 +198,7 @@ it not be scrolled at all, but displayed only in a threaded or
 historical view.
 T}
 
-Message-Id;opaque;T{
+Message-Id;string;T{
 Globally unique identifier for this message.  The use of a UUID[UUID]
 (or GUID), optionally hashed (using SHA.1, MD5, etc) to ensure
 anonymity (since the UUID includes the MAC address of the generating
@@ -235,7 +235,7 @@ lb lb lb
 l l lw(42).
 Name;Type;Description
 _
-In-Reply-To;opaque;T{
+In-Reply-To;string;T{
 The Message-Id of a previous message to which this is a reply.
 T}
 _
@@ -264,7 +264,7 @@ lb lb lb
 l l lw(42).
 Name;Type;Description
 _
-Thread-Id;opaque;T{
+Thread-Id;string;T{
 When sending a message to a group to which the sender is not
 subscribed, but wishes to see any replies, this field should be set
 (and the sender's user agent should alter its subscription so as to
@@ -326,7 +326,7 @@ therefore, it is not necessary to transform attachments (using, for
 example, base64) as is the usual practice for email.
 T}
 
-Replaces;opaque;T{
+Replaces;string;T{
 The Message-Id value of a previous message which should be replaced by
 the contents of this message.  
 
