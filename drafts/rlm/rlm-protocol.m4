@@ -295,11 +295,14 @@ The sequencer's member number is included in the reponse, and MUST be
 saved by the new member.  It is used when the sequencer wishes to
 leave the group to determine that a new sequencer must be elected.
 
-Finally, the member count is the current number of members registered
-for the group, including the new member.
+The member count is the current number of members registered for the
+group, including the new member, and is followed by the member numbers
+for all members, packed to a 32 bit boundary if required.
 
 The packet should be multicast to the group, and all existing members
-should allocate space in their history buffer for the new member.
+should allocate space in their history buffer for the new member.  The
+new member should initialise its history buffer using the supplied
+member list, and a sequence number of zero.
 
 m4_changequote([,])m4_dnl
 m4_pre([
@@ -313,7 +316,10 @@ m4_pre([
 |                        Sequence Number                        |
 |-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-|
 |           Sequencer           |         Member Count          |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+])m4_dnl
+|-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-|
+X         Member Number         |                               X
+|-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-|])m4_dnl
+
 m4_changequote(`,')m4_dnl
 
 m4_heading(3, `Leave')m4_dnl
@@ -438,10 +444,11 @@ calling member's last seen sequence.
 
 m4_heading(3, `Reset')m4_dnl
 
-The member number is set to that of the sender, the new sequencer.
-The incarnation is that of the new group, and the fragment number is
-the incarnation number of the old group.  The starting sequence number
-of the new group is sent in the sequence field.
+Both the member number and the sequencer fields are set to that of the
+sender, the new sequencer.  The incarnation is that of the new group,
+and the fragment number is the incarnation number of the old group.
+The starting sequence number of the new group is sent in the sequence
+field.
 
 The number of members is followed by the member numbers of all
 members, on 16 bit boundaries, packed to 32 bits.
@@ -450,17 +457,18 @@ m4_changequote([,])m4_dnl
 m4_pre([
  0                   1                   2                 3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 0 1 2
-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
+|-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-|
 | Ver |   Type  |     Flags     |          Incarnation          |
-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
+|-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-|
 |             Member            |            Fragment           |
-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
+|-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-|
 |                       Starting Sequence                       |
-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
-|          Member Count         |         Member Number         |
-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
+|-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-|
+|           Sequencer           |         Member Count          |
+|-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-|
 X         Member Number         |                               X
-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|])m4_dnl
+|-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-|])m4_dnl
+
 m4_changequote(`,')m4_dnl
 
 m4_heading(3, `New Sequencer')m4_dnl
