@@ -3,7 +3,7 @@ m4_dnl
 m4_dnl              Elvin Router Disoovery Protocol
 m4_dnl
 m4_dnl File:        $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/edp/main.m4,v $
-m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.2 $
+m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.3 $
 m4_dnl Copyright:   (C) 2000-2001, DSTC Pty Ltd.
 m4_dnl
 m4_dnl This specification may be reproduced or transmitted in any form or by
@@ -95,44 +95,46 @@ http://www.ietf.org/1id-abstracts.html
 
 The list of Internet-Draft Shadow Directories can be accessed at
 http://www.ietf.org/shadow.html
-
-
+m4_dnl
+m4_dnl
 m4_heading(1, Abstract)
 
 This document describes a mechanism for automatic discovery of Elvin
-routers by Elvin clients.  It uses a well-known IP Any-source
-multicast address.
+routers by Elvin clients.
 
+An Elvin router may be configured to accept connections from Elvin
+clients using a variety of protocol stacks and points of attachment.
+Each of these endpoints can be succinctly described using an Elvin URI
+[EURI].
+
+Configuring Elvin clients to connect using an appropriate URL is a
+variation of a common problem.  The Elvin Router Discovery Protocol
+provides a means of locating a suitable point of attachment to an
+Elvin router that does not require external infrastructure support, in
+contrast to alternative protocols such as SLP and DHCP.
+m4_dnl
+m4_dnl
 m4_heading(1, Terminology)
 
-This document discusses clients, client libraries, servers, producers,
-consumers, quenchers, messages, and subscriptions.
+This document discusses Elvin clients, client libraries, and routers.
 
-An Elvin server is a daemon process that runs on a single machine.  It
-acts as a distribution mechanism for Elvin message. A client is a
-program that uses the Elvin server, via a client library for a
-particular programming language.  A client library implements the
-Elvin protocol and manages clients' connections to an Elvin server.
+An Elvin router (or server) is a daemon process that runs on a single
+machine.  It acts as a distribution mechanism for Elvin messages. A
+client is a program that uses the Elvin router, via a client library
+for a particular programming language.  A client library implements
+the Elvin protocol and manages clients' connections to an Elvin
+router.
 
-Clients can have three roles: producer, consumer or quencher.
-Producer clients create structured messages and send them, using a
-client library, to an Elvin server.  Consumer clients establish a
-session with an Elvin server and register a request for delivery of
-messages matching a subscription expression.  Quenching clients also
-establish a session with a server, and register a request for
-notification of changes to the server's subscription database that
-match criteria supplied by the quencher.
-
-Clients MAY take any number of the producer, consumer and quencher
-roles concurrently.
+Further detail of these entities and their roles is provided in [EP].
+m4_dnl
 m4_dnl
 m4_heading(2, Notation Conventions)
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
 "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
 document are to be interpreted as described in [RFC2119].
-
-
+m4_dnl
+m4_dnl
 m4_heading(1, Introduction)
 
 Elvin client programs require a connection to an Elvin router in order
@@ -160,150 +162,88 @@ Elvin router implementations.
 
 Interactions between ERDP and the Elvin clustering protocol are not
 discussed in this specification, but are included in [ERCP].
-
 m4_dnl
-m4_dnl  abstract-protocol
 m4_dnl
+m4_heading(1, Protocol Description)
 
-m4_heading(1, Abstract Protocol)
+ERDP uses multicast (or if multicast is not available, link-local
+broadcast) to allow Elvin clients to solicit advertisements of
+available endpoints from Elvin routers.  It controls the scope of the
+multicast to implement an expanding search, looking progressively
+further away (in network terms) for a suitable router.
 
-The Elvin4 protocol is specified at two levels: an abstract
-description, able to be implemented using different marshalling and
-transport protocols, and a concrete specification of one such
-implementation, mandated as a standard protocol for interoperability
-between different servers.
-
-This section describes the operation of the Elvin4 protocol, without
-describing any particular protocol implementation.
-m4_dnl
-m4_heading(2, `Protocol Overview')
-
-This section describes the protocol packet types and their allowed
-use.  The following sections describe in detail the content of each
-packet in protocol and the requirements of both the server and the
-client library.
-
-Server discovery SHOULD be implemented by client libraries.
-
-Clients multicast a request for server URLs; servers respond with a
-multicast list of URLs describing their available endpoints.  Where
-multicast is not available for a concrete protcol, link-layer
-broadcast MAY be used instead.
-
-m4_changequote({,})
+m4_changequote({,})m4_dnl
 .KS
                              ,-->     +---------+
   +-------------+ ---SvrRqst-+-->   +---------+ |
   | Producer or |            `--> +---------+ | |
   |  Consumer   | <--.            |  Elvin  | |-+
-  +-------------+ <--+-SvrAdvt--- | Servers |-+     SOLICITATION and
+  +-------------+ <--+-SvrAdvt--- | Routers |-+     SOLICITATION and
                   <--'            +---------+          ADVERTISEMENT
 .KE
+m4_changequote(`,')m4_dnl
 
-When a server is shutting down, it SHOULD multicast an announcement to
-all clients that its endpoints are no longer available.
+Routers advertise their available endpoints and service properties
+using the same multicast scope and address.  
 
+m4_changequote({,})m4_dnl
 .KS
       +-------------+
     +-------------+ |                     +---------+
   +-------------+ | | <--.                |  Elvin  |
-  | Producers & | |-+ <--+-SvrAdvtClose-- |  Server |
+  | Producers & | |-+ <--+-SvrAdvtClose-- |  Router |
   |  Consumers  |-+   <--'                +---------+  ADVERTISEMENT
   +-------------+                                         WITHDRAWAL
 .KE
 m4_changequote(`,')
 
-m4_heading(2, Abstract Packet Definitions)
+The progressive expansion of the multicast request scope, careful use
+of timeouts, and advertisement caching minimise the client traffic
+used to locate routers.
+m4_dnl
+m4_dnl
+m4_heading(2, Abstract Protocol Definitions)
+
+ERDP is specified at two levels: an abstract description, able to be
+implemented using different marshalling and transport protocols, and a
+concrete specification of one such implementation, defined as a
+standard protocol for IPv4 networks.
 
 This section provides detailed descriptions of each packet used in the
 Elvin protocol. Packets are comprised from a set of simple base types
 and described in a pseudo-C style as structs made up of these types.
 
 .KS
-m4_heading(2, Packet Types)
-
-The Elvin abstract protocol specifies a number of packets used in
-interactions between clients and the server.
-
-.nf 
-  Packet Type                |  Abbreviation |  Usage 
- ----------------------------+---------------+---------
-  Server Request             |  SvrRqst      |  C -> S
-  Server Advertisement       |  SvrAdvt      |  S -> C
-  Server Advertisement Close |  SvrAdvtClose |  S -> C
-.fi
-.KE
-
-A concrete protocol implementation is free to use the most suitable
-method for distinguishing packet types.  If a packet type number or
-enumeration is used, it SHOULD reflect the above ordering.
-
-
-.KS
-The following definitions are used in several packets:
+The following definition is used in several packets:
 m4_pre(`
 typedef uint32 id32;
-typedef uint64 id64;
 ')m4_dnl
-These types are opaque n-bit identifiers.  No semantics is required
-other than bitwise comparison.  In all cases, an all zeros value is
+This type is opaque 32-bit identifier.  No semantics is required other
+than bitwise comparison.  In all cases, a value of all zero bits is
 reserved.
 
-Implementations are free to use any type capable of holding the
-required number of bits for these values.  In particular, the
-signedness of the underlying type does not matter.
+Concrete protocol implementations are free to use any type capable of
+holding the required number of bits for these values.  In particular,
+the signedness of the underlying type does not matter.
+
+m4_dnl
+m4_dnl
+m4_dnl
+m4_dnl
 
 .KE
-.KS
-m4_pre(`
-typedef byte[] opaque;
-
-union Value {
-    int32 i32;     // 4 byte signed integer
-    int64 i64;     // 8 byte signed integer
-    real64 r64;    // 8 byte double precision float
-    string str;    // length encoded UTF-8 Unicode string
-    opaque bytes;  // binary data sequence
-};
-
-struct NameValue {
-    string  name;
-    Value   value;
-};')m4_dnl
-
-Arrays of NameValue elements are used for notification data and
-description of server options.  The value type defines the range of
-data that may be exchanged using Elvin messages.  Note that there are
-no unsigned integer types, nor an explicit boolean type.
-
-.KE
-.KS
-m4_pre(
-  id32 xid
-)m4_dnl
-.na
-Where a request packet is sent by the client (other than NotifyEmit or
-UNotify), it MUST include transaction identifier (xid), used to match
-its reply.  The xid is a 32 bit number, allocated by the client.  The
-allocation MUST ensure that no packet is sent with the same identifier
-as an outstanding request.  Also, the value zero is reserved, and MUST
-NOT be used.
-.KE
-m4_heading(3, Server Request)
-
-Clients MAY and servers SHOULD implement this automatic server
-discovery mechanism.
+m4_heading(2, Router Requests)
 
 The client-side of the discovery protocol has two modes of operation:
-passive and active.  During passive discovery, a client caches server
+passive and active.  During passive discovery, a client caches router
 advertisements observed on the multicast channel(s).  During active
-discovery, clients solict advertisements from servers.
+discovery, clients solict advertisements from routers.
 
 Clients SHOULD implement active discovery and MAY add passive
 discovery for better performance and network utilisation.
 
 A client enters active discovery when the client application requests
-solicitation of server advertisements.  A client program SHOULD NOT
+solicitation of router advertisements.  A client program SHOULD NOT
 commence active discovery unless it is necessary to satisfy a
 connection request from the application.
 
@@ -314,7 +254,7 @@ struct SvrRqst {
   uint8  hop_limit;
 };)m4_dnl
 
-Clients and servers MUST discard SvrRqst packets with incompatible
+Clients and routers MUST discard SvrRqst packets with incompatible
 protocol version numbers.  Protocols are compatible when major version
 numbers are the same, and the client's minor version is equal to or
 less than the minor version of the advertisement.
@@ -348,7 +288,7 @@ SHOULD default to zero.  Values used SHOULD come from the set defined
 below.
 
 To reduce packet storms when many clients simultaneously attempt to
-find a server (such as when an existing server crashes, or hourly
+find a router (such as when an existing router crashes, or hourly
 batch jobs start), a client MUST wait before sending a SvrRqst and
 only send its own request if no others (from other clients) are
 observed during the waiting period.  
@@ -381,7 +321,7 @@ be suppressed.
 If the client receives one or more version-compatible SvrAdvt packets
 during the pre-request interval, the SvrRqst MUST be postponed until
 the client application requests that further advertisements be
-solicited (for example, because it cannot connect to the server
+solicited (for example, because it cannot connect to the router
 endpoints so far discovered).
 
 If no requests for further solicitation have been received for a
@@ -392,20 +332,19 @@ are reset to their starting values.
 Note that a SvrRqst from a downstream client can cause the suppression
 of a client's own SvrRqst with the same hop limit, even though the
 downstream SvrRqst's hop limit is exhausted, thus preventing the
-client's SvrRqst from reaching an upstream server that is within that
+client's SvrRqst from reaching an upstream router that is within that
 scope.  However, either of the two client's next SvrRqst (with higher
-hop limit) will reach the server, and while the immediate client loses
+hop limit) will reach the router, and while the immediate client loses
 one interval period, it has no permanent impact.  This could be
 avoided by allowing the client to compare the hop limit with the
 current hop count in the packet, but this is even more
 protocol-specific, and not supported by the IPv4 socket API.
 
-m4_heading(3, Server Advertisement)
+m4_heading(2, Advertisements)
 
-Servers SHOULD implement server discovery.  A Server Advertisement
-packet SHOULD be sent when the server is started, and MUST be sent
-response to SvrRqst packets received from clients, but MUST NOT be
-sent more often than once every two seconds.
+A Server Advertisement packet SHOULD be sent when the router is
+started, and MUST be sent response to SvrRqst packets received from
+clients, but MUST NOT be sent more often than once every two seconds.
 
 m4_pre(
 struct SvrAdvt {
@@ -420,57 +359,57 @@ struct SvrAdvt {
 
 Server Advertisement packets specify the version of the Elvin protocol
 which defines their format.  A SvrAdvt sent in response to a SvrRqst
-MUST use a compatible protocol version.  Where a server is capable of
+MUST use a compatible protocol version.  Where a router is capable of
 using multiple protocol versions, this can be reflected in the
-endpoint URLs.  Clients and servers MUST discard SvrAdvt packets with
+endpoint URLs.  Clients and routers MUST discard SvrAdvt packets with
 incompatible protocol versions.
 
-The advertising server is identified by a Unicode string name.
-Servers MUST ensure this name is universally unique over time.  It is
-RECOMMENDED that the combination of the Elvin server's process
+The advertising router is identified by a Unicode string name.
+Routers MUST ensure this name is universally unique over time.  It is
+RECOMMENDED that the combination of the Elvin router's process
 identifier, fully-qualified domain name and starting timestamp are
 used.
 
-Clients identify subsequent advertisements from the same server using
+Clients identify subsequent advertisements from the same router using
 the value of this string.  Although the value is Unicode text, the
 comparison MUST use bitwise identity.  After the first observed
-SvrAdvt from a server, additional advertisements SHOULD be discarded
+SvrAdvt from a router, additional advertisements SHOULD be discarded
 unless the revision number has changed.
 
-The revision number distinguishes advertisements from the same server,
-reflecting changes in the available protocols.  A server MAY change
+The revision number distinguishes advertisements from the same router,
+reflecting changes in the available protocols.  A router MAY change
 the URLs supplied in the advertisement without modifying the revision
 number as a means of influencing the endpoints used by connecting
-clients.  However, if an endpoint is withdrawn, the server's supported
+clients.  However, if an endpoint is withdrawn, the router's supported
 scope name or the value of is_default is altered, the revision number
 SHOULD be increased to flush client's caches.
 
-The scope name is the string scope name for the server.  An empty
+The scope name is the string scope name for the router.  An empty
 (zero length) scope name is allowed.  If this scope has been
 configured to be the default scope for a site, the default flag should
 be set true.
 
-The set of URLs reflect the endpoints available from the server.  A
-SvrAdvt message SHOULD include all endpoints offered by the server.
+The set of URLs reflect the endpoints available from the router.  A
+SvrAdvt message SHOULD include all endpoints offered by the router.
 Where the limitations of the underlying concrete protocol prevent
-this, the server cannot advertise all its endpoints.  Each SvrAdvt
+this, the router cannot advertise all its endpoints.  Each SvrAdvt
 MUST contain at least one URL.
 
 Note that the URLs included in a SvrAdvt MAY specify multiple protocol
-versions if the advertising server is capable of supporting this.  The
-version information in the SvrAdvt body does not imply that the server
+versions if the advertising router is capable of supporting this.  The
+version information in the SvrAdvt body does not imply that the router
 necessarily supports that protocol version alone, or indeed at all.
 
 The protocol-specific scope limit of the initial SvrAdvt packet SHOULD
-be configured in the server configuration parameters and MUST NOT
+be configured in the router configuration parameters and MUST NOT
 exceed 64.  SvrAdvt packets sent in response to a SvrRqst MUST set the
 protocol-specific scope limit to the hop limit in the received
-SvrRqst.  A server MUST remember the highest hop limit value it has
+SvrRqst.  A router MUST remember the highest hop limit value it has
 sent for use when withdrawing its advertisement.
  
 m4_heading(3, Server Advertisement Close)
 
-A server shutting down SHOULD send a Server Advertisement Close
+A router shutting down SHOULD send a Server Advertisement Close
 message.
 
 struct SvrAdvtClose {
@@ -479,20 +418,61 @@ struct SvrAdvtClose {
   string   server;
 }
 
-Clients and servers MUST discard SvrAdvtClose packets with
-incompatible protocol version numbers.  Servers that have sent SvrAdvt
+Clients and routers MUST discard SvrAdvtClose packets with
+incompatible protocol version numbers.  Routers that have sent SvrAdvt
 messages using multiple protocol versions SHOULD send a SvrAdvtClose
 in each of those protocol versions.
 
 The protocol-specific scope limit of the SvrAdvtClose packet MUST be
 set to the highest value sent in a SvrAdvt during the lifetime of the
-server process.  This ensures that the withdrawal notice reaches all
+router process.  This ensures that the withdrawal notice reaches all
 passive discovery clients that might have a cached copy of the
-server's advertisement.
+router's advertisement.
 
 Passive discovery clients MUST monitor such messages and remove all
-advertisements for the specified server (as determined by the server
+advertisements for the specified router (as determined by the router
 identification string) from their cache.
+
+
+
+
+
+
+
+
+.KS
+m4_heading(2, Packet Types)
+
+The Elvin abstract protocol specifies a number of packets used in
+interactions between clients and the router.
+
+.nf 
+  Packet Type                |  Abbreviation |  Usage 
+ ----------------------------+---------------+---------
+  Server Request             |  SvrRqst      |  C -> S
+  Server Advertisement       |  SvrAdvt      |  S -> C
+  Server Advertisement Close |  SvrAdvtClose |  S -> C
+.fi
+.KE
+
+A concrete protocol implementation is free to use the most suitable
+method for distinguishing packet types.  If a packet type number or
+enumeration is used, it SHOULD reflect the above ordering.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 m4_dnl
@@ -506,7 +486,7 @@ m4_heading(2, Use of IPv4)
 m4_heading(3, Marshalling)
 
 The standard Elvin 4 marshalling uses XDR [RFC1832] to encode data.
-Messages sent between the a client and and Elvin server are encoded as
+Messages sent between the a client and and Elvin router are encoded as
 a sequence of encoded XDR types.
 
 This section uses diagrams to illustrate clearly certain segment and
