@@ -26,7 +26,7 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/internet-draft/Attic/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.6 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.7 $
 #
 ################################################################
 
@@ -55,7 +55,7 @@ clean:
 ################################################################
 
 %.txt : %.ms
-	nroff -ms $< | ./fix.pl | sed -e 's/_//g' -e 's/dd mmm/${dd} ${mmm}/g' -e 's/yyyy/${yyyy}/g'  > $@
+	nroff -ms $< | ./fix.pl | sed -e 's/_//g' -e 's/.//g' -e 's/dd mmm/${dd} ${mmm}/g' -e 's/yyyy/${yyyy}/g'  > $@
 
 %.ms : %.m4
 	m4 -P $< > $@
