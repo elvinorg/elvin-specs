@@ -29,3 +29,21 @@ Addison-Wesley, February 1997.
 IEEE,
 "POSIX.1-1990",
 1990.
+
+.IP [RFC2119] 12
+Bradner, S.,
+"Key words for use in RFCs to Indicate Requirement Levels"
+RFC2119, March 1997
+
+.IP [RFC2717] 12
+Rich Petke and Ian King,
+"Registration Procedures for URL Scheme Names"
+RFC2717, November 1999
+
+.IP [RFC2718] 12
+L. Masinter, H. Alvestrand, D. Zigmond, R. Petke,
+"Guidelines for new URL Schemes"
+RFC2718, November 1999
+
+
+RFC2396

@@ -26,7 +26,7 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/elvin-url/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.1 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.2 $
 #
 ################################################################
 
@@ -47,7 +47,7 @@ outline.txt: main.ms
 main.txt: main.ms
 
 main.ms: *.m4
-	m4 -P main.m4 > $@
+	m4 -I.. -P main.m4 > $@
 
 clean:
 	rm -f main.txt main.ms
@@ -61,9 +61,6 @@ clean:
 	m4 -P $< > $@
 
 ################################################################
-
-billstall: main.txt
-	cp main.txt /home/bill/e4/web-public/download/internet-draft.txt
 
 install: main.txt
 	cp main.txt ../draft-arnold-elvin-url-00.txt
