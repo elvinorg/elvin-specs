@@ -20,35 +20,35 @@ The Elvin abstract protocol specifies a number of packets used in
 interactions between clients and the server.
 
 .nf 
------------------------------------------------------------------
-Packet Type                   Abbreviation    Usage   Cast Subset
------------------------------------------------------------------
-Unreliable Notification       UNotify         C -> S    U    A
-Negative Acknowledgement      Nack            S -> C    U    B
-Connect Request               ConnRqst        C -> S    U    B
-Connect Reply                 ConnRply        S -> C    U    B
-Disconnect Request            DisconnRqst     C -> S    U    B
-Disconnect Reply              DisconnRply     S -> C    U    B
-Disconnect                    Disconn         S -> C    U    B
-Security Request              SecRqst         C -> S    U    B
-Security Reply                SecRply         S -> C    U    B
-Notification Emit             NotifyEmit      C -> S    U    B
-Notification Deliver          NotifyDeliver   S -> C    U    B
-Subscription Add Request      SubAddRqst      C -> S    U    B
-Subscription Modify Request   SubModRqst      C -> S    U    B
-Subscription Delete Request   SubDelRqst      C -> S    U    B
-Subscription Reply            SubRply         S -> C    U    B
-Dropped Packet Warning        DropWarn        S -> C    U    B
-Test Connection               TestConn        C -> S    U    B
-Confirm Connection            ConfConn        S -> C    U    B
-Quench Add Request            QnchAddRqst     C -> S    U    C
-Quench Modify Request         QnchModRqst     C -> S    U    C
-Quench Delete Request         QnchDelRqst     C -> S    U    C
-Quench Reply                  QnchRply        S -> C    U    C
-Subscription Add Notify       SubAddNotify    S -> C    U    C
-Subscription Change Notify    SubModNotify    S -> C    U    C
-Subscription Delete Notify    SubDelNotify    S -> C    U    C
------------------------------------------------------------------
+-------------------------------------------------------------
+Packet Type                   Abbreviation    Usage    Subset
+-------------------------------------------------------------
+Unreliable Notification       UNotify         C -> S     A
+Negative Acknowledgement      Nack            S -> C     B
+Connect Request               ConnRqst        C -> S     B
+Connect Reply                 ConnRply        S -> C     B
+Disconnect Request            DisconnRqst     C -> S     B
+Disconnect Reply              DisconnRply     S -> C     B
+Disconnect                    Disconn         S -> C     B
+Security Request              SecRqst         C -> S     B
+Security Reply                SecRply         S -> C     B
+Notification Emit             NotifyEmit      C -> S     B
+Notification Deliver          NotifyDeliver   S -> C     B
+Subscription Add Request      SubAddRqst      C -> S     B
+Subscription Modify Request   SubModRqst      C -> S     B
+Subscription Delete Request   SubDelRqst      C -> S     B
+Subscription Reply            SubRply         S -> C     B
+Dropped Packet Warning        DropWarn        S -> C     B
+Test Connection               TestConn        C -> S     B
+Confirm Connection            ConfConn        S -> C     B
+Quench Add Request            QnchAddRqst     C -> S     C
+Quench Modify Request         QnchModRqst     C -> S     C
+Quench Delete Request         QnchDelRqst     C -> S     C
+Quench Reply                  QnchRply        S -> C     C
+Subscription Add Notify       SubAddNotify    S -> C     C
+Subscription Change Notify    SubModNotify    S -> C     C
+Subscription Delete Notify    SubDelNotify    S -> C     C
+-------------------------------------------------------------
 .fi
 .KE
 
