@@ -142,7 +142,7 @@ cease after one hour.
 Data in Elvin3 packets is marshalled using a string-based format.
 Each data item must be separated from the next using a field separator
 character.
-sh 2 "Integers"
+.sh 2 "Integers"
 .lp
 Integers are represented as a decimal string, with an optional leading
 minus sign.  The total length is restricted to 10 digits, including
@@ -159,29 +159,27 @@ struct int {
 .sh 2 "Floating Point Numbers"
 .lp
 Real numbers are also represented as a decimal string, comprised of
-the optional sign, the whole part, the fractional part and the
-exponent.
+the whole part, the fractional part and the exponent.
 .lp
-Negative numbers start with a minus sign ("-") and are one character
-longer than positive numbers. If the whole part is zero, the string
-must have a leading 0 in front of the decimal point, which must also
-be present.  Otherwise, the whole part must be constrained to a single
-digit, and the exponent adjusted appropriately.
+Negative real numbers are not supported.  Due to an error in the
+marshalling, negative floating point numbers lose the least
+significant digit of their exponent on marshalling.
+.lp
+If the whole part is zero, the string must have a leading 0 in front
+of the decimal point, which must also be present.  Otherwise, the
+whole part must be constrained to a single digit, and the exponent
+adjusted appropriately.
 .lp
 Eight digits of fractional precision must always be present, even if
 zero-valued.  This is followed by a lower-case "e" character, a sign
-character("-" or "+"), and two digits of exponent.
+character("-" or "+"), and two digits of exponent for a total length
+of 14 characters.
 .lp
 It might be useful to note that this can be respresented as "%0.8e" in
 C printf-style formatting.
 .PRE
 struct int {
-  union {
-    byte   positive_whole;
-    struct {
-      byte sign = 0x2d;
-      byte digit;
-    }      negative_whole;
+  byte     positive_whole;
   byte     decimal = 0x2e;
   byte     fractional_part[8];
   byte     exp_char = 0x65;
