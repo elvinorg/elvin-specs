@@ -147,6 +147,8 @@ of identifiers can be encoded using a single byte.
   Standby                       Standby                 129
   Restart                       Restart                 130
   Shutdown                      Shutdown                131
+  Server Status Notify          ServerStatusNotify      132
+  Negative Acknowledge          Nack                    133
 
   Cluster Request               ClusterRqst             160
   Cluster Reply                 ClusterRply             161
@@ -157,9 +159,9 @@ of identifiers can be encoded using a single byte.
   Subscription Add              FedSubAdd               166
   Subscription Modify           FedSubMod               167
   Subscription Delete           FedSubDel               168
-  Federated Notify Forward      FedNotifyFwd            169
+  Cluster Notify                ClusterNotify           169
   Client Redirect               ClientRedirect          170
-
+  Client Disconnect Notify      ClientDisconnNotify     171
   ----------------------------------------------------------------
 .fi
 .KE
@@ -197,6 +199,18 @@ struct ServerStatusNotify {
   id32 status;
 };)m4_dnl
 
+m4_heading(3, Nack)
+
+Return an error result to a requested operation.
+
+m4_pre(
+struct Nack {
+  id32 xid;
+  id32 error_code;
+  string default_template;
+  Value args[]
+};)m4_dnl
+
 m4_heading(3, Activate)
 
 A server process operates in two modes: active, or standby.  A server
@@ -216,19 +230,13 @@ struct Activate {
 m4_heading(3, Standby)
 
 The Standby message forces a server from active into standby mode.
-Any clients currently connected to the server are disconnected and no
-further connections are accepted.
-
-The Standby packet MAY include a redirection specification, allowing
-the server to direct connected clients to a specific alternative
-server.  If the redirection string is zero-length, clients MUST NOT be
-redirected.
+The server MUST withdraw any currently offered protocols, and stop
+accepting client connections.
 
 m4_pre(
 struct Standby {
-  id32  xid;
+  id32 xid;
   id32 server_ids[];
-  string redirection;
 };)m4_dnl
 
 m4_heading(3, Restart)
@@ -237,6 +245,9 @@ Restart the server with the current configuration.  Used to reclaim
 virtual memory space used by a previously busy server process.  This
 spawns a new process from the current process before shutting down the
 current process.
+
+If the server is not currently in standby mode, a ServerActive error
+MUST be returned.
 
 m4_pre(
 struct Restart {
@@ -249,6 +260,9 @@ m4_heading(3, Shutdown)
 Shut down the server.  Once a server has been shut down, it cannot be
 restarted via the Elvin protocols.
 
+If the server is not currently in standby mode, a ServerActive error
+MUST be returned.
+
 m4_pre(
 struct Shutdown {
   id32 xid;
@@ -260,32 +274,14 @@ m4_heading(3, Cluster Request)
 
 On startup, a server's configuration file can direct it to attempt
 connection to a cluster.  If this directive is present, the server
-MUST NOT accept client connections unless it has successfully joined
-the specified cluster.
+MUST NOT accept client connections until it has successfully joined
+the specified cluster and received an Activate packet.
 
 Clusters are identified by a string scope name.  The scope name is a
 UTF8 string, with a maximum length of 255 bytes.
 
 The server uses this packet, multicast to the cluster discovery
-address, to find the cluster controller.
-
-.nf
-*** this must be changed for drop 3
-.fi
-
-The packet requests that the cluster controller allocate the server an
-identifier, and supply its address for further operations.
-
-.nf
-*** i'm not sure whether we need to xid here.  is it possible that we
-*** could have multiple, *different* scoped requests getting a reply
-*** to our unicast address at any one time?  to be really safe, i've
-*** left it in, but ...
-
-*** what we probably do need however is a version header, since this
-*** is likely to be the first packet sent by a server to the cluster
-*** and there could be protocol mismatches.
-.fi
+address, to find the cluster management address.
 
 m4_pre(
 struct ClusterRqst {
@@ -295,14 +291,13 @@ struct ClusterRqst {
   string scope;
 };)m4_dnl
 
-The cluster controller MUST respond with a unicast Cluster Reply or no
-reply at all.
+The cluster MUST respond with a unicast Cluster Reply or no reply at
+all.
 
 m4_heading(3, Cluster Reply)
 
-A unicast response from the cluster controller to a server.  Includes
-the cluster controller's preferred unicast address for further
-interaction.
+A unicast response from the cluster to an enquiring server.  Includes
+the cluster's preferred address for further interaction.
 
 m4_pre(
 struct ClusterRply {
@@ -335,74 +330,64 @@ struct JoinRqst {
 m4_heading(3, Join Reply)
 
 Unicast reply to a server requesting entry to a cluster.  Includes the
-server's unique identifier.
+server's unique identifier and the current subscription database of
+the cluster.
 
 m4_pre(
 struct JoinRply {
   id32 xid;
   id32 server_id;
-};)m4_dnl
-
-m4_heading(3, Leave Request)
-
-Unicast request to the cluster controller to leave a previously joined
-cluster.  This can result from either a local fault at the server
-(ie. process interrupted) or following a Restart or Shutdown request.
-
-The cluster controller will reply with a Leave Reply.
-
-m4_pre(
-struct LeaveRqst {
-  id32 xid;
-};)m4_dnl
-
-m4_heading(3, Leave Reply)
-
-Unicast response from cluster controller.  Indicates a set of
-alternative server to use for client redirect (via Disconn).
-
-m4_pre(
-struct LeaveRply {
-  id32 xid;
-  string urls[];
-};)m4_dnl
-
-
-
-
-m4_heading(3, Subscription Database Request)
-
-Unicast request to the cluster controller for a copy of the current
-subscription database for the cluster.
-
-m4_pre(
-struct SubDBRqst {
-  id32 xid;
-};)m4_dnl
-
-m4_heading(3, Subscription Database Reply)
-
-Unicast reply to a server from the cluster controller.  This is a
-complete copy of the cluster's subscription database at the time it is
-sent.  The client_id and sub_id values include a 32bit server
-identifier prefix.
-
-m4_pre(
-struct SubDBRply {
-  id32 xid;
   struct {
-    int64 sub_id;
+    id64 sub_id;
     SubAST sub_expr;
     boolean accept_insecure;
     Keys keys[];    
   }  subscriptions[];
 };)m4_dnl
 
+m4_heading(3, Leave Request)
 
-m4_heading(3, FedNotifyEmit)
+Unicast request to the cluster controller to leave a previously joined
+cluster.  This SHOULD be generated when the server is locally
+terminated (ie. SIGINT).
+
+The cluster will normally respond with a series of ClusterRedirect
+packets, followed by a Shutdown.  The server should send a
+ServerStatusNotify before the process terminates.
 
 m4_pre(
-struct FedNotifyEmit {
+struct LeaveRqst {
+  id32 server_id;
+};)m4_dnl
+
+m4_heading(3, Cluster Redirect)
+
+Multicast to all servers, the Client Redirect packet specifies a set
+of clients to be disconnected from their current server and
+(optionally) redirected elsewhere.
+
+m4_pre(
+struct ClusterRedirect {
+  id64 client_ids[];
+  string address[];
+};)m4_dnl
+
+The client identifiers are full, 64bit identifiers, containing both a
+server identifier and per-server client identifier.  Multiple clients
+connected to multiple servers can be redirected with a single packet.
+
+The string address list MAY be zero length, in which case the clients
+are disconnected without redirection (using the client Disconn
+packet).  If multiple address values are provided, a server SHOULD
+share the redirection specification across the provided addresses
+approximately evenly using a pseudo-random selection method.
+
+m4_heading(3, ClusterNotify)
+
+m4_pre(
+struct ClusterNotify {
+  id32 server_id;
+  id32 client_id;
   NameValue attributes[];
   boolean deliver_insecure;
   Keys nfn_keys;
@@ -435,6 +420,17 @@ m4_heading(3, FedSubDel)
 m4_pre(
 struct FedSubDel {
   id64 sub_id;
+};)m4_dnl
+
+m4_heading(3, Client Disconnect Notify)
+
+When a client disconnects from a server, the server MUST notify the
+cluster.
+
+m4_pre(
+struct ClientDisconnNotify {
+  id32 server_id;
+  id32 client_id;
 };)m4_dnl
   
 
