@@ -367,6 +367,16 @@ Any (and all) of the expression, add_keys and del_keys field MAY be
 empty.  If all fields are empty, the modification SHALL be considered
 successful.
 
+*** FIXME *** when (if?) the accept_insecure is removed:
+
+Client libraries SHOULD not send SubModRqst's with all of expression,
+add_prime_keys and del_prime_keys as empty.  Server implementations,
+however, MUST still handle such packets by sending a SubRply with the
+subscription_id set to the same value of the subscription_id in the
+SubModRqst.
+
+***
+
 A successful modification of the subscription MUST return a SubRply to
 the client.
 
