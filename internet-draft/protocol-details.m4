@@ -150,15 +150,15 @@ discovery mechanism.
 The client-side of the discovery protocol has two modes of operation:
 passive and active.  During passive discovery, a client caches server
 advertisements observed on the multicast channel(s).  During active
-discovery, clients publicly solict advertisements from servers.
+discovery, clients solict advertisements from servers.
 
 Clients SHOULD implement active discovery and MAY add passive
 discovery for better performance and network utilisation.
 
-A client MAY request that servers advertise their available endpoints
-by multicasting a ServerRequest.  This is called active discovery.  A
-client program SHOULD NOT commence active discovery unless it is
-necessary to satisfy a connection request from the application.
+A client enters active discovery when the client application requests
+solicitation of server advertisements.  A client program SHOULD NOT
+commence active discovery unless it is necessary to satisfy a
+connection request from the application.
 
 m4_pre(
 struct SvrRqst {
@@ -177,9 +177,10 @@ the underlying multicast protocol SHOULD be used.  This is expressed
 as a hop limit whose range of values are mapped onto the underlying
 protocol.
 
-IPv4 multicast MUST use the hop limit setting to set the IP header TTL
-field.  IPv6 multicast MUST use the following table to translate hop
-limit values to multicast scope:
+When using IPv4 multicast, the client MUST use the hop limit setting
+to set the IP header TTL field.  For IPv6 multicast, the client MUST
+use the following table to translate hop limit values to multicast
+scopes.
 
 .KS
 .nf
@@ -211,17 +212,17 @@ from the base value MUST be determined randomly for each packet sent.
 
 .KS
 .nf
-  Hop Limit  |  Minimum Interval
-  ------------------------------
-    initial  |    0.0 seconds
-       0     |    0.4 +/- 0.2
-       1     |    2.0 +/- 1.0
-       2     |    2.0 +/- 1.0
-       4     |    2.0 +/- 1.0
-       8     |    4.0 +/- 2.0
-      16     |    4.0 +/- 2.0
-      32     |    4.0 +/- 2.0
-      64     |    8.0 +/- 4.0
+  Hop Limit  |  Pre-Request Interval
+  -----------------------------------
+    initial  |     0.0 seconds
+       0     |     0.4 +/- 0.2
+       1     |     2.0 +/- 1.0
+       2     |     2.0 +/- 1.0
+       4     |     2.0 +/- 1.0
+       8     |     4.0 +/- 2.0
+      16     |     4.0 +/- 2.0
+      32     |     4.0 +/- 2.0
+      64     |     8.0 +/- 4.0
 .fi
 .KE
 
@@ -233,12 +234,13 @@ be suppressed.
 If the client receives one or more version-compatible SvrAdvt packets
 during the pre-request interval, the SvrRqst MUST be postponed until
 the client application requests that further advertisements be
-solicited (because it cannot connect to the server endpoints so far
-discovered).
+solicited (for example, because it cannot connect to the server
+endpoints so far discovered).
 
-If no requests for further solicitation have been received for five
-minutes, discovery MUST revert to passive mode, and the hop limit and
-pre-request intervals are reset to their starting values.
+If no requests for further solicitation have been received for a
+period five minutes after sending the last SvrRqst, discovery MUST
+revert to passive mode, and the hop limit and pre-request intervals
+are reset to their starting values.
 
 Note that a SvrRqst from a downstream client can cause the suppression
 of a client's own SvrRqst with the same hop limit, even though the
@@ -256,50 +258,50 @@ m4_heading(3, Server Advertisement)
 Servers SHOULD implement server discovery.  A Server Advertisement
 packet SHOULD be sent when the server is started, and MUST be sent
 response to SvrRqst packets received from clients, but MUST NOT be
-sent more often than once every five seconds.
+sent more often than once every two seconds.
 
 m4_pre(
 struct SvrAdvt {
   uint8    major;
   uint8    minor;
-  string   server;
+  boolean  is_default;
   id32     revision;
-  string   scope;
-  boolean  default;
+  string   scope_name;
+  string   server_name;
   string   urls[];
 };)m4_pre
 
-Server Advertisements specify the version of the Elvin protocol which
-defines their content.  A SvrAdvt sent in response to a SvrRqst MUST
-use a compatible protocol version.  Where a server is capable of using
-multiple protocol versions, this can be reflected in the endpoint
-URLs.  Clients and servers MUST discard SvrAdvt packets with
+Server Advertisement packets specify the version of the Elvin protocol
+which defines their format.  A SvrAdvt sent in response to a SvrRqst
+MUST use a compatible protocol version.  Where a server is capable of
+using multiple protocol versions, this can be reflected in the
+endpoint URLs.  Clients and servers MUST discard SvrAdvt packets with
 incompatible protocol versions.
 
-The advertising server is identified by a string name.  Servers MUST
-ensure this name is universally unique over time.  It is RECOMMENDED
-that the combination of the Elvin server's process identifier,
-fully-qualified domain name and starting timestamp are used.  
+The advertising server is identified by a Unicode string name.
+Servers MUST ensure this name is universally unique over time.  It is
+RECOMMENDED that the combination of the Elvin server's process
+identifier, fully-qualified domain name and starting timestamp are
+used.
 
-Clients can identify subsequent advertisements from the same server
-using the value of this string.  The comparison MUST use bitwise
-identity: although the value is Unicode text, character
-characteristics or composition MUST NOT be used in the comparison.
-After the first observed SvrAdvt from a server, additional
-advertisements SHOULD be discarded unless the revision number has
-changed.
+Clients identify subsequent advertisements from the same server using
+the value of this string.  Although the value is Unicode text, the
+comparison MUST use bitwise identity.  After the first observed
+SvrAdvt from a server, additional advertisements SHOULD be discarded
+unless the revision number has changed.
 
 The revision number distinguishes advertisements from the same server,
 reflecting changes in the available protocols.  A server MAY change
 the URLs supplied in the advertisement without modifying the revision
 number as a means of influencing the endpoints used by connecting
 clients.  However, if an endpoint is withdrawn, the server's supported
-scope or the value of is_default are altered, the revision number
-SHOULD be increased to update client's caches.
+scope name or the value of is_default is altered, the revision number
+SHOULD be increased to flush client's caches.
 
-The scope name must be the string scope name for the server.  An empty
-scope name is allowed.  If this scope has been configured to be the
-default scope for a site, the default flag should be set true.
+The scope name is the string scope name for the server.  An empty
+(zero length) scope name is allowed.  If this scope has been
+configured to be the default scope for a site, the default flag should
+be set true.
 
 The set of URLs reflect the endpoints available from the server.  A
 SvrAdvt message SHOULD include all endpoints offered by the server.
