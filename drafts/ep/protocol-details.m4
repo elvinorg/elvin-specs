@@ -491,9 +491,10 @@ packets are waiting for the client to service its connection, the
 server MUST NOT send the ConfConn (since the client's reading of the
 other packets will indicate that its connection is active).
 
-Servers MAY drop ConfConn packets queued for delivery to a client.
-The DropWarn packet will serve to indicate to the client that the
-connection is active. 
+Servers MAY drop ConfConn packets queued for delivery to a client if
+there is any other packet about to be sent to the client.  The client
+MUST use use the fact that any packet arriving from the server indicates
+an active connection.
 
 Clients MUST send a ConfConn in response to a TestConn from the
 server.
