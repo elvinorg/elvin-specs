@@ -233,6 +233,10 @@ Error Code  |  Meaning / Action                    |  Arguments
             |                                      |  function, string
 2109        |  Invalid regular expression          |  offset, int32
             |                                      |  regexp, string
+2110- 2200  |  ( Reserved )                        |  Undefined
+2201        |  Empty quench                        |  None
+2202        |  Attribute exists                    |  name, string
+2203        |  No such attribute                   |  name, string
 2110- 2499  |  ( Reserved )                        |  Undefined
 2500- 2999  |  ( Implementation-specific           |  Undefined
             |    operation failure )               |
