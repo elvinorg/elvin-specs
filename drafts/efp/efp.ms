@@ -210,7 +210,7 @@ struct FedModify {
   SubAST pull_filter;
 };)m4_dnl
 
-The pull_filter MAY NOT exactly reflect the subscription database of the
+The pull_filter MAY be different from the subscription database of the
 sender; for example it MAY be made more general to minimise updates caused
 by minor changes to the local subscription database, and/or it MAY be made
 more specific to prevent importation of notifications known to be unwanted
