@@ -187,6 +187,7 @@ The server begins to accept client connections.
 m4_pre(
 struct Activate {
   id32 xid;
+  id32 server_id;
 };)m4_dnl
 
 m4_heading(3, Standby)
@@ -209,6 +210,7 @@ MUST NOT be redirected
 m4_pre(
 struct Standby {
   id32  xid;
+  id32 server_id;
   string redirection;
 };)m4_dnl
 
@@ -222,6 +224,7 @@ current process.
 m4_pre(
 struct Restart {
   id32 xid;
+  id32 server_id;
 };)m4_dnl
 
 m4_heading(3, Shutdown)
@@ -232,6 +235,7 @@ restarted by a cluster controller.
 m4_pre(
 struct Shutdown {
   id32 xid;
+  id32 server_id;
 };)m4_dnl
 
 
@@ -319,6 +323,33 @@ struct JoinRply {
   id32 xid;
   id32 server_id;
 };)m4_dnl
+
+m4_heading(3, Leave Request)
+
+Unicast request to the cluster controller to leave a previously joined
+cluster.  This can result from either a local fault at the server
+(ie. process interrupted) or following a Restart or Shutdown request.
+
+The cluster controller will reply with a Leave Reply.
+
+m4_pre(
+struct LeaveRqst {
+  id32 xid;
+};)m4_dnl
+
+m4_heading(3, Leave Reply)
+
+Unicast response from cluster controller.  Indicates a set of
+alternative server to use for client redirect (via Disconn).
+
+m4_pre(
+struct LeaveRply {
+  id32 xid;
+  string urls[];
+};)m4_dnl
+
+
+
 
 m4_heading(3, Subscription Database Request)
 
