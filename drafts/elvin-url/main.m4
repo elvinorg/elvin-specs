@@ -22,7 +22,7 @@ m4_include(macros.m4)m4_dnl
 .ds CF Expires in 6 months
 .ds LH Internet Draft
 .ds RH dd mmm yyyy
-.ds CH Elvin URL
+.ds CH Elvin URI Scheme
 .\" hyphenation mode 0
 .hy 0
 .\" adjust left
@@ -37,7 +37,7 @@ Expires: aa bbb cccc                                         dd mmm yyyy
 .ce
 Elvin URI Scheme
 .ce
-draft-arnold-elvin-url-00pre.txt
+draft-arnold-elvin-uri-00pre.txt
 
 m4_heading(1, Status of this Memo)
 
@@ -137,7 +137,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
 document are to be interpreted as described in RFC 2119.
 
 
-m4_heading(1, `URL Scheme Name')
+m4_heading(1, `URI Scheme Name')
 
 The scheme name is: elvin
 
@@ -157,24 +157,39 @@ specification, without elaboration.
 m4_heading(2, `Base Syntax')
 
 The Elvin URI scheme is opaque, and SHOULD NOT be interpreted as
-hierarchical.  It sub-classes the definition of RFC2396 opaque_part to
-define the a scheme-specific opaque part.
+hierarchical.  It sub-classes the definition of RFC2396 'opaque_part'
+to define the scheme-specific opaque part.
 
 m4_pre(
 elvin_opaque_part = [ version ] "/" protocol "/" endpoint [ options ]
 version = 1*digit [ "." 1*digit ]
 )m4_dnl
 m4_dnl
+
+While some uses of the scheme appear to be heirarchical, there is no
+hierarchy of Elvin resources.  The use of a similar syntax to an
+hierarchical authority component within the endpoint is a reflection
+of the similar underlying technologies (ie. DNS host names; Unix
+filesystem paths).
+
 The version specification uses a two part major.minor format to
 describe the protocol version implemented by the described resource.
-Elvin URI exported from an Elvin router MUST include the version
+Elvin URI exported from an Elvin router MUST include the 'version'
 component, describing the implemented protocol.  Where multiple
 versions of the protocol are supported, separate URI MUST be used.
 
-URI supplied to an Elvin client MAY include the version component.  If
-no version is supplied, the SHOULD initiate connection to the
-specified endpoint, and negotiate version compatibility upon
+URI supplied to an Elvin client MAY include the 'version' component.
+If no version is supplied, the client SHOULD initiate connection to
+the specified endpoint, and negotiate version compatibility upon
 connection as described in [EP].
+
+Note that the absence of a 'version' component will cause the
+resulting URI to violate the RFC2396 specification for opaque scheme
+URI, which requires the first character of an opaque URI to be
+'uric_no_slash'.  For this reason, uses of the Elvin URI scheme SHOULD
+always include the 'version' component.  However, for convenience of
+human users, all Elvin URI scheme parsers MUST accept Elvin URI
+without the 'version' component.
 
 m4_pre(
 protocol = protocol_name *( "," protocol_name )
@@ -183,12 +198,12 @@ official_name = alpha *( alphanum | "-" )
 experimental_name = "x-" official_name
 )m4_dnl
 m4_dnl
-The protocol specification describes the stack of protocol modules
+The 'protocol' specification describes the stack of protocol modules
 required to make a connection to the identified resource.  Protocol
 module names must be unique.  Official names are allocated by IANA,
 within the Elvin Protocol registry.
 
-Experimental protocol names should follow the guidelines for official
+Experimental protocol names MUST follow the guidelines for official
 names, within a leading "x-" prefix to distinguish them as an
 unmanaged registry.
 
@@ -198,7 +213,7 @@ option_name = alpha *( unreserved | escaped )
 option_value = *( unreserved | escaped )
 )m4_dnl
 m4_dnl
-The options component is used to define parameters to be interpreted
+The 'options' component is used to define parameters to be interpreted
 by the Elvin client or its protocol modules to select variant
 behaviour required to connect to the Elvin resource.
 
@@ -218,15 +233,16 @@ m4_heading(2, `Unix Endpoint Syntax')
 
 m4_heading(1, `Character Encoding Considerations')
 
-Elvin URLs normally contain only those characters present in the DNS
-names of the hosting servers.  However, it is possible that the URL
+Elvin URI normally contain only those characters present in the DNS
+names of the hosting servers.  However, it is possible that the URI
 options, or a yet to be defined endpoint syntax, could require
-non-ASCII characters.  In such cases, characters should be encoded as
-UTF-8, and represented using the normal URL encoding %xx.
+non-ASCII characters.  In such cases, characters MUST be encoded as
+UTF-8 [RFC2279, UNICODE], and represented using the normal URI escaped
+encoding mechanism [RFC2396].
 
 m4_heading(1, `Intended Usage')
 
-Elvin URLs are normally used in two ways: for specification of an
+Elvin URI are normally used in two ways: for specification of an
 Elvin server in a client application by a human user, and, in
 advertisements of server endpoints emitted by an Elvin server.
 
@@ -268,28 +284,63 @@ Elvin clients should be careful to select only endpoints offered using
 protocols with the desired properties, especially those providing
 appropriate security.
 
-Similarly, administrators of Elvin routers, should be careful to
-ensure that only appropriate combinations of protocols are offered by
-their routers.
+Similarly, administrators of Elvin routers should be careful to ensure
+that only appropriate combinations of protocols are offered by their
+routers.
 
 The ability of client programs to specify both the protocol modules to
 be used, and the address at which that protocol is expected gives
-wide-ranging ability to reach an offered host.
+wide-ranging ability to reach an offered host, but does not provide
+access beyond that which is already available.
 
 m4_heading(1, `IANA Considerations')
+m4_heading(2, `Elvin URI Scheme')
 
-Scheme registration.
+The 'elvin' scheme is not yet registered with IANA, despite its use of
+the IETF tree, as defined in [RFC2717].  
+
+It is intended that the scheme be registered as part of the
+publication of the Elvin protocols.  Registration of a scheme via an
+Informational RFC requires "wide usage" and "demonstrated utility",
+both of which are subject to the discretion of the IESG.
+
+m4_heading(2, `Protocol Modules')
+
+This scheme also defines a registry of 'protocol' module names,
+representing network transport, security, marshalling or other
+functionality able to be used within an Elvin protocol stack, as
+defined in [EP].
+
+This registry is currently maintained by DSTC Pty Ltd.  Procedures for
+registration of new protocol module names can be obtained from the
+contact address in section 17.
 
 m4_heading(1, `Relevant Publications')
 
+The Elvin client protocol [EP] defines an abstract protocol for
+communication between Elvin clients and Elvin routers, and concrete
+protocols for TCP-based transport and XDR-based data marshalling.
+
+A RECOMMENDED extension to [EP] providing automatic router discovery
+is defined in [EDP].
+
+Inter-router protocols for clustering [ERCP] and wide-area routing
+[ERFP] are also available.  Elvin router implementations MAY support
+clustering and SHOULD support federation.
+
 m4_heading(1, `Contact for further information')
 
-elvin@dstc.com
+See section 17 for full contact details.
 
 m4_heading(1, `Author/Change controller')
 
-Elvin
-DSTC
+This specification is a component of the Elvin protocol suite.  Elvin
+specifications are maintained by DSTC Pty Ltd, and change control
+authority is retained by DSTC Pty Ltd, at this time.
+
+Suggested revisions or extensions to this specification should be sent
+to DSTC, at the address listed in section 17.
+
 
 m4_dnl  bibliography
 m4_dnl
@@ -297,11 +348,6 @@ m4_dnl  -*-nroff-mode-*-
 m4_dnl
 .bp
 m4_heading(1, REFERENCES)
-
-.IP [RFC1832] 12
-Srinivasan, R.,
-"XDR: External Data Representation Standard",
-RFC 1832, August 1995.
 
 .IP [RFC2234] 12
 Crocker, D., Overell, P., 
@@ -317,11 +363,6 @@ RFC 2279, January 1998.
 Unicode Consortium, The,
 "The Unicode Standard, Version 2.0",
 Addison-Wesley, February 1997.
-
-.IP [POSIX.1] 12
-IEEE,
-"POSIX.1-1990",
-1990.
 
 .IP [RFC2119] 12
 Bradner, S.,
@@ -356,6 +397,16 @@ Work in progress
 .IP [ERDP] 12
 D.Arnold, et al
 "Elvin Router Discovery Protocol",
+Work in progress
+
+.IP [ERCP] 12
+D.Arnold, et al
+"Elvin Router Clustering Protocol",
+Work in progress
+
+.IP [ERFP] 12
+D.Arnold, et al
+"Elvin Router Federation Protocol",
 Work in progress
 
 .KS
