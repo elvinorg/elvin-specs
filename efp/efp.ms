@@ -239,7 +239,7 @@ The server begins to accept client connections.
 
 m4_pre(
 struct Activate {
-  int32 xid;
+  id32 xid;
 };)m4_dnl
 
 m4_heading(3, Standby)
@@ -261,7 +261,7 @@ MUST NOT be redirected
 
 m4_pre(
 struct Standby {
-  int32  xid;
+  id32  xid;
   string redirection;
 };)m4_dnl
 
@@ -274,7 +274,7 @@ current process.
 
 m4_pre(
 struct Restart {
-  int32 xid;
+  id32 xid;
 };)m4_dnl
 
 m4_heading(3, Shutdown)
@@ -284,7 +284,7 @@ restarted by a cluster controller.
 
 m4_pre(
 struct Shutdown {
-  int32 xid;
+  id32 xid;
 };)m4_dnl
 
 
@@ -322,7 +322,7 @@ identifier, and supply its address for further operations.
 
 m4_pre(
 struct ClusterRqst {
-  int32 xid;  
+  id32 xid;  
   string scope;
 };)m4_dnl
 
@@ -337,7 +337,7 @@ interaction.
 
 m4_pre(
 struct ClusterRply {
-  int32 xid;
+  id32 xid;
   string address;
 };)m4_dnl
 
@@ -350,7 +350,7 @@ the role of advertising server endpoints to client programs.
 
 m4_pre(
 struct JoinRqst {
-  int32 xid; 
+  id32 xid; 
   string server;        /* unique name for server */
   string urls[];        /* set of URLs for server */
 };)m4_dnl
@@ -370,8 +370,32 @@ server's unique identifier.
 
 m4_pre(
 struct JoinRply {
-  int32 xid;
-  int32 server_id;
+  id32 xid;
+  id32 server_id;
+};)m4_dnl
+
+m4_heading(3, Leave Request)
+
+Unicast request to the cluster controller to leave a previously joined
+cluster.  This can result from either a local fault at the server
+(ie. process interrupted) or following a Restart or Shutdown request.
+
+The cluster controller will reply with a Leave Reply.
+
+m4_pre(
+struct LeaveRqst {
+  id32 xid;
+};)m4_dnl
+
+m4_heading(3, Leave Reply)
+
+Unicast response from cluster controller.  Indicates a set of
+alternative server to use for client redirect (via Disconn).
+
+m4_pre(
+struct LeaveRply {
+  id32 xid;
+  string urls[];
 };)m4_dnl
 
 m4_heading(3, Subscription Database Request)
@@ -381,7 +405,7 @@ subscription database for the cluster.
 
 m4_pre(
 struct SubDBRqst {
-  int32 xid;
+  id32 xid;
 };)m4_dnl
 
 m4_heading(3, Subscription Database Reply)
@@ -393,12 +417,12 @@ identifier prefix.
 
 m4_pre(
 struct SubDBRply {
-  int32 xid;
+  id32 xid;
   struct {
     int64 sub_id;
     SubAST sub_expr;
     boolean accept_insecure;
-    opaque keys[];    
+    Keys keys[];    
   }  subscriptions[];
 };)m4_dnl
 
@@ -407,37 +431,46 @@ m4_heading(3, FedNotifyEmit)
 
 m4_pre(
 struct FedNotifyEmit {
+  boolean deliver_insecure;
   NameValue attributes[];
-  opaque prime_keys[];
+  Keys keys;
 };)m4_dnl
 
 m4_heading(3, FedNotifyDeliver)
+
+m4_pre(
+struct FedNotifyDeliver {
+  boolean deliver_insecure;
+  NameValue attributes[];
+  Keys keys;
+};)m4_dnl
+
 m4_heading(3, FedSubAdd)
 
 m4_pre(
 struct FedSubAdd {
-  int64 sub_id;
-  SubAST sub_expr;
+  id64 sub_id;
+  SubAST expr;
   boolean accept_insecure;
-  opaque prime_keys[];
+  Keys keys;
 };)m4_dnl
   
 m4_heading(3, FedSubMod)
 
 m4_pre(
 struct FedSubMod {
-  int64 sub_id;
-  SubAST sub_expr;
+  id64 sub_id;
+  SubAST expr;
   boolean accept_insecure;
-  opaque add_prime_keys[];
-  opaque del_prime_keys[];
+  Keys add_keys;
+  Keys del_keys;
 };)m4_dnl
   
 m4_heading(3, FedSubDel)
 
 m4_pre(
 struct FedSubDel {
-  int64 sub_id;
+  id64 sub_id;
 };)m4_dnl
   
 
