@@ -243,11 +243,11 @@ defined later in this document.
 m4_pre(
 struct ConnRqst {
    int32 xid;
-   int32 client_major_version;
-   int32 client_minor_version;
+   uint8 client_major_version;
+   uint8 client_minor_version;
    NameValue options[];
-   opaque not_keys[];
-   opaque sub_keys[];
+   opaque raw_keys[];
+   opaque prime_keys[];
 };)
 
 m4_heading(3, Connect Reply)
@@ -306,8 +306,8 @@ client that the server is shutting down.
 
 m4_pre(
 struct DisCon {
-  int32 xid;
-  int32 why;
+  int32  xid;
+  int32  why;
   string args;
 };)m4_dnl
 
@@ -352,10 +352,10 @@ sets as an atomic operation.
 m4_pre(
 struct SecRqst {
   int32  xid;
-  opaque not_keys_add[];
-  opaque not_keys_del[];
-  opaque sub_keys_add[];
-  opaque sub_keys_del[];
+  opaque raw_keys_add[];
+  opaque raw_keys_del[];
+  opaque prime_keys_add[];
+  opaque prime_keys_del[];
 };)m4_dnl
 
 It is a protocol error to request the addition of a key already
@@ -399,9 +399,10 @@ notifications which match the supplied subscription expression.
 
 m4_pre(
 struct SubAddRqst {
-  int32 xid;
-  string expression;
-  opaque keys[];
+  int32   xid;
+  string  expression;
+  boolean accept_insecure;
+  opaque  prime_keys[];
 };)m4_dnl
 
 If successful, the server MUST respond with a SubRply.
@@ -423,11 +424,12 @@ or to alter the security keys associated with the subscription.
 
 m4_pre(
 struct SubModRqst {
-  int32 xid;
-  int64 subscription_id;
-  string expression;
-  opaque add_keys[];
-  opaque del_keys[];
+  int32   xid;
+  int64   subscription_id;
+  string  expression;
+  boolean accept_insecure;
+  opaque  add_prime_keys[];
+  opaque  del_prime_keys[];
 };)m4_dnl
 
 Any (and all) of the expression, add_keys and del_keys field MAY be
@@ -469,8 +471,10 @@ subscriptions referring to the specified attributes.
 
 m4_pre(
 struct QnchAddRqst {
-  int32 xid;
-  string names[];
+  int32   xid;
+  string  names[];
+  boolean accept_insecure;
+  opaque  raw_keys[];
 };)m4_dnl
 
 
@@ -481,10 +485,13 @@ attribute names associated with a quench identifier.
 
 m4_pre(
 struct QnchModRqst {
-  int32 xid;
-  int64 quench_id;
-  string names_add[];
-  string names_del[];
+  int32   xid;
+  int64   quench_id;
+  string  names_add[];
+  string  names_del[];
+  boolean accept_insecure;
+  opaque  add_raw_keys[];
+  opaque  del_raw_keys[];
 };)m4_dnl
 
 
@@ -509,7 +516,7 @@ m4_pre(
 struct Notif{
    int32     xid;
    NameValue attributes[];
-   opaque    keys[];
+   opaque    raw_keys[];
 };)m4_dnl
 
 
@@ -521,6 +528,7 @@ m4_pre(
 struct NotifDel{
    int32     xid;
    int64     matching_ids[];
+   boolean   insecure[];
    NameValue attributes[];
 };)m4_dnl
 
@@ -576,10 +584,23 @@ subscriptions matching their registered quench attribute name list.
 
 m4_pre(
 struct SubModNotif {
-  int64 quench_id;
-  int64 sub_id;
-  SubAST sub_expr;
+  int64   quench_id;
+  int64   sub_id;
+  boolean insecure;
+  SubAST  sub_expr;
 };)m4_dnl
+
+This packet indicates that a subscription matching the client's
+specified quench request has been registered at the server, or that a
+previously registered matching subscription has been changed.
+
+A change to the registered subscription expression or a change from
+having no associated keys to having keys (or vice versa) will generate
+this notification.
+
+If the client's quench request did not have the allow_insecure flag
+set, the insecure flag MUST NOT be set. If the insecure flag is set,
+it indicates that the matching subscription has no associated keys.
 
 m4_heading(3, Subscription Removal Notification)
 
@@ -589,9 +610,10 @@ list.
 
 m4_pre(
 struct SubDelNotif {
-  int64 quench_id;
-  int64 sub_id;
+  int64   quench_id;
+  int64   sub_id;
 };)m4_dnl
+
 
 m4_heading(2, Protocol Errors)
 
