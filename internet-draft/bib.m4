@@ -1,10 +1,10 @@
-dnl  bibliography
-dnl
-dnl  -*-nroff-mode-*-
-dnl
-m4_include(macros.m4)dnl
+m4_dnl  bibliography
+m4_dnl
+m4_dnl  -*-nroff-mode-*-
+m4_dnl
+m4_include(macros.m4)m4_dnl
 .bp
-heading(1, REFERENCES)
+m4_heading(1, REFERENCES)
 
 .IP [RFC1832] 12
 Srinivasan, R.,

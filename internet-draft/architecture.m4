@@ -1,9 +1,9 @@
-dnl  architecture.m4
-dnl
+m4_dnl  architecture.m4
+m4_dnl
 m4_include(macros.m4)
-dnl
-heading(1, ARCHITECTURE)
-dnl
+m4_dnl
+m4_heading(1, ARCHITECTURE)
+m4_dnl
 .LP
 describe the basic concepts of notification, subscription, evaluation
 of subscriptions, delivery. 
@@ -12,16 +12,16 @@ Elvin has two components: a client and a server.  Within an Elvin
 system, mutliple clients may exist, supported by a single server.
 
 
-heading(2, Philosophy)
-heading(3, Simplicity)
+m4_heading(2, Philosophy)
+m4_heading(3, Simplicity)
 API, data-types, administration
-heading(3, Speed)
-heading(3, Fail-stop Communications)
-heading(3, Best-effort Reliability)
-heading(3, Use of Multicast)
+m4_heading(3, Speed)
+m4_heading(3, Fail-stop Communications)
+m4_heading(3, Best-effort Reliability)
+m4_heading(3, Use of Multicast)
 
-heading(2, Server)
-heading(2, Client)
-heading(2, Federation)
+m4_heading(2, Server)
+m4_heading(2, Client)
+m4_heading(2, Federation)
 
 

@@ -56,7 +56,7 @@ TABLE OF CONTENTS
 (tdb) (probably last ;-)
 
 .bp
-heading(1, INTRODUCTION)
+m4_heading(1, INTRODUCTION)
 
 Undirected communication, where the sender is unaware of the identity,
 location or even existence of the receiver, is not currently provided
@@ -82,7 +82,7 @@ messages.  It has been show to work on a wide-area scale and is
 designed to complement the existing Internet protocols.
 
 
-heading(1, TERMINOLOGY)
+m4_heading(1, TERMINOLOGY)
 
 This document discusses clients, client libraries, servers, producers,
 consumers, subscription, notification, events and federation.  
@@ -123,7 +123,7 @@ system to scale beyond a single company or network.
             producer or consumer of notifications.
 .fi
 
-heading(2, Notation Conventions)
+m4_heading(2, Notation Conventions)
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
 "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
@@ -138,15 +138,15 @@ m4_include(abstract-protocol.m4)
 
 
 
-heading(2, Protocols)
-heading(3, Marshalling)
-heading(3, Security)
-heading(3, Transport)
+m4_heading(2, Protocols)
+m4_heading(3, Marshalling)
+m4_heading(3, Security)
+m4_heading(3, Transport)
 
-heading(2, Interoperability)
-heading(3, Server Features)
-heading(3, Protocols)
-heading(3, Standard Protocol)
+m4_heading(2, Interoperability)
+m4_heading(3, Server Features)
+m4_heading(3, Protocols)
+m4_heading(3, Standard Protocol)
 
 overview: TCP/SSL, XDR
 
@@ -166,15 +166,15 @@ Additional protocol layers must be proposed and registered via the
 IETF RFC series, either as a revision to this document, or as a
 separate specification.
 
-heading(4, Marshalling)
+m4_heading(4, Marshalling)
 
 m4_include(xdr-encoding.m4)
 
-heading(4, Security)
+m4_heading(4, Security)
 
 null
 
-heading(4, Transport)
+m4_heading(4, Transport)
 
 tcp
 
@@ -187,20 +187,20 @@ The connection is established to a port advertised by the server.
 Once the connection is open, the server must determine the security
 protocol required for the connection.  how?
 
-heading(2, Federation)
-heading(3, Objectives)
-heading(3, Local Area)
-heading(3, Wide Area)
-heading(4, Network Issues)
-heading(4, Security)
+m4_heading(2, Federation)
+m4_heading(3, Objectives)
+m4_heading(3, Local Area)
+m4_heading(3, Wide Area)
+m4_heading(4, Network Issues)
+m4_heading(4, Security)
 
 
-heading(2, Quality of Service)
-heading(3, Fairness)
-heading(3, Policies)
+m4_heading(2, Quality of Service)
+m4_heading(3, Fairness)
+m4_heading(3, Policies)
 
 
-heading(2, Environment)
+m4_heading(2, Environment)
 
 .nf
 ports
@@ -214,7 +214,7 @@ registry
 .fi
 
 
-heading(1, SECURITY CONSIDERATIONS)
+m4_heading(1, SECURITY CONSIDERATIONS)
 
 m4_include(sub-syntax.m4)
 m4_include(c-api.m4)
@@ -224,7 +224,7 @@ m4_include(slp-template.m4)
 m4_include(bib.m4)
 
 .KS
-heading(1, CONTACT)
+m4_heading(1, CONTACT)
 
 Author's Address
 
@@ -248,7 +248,7 @@ Email:  elvin@dstc.edu.au
 .KE
 
 .KS
-heading(1, FULL COPYRIGHT STATEMENT)
+m4_heading(1, FULL COPYRIGHT STATEMENT)
 
 Copyright (C) The Internet Society (1999).  All Rights Reserved.
 

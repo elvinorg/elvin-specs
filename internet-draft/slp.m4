@@ -1,7 +1,7 @@
-dnl  slp
-dnl
+m4_dnl  slp
+m4_dnl
 m4_include(macros.m4)
-heading(2, Service Location)
+m4_heading(2, Service Location)
 .LP
 Elvin 4 will use the Service Location Protocol (SLPv2) to enable
 clients to locate suitable Elvin servers.  The advantages of this

@@ -1,8 +1,8 @@
-dnl sub-syntax
-dnl
-m4_include(macros.m4)dnl
+m4_dnl sub-syntax
+m4_dnl
+m4_include(macros.m4)m4_dnl
 .bp
-heading(1, APPENDIX A - ELVIN SUBSCRIPTION LANGUAGE)
+m4_heading(1, APPENDIX A - ELVIN SUBSCRIPTION LANGUAGE)
 .LP
 The Elvin subscription language is used by clients to select
 notifications for delivery.  This section documents the formal syntax

@@ -1,15 +1,15 @@
-dnl  basic-impl
-dnl
-dnl  this is the basic implementation details
-m4_include(macros.m4)dnl
-dnl
-heading(1, IMPLEMENTATION)
+m4_dnl  basic-impl
+m4_dnl
+m4_dnl  this is the basic implementation details
+m4_include(macros.m4)m4_dnl
+m4_dnl
+m4_heading(1, IMPLEMENTATION)
 .LP
 Throughout the remainder of this document, unless otherwise specified,
 any quantity value is defined to be represented using a signed, 32 bit
 2's complement integer, making the maximum value 2**31 - 1.
 
-heading(2, Data Types)
+m4_heading(2, Data Types)
 
 Elvin defines a set of simple, platform-independent types for
 communication of notification data.  The types have been chosen to
@@ -77,7 +77,7 @@ String and opaque data values have known sizes (ie. they don't use a
 termination character).  An implementation MAY enforce limits on these
 sizes; see section X on Server Features.
 
-heading(2, Notifications)
+m4_heading(2, Notifications)
 
 A notification consists of a sequence of named, typed, attribute
 values.  The client libraries support the creation of notifications
@@ -87,7 +87,7 @@ An implementation MAY limit the number of attributes in a notification
 and/or the total size of the notification data.  See section X on
 Server Features.
 
-heading(3, Notification Attributes)
+m4_heading(3, Notification Attributes)
 
 An attribute name is a string value from a subset of the printable
 ASCII character set.  The maximum length of an attribute name is 1024
@@ -95,7 +95,7 @@ bytes.  An attribute name may have any value comprised of legal
 characters; there are no reserved values.
 
 
-heading(2, Subscriptions)
+m4_heading(2, Subscriptions)
 
 An Elvin consumer client registers a test that the server applies on
 its behalf to each notification delivered to the server. If the test succeeds,
@@ -108,7 +108,7 @@ This test is expressed as a predicate using the Elvin subscription
 language, described in this section.  
 
 
-heading(3, Truth values, Predicates and Logical operators)
+m4_heading(3, Truth values, Predicates and Logical operators)
 
 The result of applying a subscription expression to a notification is
 a truth value, true or false.  However, it should be emphasized that:
@@ -123,7 +123,7 @@ such a conversion to be made explicit, for example
 .QP
 (iHaveBeenNotified != 0)
 
-heading(4, Grouping)
+m4_heading(4, Grouping)
 
 Clauses in an expression may be grouped to override precedence of
 evaluation using parentheses.  Unlike the logical or arithmetic
@@ -135,7 +135,7 @@ in subscription expressions; an expression which exceeds this limit
 MUST generate a NESTING_TOO_DEEP error in response to registration
 with the server.
 
-heading(4, Logical Operators)
+m4_heading(4, Logical Operators)
 
 A subscription expression may be a single predicate, or it may consist
 of multiple predicates composed by logical operators. The logical
@@ -152,7 +152,7 @@ proceeds left to right, stopping as soon as a result is determined
 following by AND, with OR and XOR equal.
 
 .KS
-heading(4, General predicates)
+m4_heading(4, General predicates)
 .LP
 The subscription language defines a number of predicates that return truth
 values.
@@ -206,7 +206,7 @@ Returns true if the type of the attribute is
 .B opaque.
 .KE
 
-heading(3, String predicates)
+m4_heading(3, String predicates)
 
 Some of the most used features of the subscription language are its
 string predicates.  The most general provides regular-expression
@@ -268,13 +268,13 @@ is equivalent to
 There are no predicates for string comparison, i.e. testing whether one
 string "is less than" another string.
 
-heading(3, Operations on International Characters)
+m4_heading(3, Operations on International Characters)
 
 Unicode characters introduce some complexity to the string
 predicates.  Comparison of Unicode characters must consider two
 aspects: character decomposition, and strength of the comparison.
 
-heading(4, Decomposition)
+m4_heading(4, Decomposition)
 
 A single Unicode "character" might consist of a base character
 together with a number of combining characters (such as accents),
@@ -314,7 +314,7 @@ resulting string value.
 Perform compatible (and canonical) decomposition of the supplied string
 and return the resulting string value.
 
-heading(4, Comparison Strength)
+m4_heading(4, Comparison Strength)
 .LP
 There are four "strengths" of comparison defined for Unicode
 characters: identical, primary, secondary and tertiary.  Three string
@@ -335,7 +335,7 @@ characteristics, are identical save for their bitwise representation:
 they have the same base character, case and accents.  Importantly,
 embedded control characters are stripped during tertiary conversion.
 
-heading(3, Numeric predicates)
+m4_heading(3, Numeric predicates)
 
 The numeric predicates are the usual arithmetic comparison operators:
 .IP "==" 4
@@ -390,7 +390,7 @@ implemented using other predicates, like
 .LP
 which can again cause confusion when the attributes are not defined.
 
-heading(3, Numeric functions)
+m4_heading(3, Numeric functions)
 
 The following functions are defined on all three numeric types:
 .IP "+" 4
@@ -427,7 +427,7 @@ Bitwise XOR
 .IP "~" 4
 Bitwise inversion (unary)
 
-heading(3, Numeric type promotion)
+m4_heading(3, Numeric type promotion)
 
 The three numeric types (int32, int64 and real64) may be mixed freely
 in numeric expressions, and Elvin performs automatic type promotions
@@ -448,7 +448,7 @@ Otherwise, if either operand is int64, the promoted type is also int64.
 .IP "3." 3
 Otherwise, both operands must be int32, and no promotion is required.
 
-heading(4, Evaluation errors in numeric expressions)
+m4_heading(4, Evaluation errors in numeric expressions)
 
 During the evaluation of a numeric predicate (including the evaluation of
 any expressions that are the arguments to the predicate), the following
@@ -481,7 +481,7 @@ either argument is NaN. (What about other magic numbers, e.g.
 underflow?) Does 754 specify behaviour of != with NaN, and how does
 that compare to Elvin semantics?
 
-heading(3, Subscription Errors)
+m4_heading(3, Subscription Errors)
 
 Elvin subscriptions are compiled by the server after submission at runtime.
 Various errors are possible; this section documents the error conditions.
@@ -506,7 +506,7 @@ the supplied element identifier contains illegal characters. Remember
 that the first character must be only a letter or underscore.
 
 
-heading(2, Quenching)
+m4_heading(2, Quenching)
 
 description of quenching: problem, what it is, how it works, impact on
 security, impact on federation
