@@ -15,11 +15,11 @@ m4_pre(`
 typedef byte[] opaque;
 
 union Value {
-    int32   i32;   // 4 byte signed integer
-    int64   i64;   // 8 byte signed integer
-    real64  r64;   // 8 byte double precision float
-    string  str;   // length encoded string
-    opaque  blob;  // binary data sequence
+    int32 i32;     // 4 byte signed integer
+    int64 i64;     // 8 byte signed integer
+    real64 r64;    // 8 byte double precision float
+    string str;    // length encoded string
+    opaque bytes;  // binary data sequence
 };
 
 struct NameValue {
@@ -27,6 +27,15 @@ struct NameValue {
     Value   value;
 };
 
+struct Keys {
+    struct KeySetList {
+	int32 list_type;
+	struct KeySet {
+	    opaque keys[];
+	} key_sets[];
+    } key_set_lists[];
+};
+ 
 struct SubASTNode {
     SubAST[] children;
 };
@@ -119,10 +128,10 @@ single UNotify packets to the server.
 
 m4_pre(
 struct UNotify {
-   uint8     client_major_version;
-   uint8     client_minor_version;
-   NameValue attributes[];
-   opaque    raw_keys[];
+    uint8 client_major_version;
+    uint8 client_minor_version;
+    NameValue attributes[];
+    Keys keys;
 };)m4_dnl
 
 m4_heading(3, Negative Acknowledgement)
@@ -134,10 +143,10 @@ operation.
 
 m4_pre(
 struct Nack {
-  int32  xid;
-  int32  error;
-  string message;
-  Value  args[]
+    uint32 xid;
+    int32 error;
+    string message;
+    Value args[]
 };)m4_dnl
 
 m4_heading(3, Connect Request)
@@ -164,12 +173,12 @@ defined later in this document.
 
 m4_pre(
 struct ConnRqst {
-   int32 xid;
-   uint8 client_major_version;
-   uint8 client_minor_version;
-   NameValue options[];
-   opaque raw_keys[];
-   opaque prime_keys[];
+    uint32 xid;
+    uint8 client_major_version;
+    uint8 client_minor_version;
+    NameValue options[];
+    Keys nfn_keys;
+    Keys sub_keys;
 };)m4_dnl
 
 m4_heading(3, Connect Reply)
@@ -179,8 +188,8 @@ Specifies the connection option values agreed by the server.
 
 m4_pre(
 struct ConnRply {
-   int32 xid;
-   NameValue options[];
+    uint32 xid;
+    NameValue options[];
 };)m4_dnl
 
 For each legal option included in the ConnRqst, a matching response
@@ -200,7 +209,7 @@ Sent by client to the Elvin server.  Requests disconnection.
 
 m4_pre(
 struct DisconnRqst {
-  int32 xid;
+    uint32 xid;
 };)m4_dnl
 
 A client MUST send this packet and wait for confirmation via
@@ -226,7 +235,7 @@ to a Disconnect Request, prior to breaking the connection.
 
 m4_pre(
 struct DisconnRply {
-  int32  xid;
+    uint32  xid;
 };)m4_dnl
 
 This MUST be the last packet sent by a server on a connection.  The
@@ -242,8 +251,8 @@ server, or to inform that client that the server is shutting down.
 
 m4_pre(
 struct Disconn {
-  int32  reason;
-  string args;
+    int32  reason;
+    string args;
 };)m4_dnl
 
 .KS
@@ -297,11 +306,11 @@ sets as an atomic operation.
 
 m4_pre(
 struct SecRqst {
-  int32  xid;
-  opaque add_raw_keys[];
-  opaque del_raw_keys[];
-  opaque add_prime_keys[];
-  opaque del_prime_keys[];
+    uint32  xid;
+    Keys add_nfn_keys;
+    Keys del_nfn_keys;
+    Keys add_sub_keys;
+    Keys del_sub_keys;
 };)m4_dnl
 
 It is a protocol error to request the addition of a key already
@@ -313,7 +322,7 @@ Sent by the server to clients to confirm a successful change of keys.
 
 m4_pre(
 struct SecRply {
-  int32 xid;
+    uint32 xid;
 };)m4_dnl
 
 m4_heading(3, Notification Emit)
@@ -327,9 +336,9 @@ supplied, then at least one must match (deliver_insecure is set).
 
 m4_pre(
 struct NotifyEmit {
-   boolean   deliver_insecure;
-   NameValue attributes[];
-   opaque    raw_keys[];
+    boolean deliver_insecure;
+    NameValue attributes[];
+    Keys keys;
 };)m4_dnl
 
 
@@ -339,9 +348,9 @@ Sent by the Elvin server to a client.
 
 m4_pre(
 struct NotifyDeliver {
-   NameValue attributes[];
-   int64     secure_matches[];
-   int64     insecure_matches[];
+    NameValue attributes[];
+    int64 secure_matches[];
+    int64 insecure_matches[];
 };)m4_dnl
 
 m4_heading(3, Subscription Add Request)
@@ -351,10 +360,10 @@ notifications which match the supplied subscription expression.
 
 m4_pre(
 struct SubAddRqst {
-  int32   xid;
-  string  expression;
-  boolean accept_insecure;
-  opaque  prime_keys[];
+    uint32 xid;
+    string expression;
+    boolean accept_insecure;
+    Keys keys;
 };)m4_dnl
 
 If successful, the server MUST respond with a SubRply.
@@ -376,12 +385,12 @@ or to alter the security keys associated with the subscription.
 
 m4_pre(
 struct SubModRqst {
-  int32   xid;
-  int64   subscription_id;
-  string  expression;
-  boolean accept_insecure;
-  opaque  add_prime_keys[];
-  opaque  del_prime_keys[];
+    uint32 xid;
+    int64 subscription_id;
+    string  expression;
+    boolean accept_insecure;
+    Keys add_keys;
+    Keys del_keys;
 };)m4_dnl
 
 Any (and all) of the expression, add_keys and del_keys field MAY be
@@ -422,8 +431,8 @@ subscription identifier is not valid.
 
 m4_pre(
 struct SubDelRqst {
-  int32 xid;
-  int64 subscription_id;
+    uint32 xid;
+    int64 subscription_id;
 };)m4_dnl
 
 m4_heading(3, Subscription Reply)
@@ -433,8 +442,8 @@ subscription change.
 
 m4_pre(
 struct SubRply {
-  int32 xid;
-  int64 subscription_id;
+    uint32 xid;
+    int64 subscription_id;
 };)m4_dnl
 
 m4_heading(3, Quench Add Request)
@@ -444,10 +453,10 @@ subscriptions referring to the specified attributes.
 
 m4_pre(
 struct QnchAddRqst {
-  int32   xid;
-  string  names[];
-  boolean deliver_insecure;
-  opaque  raw_keys[];
+    uint32 xid;
+    string names[];
+    boolean deliver_insecure;
+    Keys keys;
 };)m4_dnl
 
 m4_heading(3, Quench Modify Request)
@@ -457,13 +466,13 @@ attribute names associated with a quench identifier.
 
 m4_pre(
 struct QnchModRqst {
-  int32   xid;
-  int64   quench_id;
-  string  names_add[];
-  string  names_del[];
-  boolean deliver_insecure;
-  opaque  add_raw_keys[];
-  opaque  del_raw_keys[];
+    uint32 xid;
+    int64 quench_id;
+    string names_add[];
+    string names_del[];
+    boolean deliver_insecure;
+    Keys add_keys;
+    Keys del_keys;
 };)m4_dnl
 
 m4_heading(3, Quench Delete Request)
@@ -474,8 +483,8 @@ associated attribute names.
 
 m4_pre(
 struct QnchDelRqst {
-  int32 xid;
-  int64 quench_id;
+    uint32 xid;
+    int64 quench_id;
 };)m4_dnl
 
 m4_heading(3, Quench Reply)
@@ -485,8 +494,8 @@ quench requirements change (QnchAddRqst, QnchModRqst, QnchDelRqst):
 
 m4_pre(
 struct QnchRply {
-  int32   xid;
-  int64   quench_id;
+    uint32 xid;
+    int64 quench_id;
 };)m4_dnl
 
 m4_heading(3, Subscription Add Notification)
@@ -500,10 +509,10 @@ subscription has no associated keys.
 
 m4_pre(
 struct SubAddNotify {
-  int64   quench_ids[];
-  int64   term_id;
-  boolean insecure;
-  SubAST  sub_expr;
+    int64 quench_ids[];
+    int64 term_id;
+    boolean insecure;
+    SubAST sub_expr;
 };)m4_dnl
 
 m4_heading(3, Subscription Modify Notification)
@@ -523,10 +532,10 @@ request.
 
 m4_pre(
 struct SubModNotify {
-  int64   quench_ids[];
-  int64   term_id;
+  int64 quench_ids[];
+  int64 term_id;
   boolean insecure;
-  SubAST  sub_expr;
+  SubAST sub_expr;
 };)m4_dnl
 
 m4_heading(3, Subscription Delete Notification)
@@ -537,7 +546,7 @@ attribute name list for each of the identified quench registrations.
 
 m4_pre(
 struct SubDelNotify {
-  int64   quench_ids[];
-  int64   term_id;
+  int64 quench_ids[];
+  int64 term_id;
 };)m4_dnl
 
