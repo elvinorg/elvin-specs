@@ -45,12 +45,12 @@ m4_pre(
     NotifyEmit     = 56,   NotifyDeliver  = 57,
     SubAddRqst     = 58,   SubModRqst     = 59,
     SubDelRqst     = 60,   SubRply        = 61,
-    DropWarn       = 62
+    DropWarn       = 62,
 
-    QnchAddRqst    = 64,   QnchModRqst    = 65,
-    QnchDelRqst    = 66,   QnchRply       = 67,
-    SubAddNotify   = 68,   SubModNotify   = 69,
-    SubDelNotify   = 70
+    QnchAddRqst    = 80,   QnchModRqst    = 81,
+    QnchDelRqst    = 82,   QnchRply       = 83,
+    SubAddNotify   = 84,   SubModNotify   = 85,
+    SubDelNotify   = 86
 } pkt_id;')
 
 In XDR, enumerations are marshalled as 32 bit integral values.  For
