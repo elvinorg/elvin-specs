@@ -519,16 +519,14 @@ struct Disconn {
 where the defined values for "reason" are
 
 .nf
------------------------------------------------------------------
-Reason  Definition
------------------------------------------------------------------
- 0   Reserved.
- 1   Server is closing down.
- 2   Server is closing this connection, and requests that client
-     makes new connection to server address in "args".  
- 4   Server is closing this connection for repeated protocol errors.
-
----------------------------------------------------------------
+  Reason  |  Definition
+  --------+--------------------------------------------------------
+     0    |  Reserved.
+     1    |  Server is closing down.
+     2    |  Server is closing this connection, and directs the
+          |  client to connect to the server address in "args".  
+     4    |  Server is closing this connection for repeated 
+          |  protocol errors.
 .fi
 .KE
 

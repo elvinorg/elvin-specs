@@ -12,17 +12,18 @@ A server implementation MUST support the following options.  It MAY
 support additional, implementation-specific options.
 
 .KS
-  -----------------------------------------------------------------
-  Name                                   Type     Min  Default Max
-  -----------------------------------------------------------------
-   sub_max                               int32
-   sub_len_max                           int32
-   attribute_max                         int32
-   attribute_name_len_max                int32
-   byte_size_max                         int32
-   string_len_max                        int32
-   opaque_len_max                        int32
-   notif_buffer_min                      int32
-   notif_buffer_drop_policy              int32    (see below)
-  -----------------------------------------------------------------
+.nf
+  Name                        |  Type    |  Min  Default  Max
+  ----------------------------+----------+-------------------------
+  attribute_max               |  int32   |
+  attribute_name_len_max      |  int32   |
+  byte_size_max               |  int32   |
+  lang                        |  string  |   (server defined)
+  notif_buffer_drop_policy    |  int32   |      (see below)
+  notif_buffer_min            |  int32   |
+  opaque_len_max              |  int32   |
+  string_len_max              |  int32   |
+  sub_len_max                 |  int32   |
+  sub_max                     |  int32   |
+.fi
 .KE

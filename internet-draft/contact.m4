@@ -6,7 +6,7 @@ Author's Address
 .nf
 David Arnold
 Julian Boot
-Thomas Maslen
+Michael Henderson
 Ted Phelps
 Bill Segall
 

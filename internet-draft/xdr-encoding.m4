@@ -45,7 +45,8 @@ m4_pre(
     NotifyEmit     = 56,   NotifyDeliver  = 57,
     SubAddRqst     = 58,   SubModRqst     = 59,
     SubDelRqst     = 60,   SubRply        = 61,
-    DropWarn       = 62,
+    DropWarn       = 62,   TestConn       = 63,
+    ConfConn       = 64,
 
     QnchAddRqst    = 80,   QnchModRqst    = 81,
     QnchDelRqst    = 82,   QnchRply       = 83,
