@@ -38,10 +38,10 @@ length, the implementation MUST reset the TCP connection.  Note that
 the use of a 4 octet header puts an upper limit on this size.  Elvin
 clients SHOULD negotiate the maximum packet length during connection.
 
-An open TCP connection may be closed only between the packet data, and
-the following framing header.  If the connection is lost mid-packet,
-it MUST be reported to the abstract protocol layer as a protocol
-error.
+An open TCP connection may be closed only between the last byte of
+packet data, and the following framing header.  If the connection is
+lost mid-packet, it MUST be reported to the abstract protocol layer as
+a protocol error.
 
 m4_heading(4, Use of Proxies)
 
