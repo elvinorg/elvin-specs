@@ -3,7 +3,7 @@ m4_dnl
 m4_dnl              Elvin Router Disoovery Protocol
 m4_dnl
 m4_dnl File:        $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/edp/main.m4,v $
-m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.3 $
+m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.4 $
 m4_dnl Copyright:   (C) 2000-2001, DSTC Pty Ltd.
 m4_dnl
 m4_dnl This specification may be reproduced or transmitted in any form or by
@@ -107,7 +107,7 @@ clients using a variety of protocol stacks and points of attachment.
 Each of these endpoints can be succinctly described using an Elvin URI
 [EURI].
 
-Configuring Elvin clients to connect using an appropriate URL is a
+Configuring Elvin clients to connect using an appropriate URI is a
 variation of a common problem.  The Elvin Router Discovery Protocol
 provides a means of locating a suitable point of attachment to an
 Elvin router that does not require external infrastructure support, in
@@ -146,31 +146,31 @@ This problem is shared by many other systems, and common mechanisms
 have been implemented to resolve it in various ways suited to various
 circumstances.  These methods include manual (or static)
 configuration, the Service Location Protocol [RFC2608], Dynamic Host
-Configuration Protocol [RFCxxxx] or use of a directory service, such a
-LDAP [RFCxxxx].  Common to all these mechanisms is an external system
+Configuration Protocol [RFC2131] or use of a directory service, such a
+LDAP [RFC2251].  Common to all these mechanisms is an external system
 that provides the location mechanism, some of which also require human
 intervention.
 
 This document describes a lightweight discovery mechanism that does
-not require external infrastructure or configuration.  It can be used
-independently or in conjunction with other discovery or location
-services as required.
+not require external infrastructure, administrator privileges or
+manual configuration.  It can be used independently or in conjunction
+with other discovery or location services as required.
 
 The Elvin Router Discovery Protocol (ERDP) is an extension of the base
-Elvin Protocol.  It is OPTIONAL for Elvin clients, and RECOMMENDED for
-Elvin router implementations.
+Elvin Protocol [EP].  It is OPTIONAL for Elvin clients, and
+RECOMMENDED for Elvin router implementations.
 
 Interactions between ERDP and the Elvin clustering protocol are not
 discussed in this specification, but are included in [ERCP].
 m4_dnl
 m4_dnl
-m4_heading(1, Protocol Description)
+m4_heading(1, Protocol)
 
-ERDP uses multicast (or if multicast is not available, link-local
-broadcast) to allow Elvin clients to solicit advertisements of
-available endpoints from Elvin routers.  It controls the scope of the
-multicast to implement an expanding search, looking progressively
-further away (in network terms) for a suitable router.
+The basic principle of the discovery protocol is that clients solicit
+advertisements from routers, and routers respond, advertising their
+available endpoint URI.  The client can examine the URI as they are
+discovered, discarding or selecting a particular router and point of
+attachment using whatever criteria are applicable.
 
 m4_changequote({,})m4_dnl
 .KS
@@ -183,8 +183,20 @@ m4_changequote({,})m4_dnl
 .KE
 m4_changequote(`,')m4_dnl
 
-Routers advertise their available endpoints and service properties
-using the same multicast scope and address.  
+Both the solicitation and the resulting advertisments use a multicast
+transport.  The use of multicast for the advertisements allows active
+clients to maintain a cache of available routers, to be used for
+future connection attempts.
+
+The protocol manipulates the scope of the multicast packets to control
+the locality of solicitation and advertisement.  This enables router
+and client configuration to match network topologies, and minimises
+the impact of the discovery traffic.
+
+In addition to responses to solicitations, routers advertise their
+availability on startup, and whenever their offered configuration
+changes.  A separate withdrawal packet is used to cancel the previous
+advertisements, normally on router shutdown.
 
 m4_changequote({,})m4_dnl
 .KS
@@ -195,49 +207,98 @@ m4_changequote({,})m4_dnl
   |  Consumers  |-+   <--'                +---------+  ADVERTISEMENT
   +-------------+                                         WITHDRAWAL
 .KE
-m4_changequote(`,')
-
-The progressive expansion of the multicast request scope, careful use
-of timeouts, and advertisement caching minimise the client traffic
-used to locate routers.
+m4_changequote(`,')m4_dnl
 m4_dnl
+m4_heading(2, Selecting Router URI)
+
+Client libraries can expose the advertised URI to client applications,
+enabling them to select a particular endpoint on the basis of protocol
+stack, endpoint address or other properties of the URI itself.
+
+But these properties pertain only to the specific endpoint, not the
+router.  Advertisement packets contain two properties of the router
+itself used by the client to select a URI: a scope name and a default
+flag.
+m4_dnl
+m4_heading(3, Scope Names)
+
+Scope names provide a means of selecting specifically provisioned
+Elvin routers without knowledge of their location or identity.
+
+A router MUST advertise a ``scope name''.  A scope name is a UTF-8
+encoded character string.  It MUST NOT contain the colon character
+(UTF-8 0000 003a hexadecimal, from the US-ASCII repertoire).  Scope
+names MAY be zero-length.
+
+A client configured with an Elvin scope name MUST NOT connect to an
+endpoint of a discovered router not advertising itself as a provider
+of that scope.
+
+The use of scope names retains the location transparency of dynamic
+router discovery, while giving a simple means of provisioning multiple
+Elvin routers or router networks, within a LAN environment.
+
+Note that while there are no explicit semantics associated with a
+scope name in the discovery protocol, the Elvin Router Clustering
+Protocol requires that all routers in a cluster provide the same named
+scope [ERCP].
+m4_dnl
+m4_heading(3, Default Routers)
+
+In addition to the scope name, a router MAY advertise itself as a
+default router.  Clients not configured with a scope name but using
+router discovery to obtain router URI, MUST ignore all advertisements
+without the ``default'' flag set.
+
+This mechanism is the simplest means for a client to find its local
+router.  The expanding search will search in an increasing radius from
+the client's network location, and return the discovered routers URI.
 m4_dnl
 m4_heading(2, Abstract Protocol Definitions)
 
-ERDP is specified at two levels: an abstract description, able to be
-implemented using different marshalling and transport protocols, and a
-concrete specification of one such implementation, defined as a
-standard protocol for IPv4 networks.
-
-This section provides detailed descriptions of each packet used in the
-Elvin protocol. Packets are comprised from a set of simple base types
-and described in a pseudo-C style as structs made up of these types.
+The discovery protocol is specified at two levels: an abstract
+description, able to be implemented using different marshalling and
+transport protocols, and a concrete specification of one such
+implementation, defined as a standard protocol for IPv4 networks.
 
 .KS
-The following definition is used in several packets:
+The abstract protocol specifies three packets used in discovery
+interactions between clients and routers.
+
+.nf 
+  Packet Type                      |  Abbreviation |  Usage 
+ ----------------------------------+---------------+---------
+  Router Solicitiation Request     |  SvrRqst      |  C -> R
+  Router Advertisement             |  SvrAdvt      |  R -> C
+  Router Advertisement Withdrawal  |  SvrAdvtClose |  R -> C
+.fi
+.KE
+
+A concrete protocol implementation is free to use the most suitable
+method for distinguishing packet types.  If a packet type number or
+enumeration is used, it SHOULD reflect the above ordering.
+
+.KS
+Packets are described using a set of simple base types in a pseudo-C
+style as structures composed of these types.  The following definition
+is used in several packets:
 m4_pre(`
 typedef uint32 id32;
 ')m4_dnl
-This type is opaque 32-bit identifier.  No semantics is required other
-than bitwise comparison.  In all cases, a value of all zero bits is
-reserved.
+This type is an opaque 32-bit identifier.  No semantics is required
+other than bitwise comparison.  In all cases, a value of all zero bits
+is reserved.
 
 Concrete protocol implementations are free to use any type capable of
 holding the required number of bits for these values.  In particular,
 the signedness of the underlying type does not matter.
-
-m4_dnl
-m4_dnl
-m4_dnl
-m4_dnl
-
 .KE
-m4_heading(2, Router Requests)
+m4_heading(3, Router Solicitation Request)
 
 The client-side of the discovery protocol has two modes of operation:
-passive and active.  During passive discovery, a client caches router
-advertisements observed on the multicast channel(s).  During active
-discovery, clients solict advertisements from routers.
+passive and active.  During passive discovery, a client caches
+onserved router advertisements.  During active discovery, clients
+explicitly solict advertisements from routers.
 
 Clients SHOULD implement active discovery and MAY add passive
 discovery for better performance and network utilisation.
@@ -247,22 +308,197 @@ solicitation of router advertisements.  A client program SHOULD NOT
 commence active discovery unless it is necessary to satisfy a
 connection request from the application.
 
+During active discovery, router solicitation requests are multicast
+such that all active clients and routers observe the request packet.
+
 m4_pre(
 struct SvrRqst {
-  uint8  major;
-  uint8  minor;
-  uint8  hop_limit;
+  uint8  major_version;
+  uint8  minor_version;
+  uint8  locality;
 };)m4_dnl
 
-Clients and routers MUST discard SvrRqst packets with incompatible
-protocol version numbers.  Protocols are compatible when major version
-numbers are the same, and the client's minor version is equal to or
-less than the minor version of the advertisement.
+Both clients and routers MUST discard SvrRqst packets with
+incompatible protocol version numbers.  Protocols are defined to be
+compatible when the major version numbers are the same, and the
+client's minor version is equal to or less than the minor version of
+the SvrRqst packet.
+
+The protocol described in this document is major version 4 and minor
+version 0.
 
 To control the propagation of SvrRqst packets, a scoping mechanism for
 the underlying multicast protocol SHOULD be used.  This is expressed
-as a hop limit whose range of values are mapped onto the underlying
-protocol.
+as a locality attribute whose range of values are mapped onto the
+underlying protocol.
+
+SvrRqst packets MUST have an initial locality between 0 and 15, and
+SHOULD default to zero.  Values used SHOULD come from the set defined
+below.
+
+To reduce packet storms when many clients simultaneously attempt to
+find a router (such as when an existing router crashes, or hourly
+batch jobs start), a client MUST wait before sending a SvrRqst and
+only send its own request if no other requests (from other clients)
+are observed during the waiting period.
+
+For a given locality value, the waiting period before sending the
+SvrAdvt MUST NOT be less than the intervals defined below, and the
+random variation from the base value MUST be re-calculated every time
+a SvrRqst is sent.
+
+.KS
+.nf
+  Pre-Request Interval  |  Locality
+  ----------------------+-----------
+       0.0 seconds      |      0
+       0.4 +/- 0.2      |      1
+       2.0 +/- 1.0      |      2
+       2.0 +/- 1.0      |      4
+       2.0 +/- 1.0      |      8
+       4.0 +/- 2.0      |     16
+       4.0 +/- 2.0      |     32
+       8.0 +/- 4.0      |     64
+.fi
+.KE
+
+If a version-compatible SvrRqst from another client with equal or
+greater locality than that to be used for the next SvrRqst is observed
+during the pre-request interval, sending of the SvrRqst MUST be
+suppressed.
+
+If the client receives one or more version-compatible advertisment
+(SvrAdvt) packets during the pre-request interval, the SvrRqst MUST be
+postponed until the client application requests that further
+advertisements be solicited (for example, because it cannot connect to
+the router endpoints discovered so far).
+
+If no requests for further solicitation have been received for a
+period of five minutes after sending the last SvrRqst, discovery MUST
+revert to passive mode, and the locality and pre-request intervals are
+reset to their starting values.
+
+Note that a SvrRqst from a downstream client can cause the suppression
+of a client's own SvrRqst with the same locality value, even though
+the downstream SvrRqst's locality is exhausted, thus preventing the
+client's SvrRqst from reaching an upstream router that is within the
+range of its locality value.
+
+However, either of the two clients' next SvrRqst (with higher locality
+value) will reach the router, and while the immediate client loses one
+interval period, it has no permanent impact.  
+
+This could be avoided by allowing the client to compare the packet's
+locality value with the current concrete protocol equivalent, but this
+facility is not widely support by available multicast protocols.  For
+example, in IPv4, the locality value maps to the IP TTL field, but the
+ability to examine the TTL of a received UDP packet is not supported
+by the IPv4 socket API.
+
+m4_heading(2, Router Advertisements)
+
+A router advertisement packet SHOULD be sent when the router is
+started, and MUST be sent in response to version-compatible SvrRqst
+packets received from clients, except, that it MUST NOT be sent more
+often than once every two seconds.
+
+m4_pre(
+struct SvrAdvt {
+  uint8    major_version;
+  uint8    minor_version;
+  boolean  default_flag;
+  id32     revision;
+  string   scope_name;
+  string   server_name;
+  string   urls[];
+};)m4_pre
+
+Router advertisement packets specify the version of the discovery
+protocol which defines their format.  A SvrAdvt sent in response to a
+SvrRqst MUST use a compatible protocol version.  Where a router is
+capable of using multiple Elvin protocol versions, this can be
+reflected in the endpoint URI.  Clients and routers MUST discard
+SvrAdvt packets with incompatible protocol versions.
+
+The advertising router is identified by a Unicode string name.
+Routers MUST ensure this name is universally unique over time.  It is
+RECOMMENDED that the combination of the Elvin router's process
+identifier, fully-qualified domain name and starting timestamp are
+used.  The bitwise value of a router's name MUST NOT change during its
+execution.
+
+Clients identify subsequent advertisements from the same router using
+the value of this string.  Although the value is Unicode text, the
+comparison MAY use bitwise identity.  After the first observed SvrAdvt
+from a router, additional advertisements SHOULD be discarded unless
+the revision number has changed.
+
+The revision number distinguishes advertisements from the same router,
+reflecting changes in the available protocols.  If an endpoint is
+withdrawn, the router's supported scope name or the value of the
+default flag is altered, the revision number SHOULD be increased to
+flush client's caches.
+
+A router MAY add additional URI or change the order of URI supplied in
+the advertisement without modifying the revision number as a means of
+influencing the endpoints selected by connecting clients.
+
+The scope name is the UTF-8 encoded scope name for the router.  The
+scope name MAY be empty (zero length).
+
+The set of URI reflect the endpoints available from the router.  A
+SvrAdvt message SHOULD include all endpoints offered by the router.
+Where the limitations of the underlying concrete protocol prevent
+this, the router cannot advertise all its endpoints.  Each SvrAdvt
+MUST contain at least one URI.
+
+Note that the URI included in a SvrAdvt MAY specify multiple protocol
+versions if the advertising router is capable of supporting this.  The
+version information in the SvrAdvt body does not imply that the router
+necessarily supports that protocol version alone, or indeed at all.
+
+The transmission of the initial SvrAdvt packet MUST use an equivalent
+locality limit not exceeding 64 (one quarter of the available range).
+SvrAdvt packets sent in response to a SvrRqst MUST set the
+protocol-specific locality limit to that specified in the received
+SvrRqst.  A router MUST remember the highest locality value it has
+sent for use when withdrawing its advertisement.
+ 
+m4_heading(3, Router Advertisement Withdrawal)
+
+A router shutting down SHOULD send a Router Advertisement Withdrawal
+message.
+
+struct SvrAdvtClose {
+  uint8    major_version;
+  uint8    minor_version;
+  string   server;
+}
+
+Clients and routers MUST discard SvrAdvtClose packets with
+incompatible protocol version numbers.  Routers that have sent SvrAdvt
+messages using multiple protocol versions SHOULD send a SvrAdvtClose
+in each of those protocol versions.
+
+The protocol-specific locality limit of the SvrAdvtClose packet MUST be
+set to the highest value sent in a SvrAdvt during the lifetime of the
+router process.  This ensures that the withdrawal notice reaches all
+passive discovery clients that might have a cached copy of the
+router's advertisement.
+
+Passive discovery clients MUST monitor such messages and remove all
+advertisements for the specified router (as determined by the router
+identification string) from their cache.
+
+
+
+
+
+
+
+
+
+
 
 When using IPv4 multicast, the client MUST use the hop limit setting
 to set the IP header TTL field.  For IPv6 multicast, the client MUST
@@ -282,185 +518,6 @@ scopes.
 .KE
 
 Other protocols SHOULD interpret this value as appropriate.
-
-SvrRqst packets MUST have an initial hop limit between 0 and 15, and
-SHOULD default to zero.  Values used SHOULD come from the set defined
-below.
-
-To reduce packet storms when many clients simultaneously attempt to
-find a router (such as when an existing router crashes, or hourly
-batch jobs start), a client MUST wait before sending a SvrRqst and
-only send its own request if no others (from other clients) are
-observed during the waiting period.  
-
-For a given hop limit, the waiting period before sending the SvrAdvt
-MUST NOT be less than the intervals defined below, and the random
-variation from the base value MUST be re-calculated every time a
-SvrRqst is sent.
-
-.KS
-.nf
-  Pre-Request Interval  |  Hop Limit
-  ----------------------+-----------
-       0.0 seconds      |      0
-       0.4 +/- 0.2      |      1
-       2.0 +/- 1.0      |      2
-       2.0 +/- 1.0      |      4
-       2.0 +/- 1.0      |      8
-       4.0 +/- 2.0      |     16
-       4.0 +/- 2.0      |     32
-       8.0 +/- 4.0      |     64
-.fi
-.KE
-
-If a version-compatible SvrRqst from another client with equal or
-greater hop limit than that to be used for the next SvrRqst is
-observed during the pre-request interval, sending of the SvrRqst MUST
-be suppressed.
-
-If the client receives one or more version-compatible SvrAdvt packets
-during the pre-request interval, the SvrRqst MUST be postponed until
-the client application requests that further advertisements be
-solicited (for example, because it cannot connect to the router
-endpoints so far discovered).
-
-If no requests for further solicitation have been received for a
-period five minutes after sending the last SvrRqst, discovery MUST
-revert to passive mode, and the hop limit and pre-request intervals
-are reset to their starting values.
-
-Note that a SvrRqst from a downstream client can cause the suppression
-of a client's own SvrRqst with the same hop limit, even though the
-downstream SvrRqst's hop limit is exhausted, thus preventing the
-client's SvrRqst from reaching an upstream router that is within that
-scope.  However, either of the two client's next SvrRqst (with higher
-hop limit) will reach the router, and while the immediate client loses
-one interval period, it has no permanent impact.  This could be
-avoided by allowing the client to compare the hop limit with the
-current hop count in the packet, but this is even more
-protocol-specific, and not supported by the IPv4 socket API.
-
-m4_heading(2, Advertisements)
-
-A Server Advertisement packet SHOULD be sent when the router is
-started, and MUST be sent response to SvrRqst packets received from
-clients, but MUST NOT be sent more often than once every two seconds.
-
-m4_pre(
-struct SvrAdvt {
-  uint8    major;
-  uint8    minor;
-  boolean  is_default;
-  id32     revision;
-  string   scope_name;
-  string   server_name;
-  string   urls[];
-};)m4_pre
-
-Server Advertisement packets specify the version of the Elvin protocol
-which defines their format.  A SvrAdvt sent in response to a SvrRqst
-MUST use a compatible protocol version.  Where a router is capable of
-using multiple protocol versions, this can be reflected in the
-endpoint URLs.  Clients and routers MUST discard SvrAdvt packets with
-incompatible protocol versions.
-
-The advertising router is identified by a Unicode string name.
-Routers MUST ensure this name is universally unique over time.  It is
-RECOMMENDED that the combination of the Elvin router's process
-identifier, fully-qualified domain name and starting timestamp are
-used.
-
-Clients identify subsequent advertisements from the same router using
-the value of this string.  Although the value is Unicode text, the
-comparison MUST use bitwise identity.  After the first observed
-SvrAdvt from a router, additional advertisements SHOULD be discarded
-unless the revision number has changed.
-
-The revision number distinguishes advertisements from the same router,
-reflecting changes in the available protocols.  A router MAY change
-the URLs supplied in the advertisement without modifying the revision
-number as a means of influencing the endpoints used by connecting
-clients.  However, if an endpoint is withdrawn, the router's supported
-scope name or the value of is_default is altered, the revision number
-SHOULD be increased to flush client's caches.
-
-The scope name is the string scope name for the router.  An empty
-(zero length) scope name is allowed.  If this scope has been
-configured to be the default scope for a site, the default flag should
-be set true.
-
-The set of URLs reflect the endpoints available from the router.  A
-SvrAdvt message SHOULD include all endpoints offered by the router.
-Where the limitations of the underlying concrete protocol prevent
-this, the router cannot advertise all its endpoints.  Each SvrAdvt
-MUST contain at least one URL.
-
-Note that the URLs included in a SvrAdvt MAY specify multiple protocol
-versions if the advertising router is capable of supporting this.  The
-version information in the SvrAdvt body does not imply that the router
-necessarily supports that protocol version alone, or indeed at all.
-
-The protocol-specific scope limit of the initial SvrAdvt packet SHOULD
-be configured in the router configuration parameters and MUST NOT
-exceed 64.  SvrAdvt packets sent in response to a SvrRqst MUST set the
-protocol-specific scope limit to the hop limit in the received
-SvrRqst.  A router MUST remember the highest hop limit value it has
-sent for use when withdrawing its advertisement.
- 
-m4_heading(3, Server Advertisement Close)
-
-A router shutting down SHOULD send a Server Advertisement Close
-message.
-
-struct SvrAdvtClose {
-  uint8    major;
-  uint8    minor;
-  string   server;
-}
-
-Clients and routers MUST discard SvrAdvtClose packets with
-incompatible protocol version numbers.  Routers that have sent SvrAdvt
-messages using multiple protocol versions SHOULD send a SvrAdvtClose
-in each of those protocol versions.
-
-The protocol-specific scope limit of the SvrAdvtClose packet MUST be
-set to the highest value sent in a SvrAdvt during the lifetime of the
-router process.  This ensures that the withdrawal notice reaches all
-passive discovery clients that might have a cached copy of the
-router's advertisement.
-
-Passive discovery clients MUST monitor such messages and remove all
-advertisements for the specified router (as determined by the router
-identification string) from their cache.
-
-
-
-
-
-
-
-
-.KS
-m4_heading(2, Packet Types)
-
-The Elvin abstract protocol specifies a number of packets used in
-interactions between clients and the router.
-
-.nf 
-  Packet Type                |  Abbreviation |  Usage 
- ----------------------------+---------------+---------
-  Server Request             |  SvrRqst      |  C -> S
-  Server Advertisement       |  SvrAdvt      |  S -> C
-  Server Advertisement Close |  SvrAdvtClose |  S -> C
-.fi
-.KE
-
-A concrete protocol implementation is free to use the most suitable
-method for distinguishing packet types.  If a packet type number or
-enumeration is used, it SHOULD reflect the above ordering.
-
-
-
 
 
 
@@ -731,20 +788,55 @@ m4_dnl
 .bp
 m4_heading(1, References)
 
+.IP [EP] 12
+D. Arnold, J. Boot, T. Phelps, B. Segall,
+"Elvin Client Protocol",
+Work in progress
+
+.IP [ERCP] 12
+D. Arnold, J. Boot, T. Phelps,
+"Elvin Router Clustering Protocol",
+Work in progress
+
+.IP [EURI] 12
+D. Arnold, J. Boot, T. Phelps, B. Segall,
+"Elvin URI Scheme",
+Work in progress
+
 .IP [RFC1832] 12
-Srinivasan, R.,
+R. Srinivasan,
 "XDR: External Data Representation Standard",
 RFC 1832, August 1995.
 
+.IP [RFC2119] 12
+S. Bradner,
+"Key words for use in RFCs to Indicate Requirement Levels"
+RFC2119, March 1997
+
+.IP [RFC2131] 12
+R. Droms,
+"Dynamic Host Configuration Protocol",
+RFC 2131, March 1997.
+
 .IP [RFC2234] 12
-Crocker, D., Overell, P., 
+D. Crocker, P. Overell,
 "Augmented BNF for Syntax Specifications: ABNF", 
 RFC 2234, November 1997.
 
+.IP [RFC2251] 12
+M. Wahl, T. Howes, S. Kille,
+"Lightweight Directory Access Protocol (v3)",
+RFC 2251, December 1997
+
 .IP [RFC2279] 12
-Yergeau, F.,
+F. Yergeau,
 "UTF-8, a transformation format of ISO 10646",
 RFC 2279, January 1998.
+
+.IP [RFC2608] 12
+E. Guttmann, C.Perkins, J. Veizades, M. Day,
+"Service Location Protocol, Version 2",
+RFC2608, June 1999.
 
 .IP [UNICODE] 12
 Unicode Consortium, The,
