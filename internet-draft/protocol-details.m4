@@ -148,12 +148,12 @@ Clients MAY and servers SHOULD implement this automatic server
 discovery mechanism.
 
 The client-side of the discovery protocol has two modes of operation:
-passive and active.  During passive discovery, a client caches, for
-possible future use, server advertisements as observed on the
-multicast channel(s).  During active discovery, clients publicly
-solict advertisements from servers.  Clients SHOULD implement active
-discovery and MAY add passive discovery for better performance and
-network utilisation.
+passive and active.  During passive discovery, a client caches server
+advertisements observed on the multicast channel(s).  During active
+discovery, clients publicly solict advertisements from servers.
+
+Clients SHOULD implement active discovery and MAY add passive
+discovery for better performance and network utilisation.
 
 A client MAY request that servers advertise their available endpoints
 by multicasting a ServerRequest.  This is called active discovery.  A
@@ -172,24 +172,24 @@ protocol version numbers.  Protocols are compatible when major version
 numbers are the same, and the client's minor version is equal to or
 less than the minor version of the advertisement.
 
-To control the propagation of SvrRqst packets, the scoping mechanism
-of the underlying protocol SHOULD be used.  This is expressed as a hop
-limit whose range of values are mapped onto the underlying multicast
-protocol.  
+To control the propagation of SvrRqst packets, a scoping mechanism for
+the underlying multicast protocol SHOULD be used.  This is expressed
+as a hop limit whose range of values are mapped onto the underlying
+protocol.
 
-IPv4 multicast MUST use the hop limit setting directly to set the IP
-header TTL field.  IPv6 multicast MUST use the following table to
-translate hop limit values to multicast scope:
+IPv4 multicast MUST use the hop limit setting to set the IP header TTL
+field.  IPv6 multicast MUST use the following table to translate hop
+limit values to multicast scope:
 
 .KS
 .nf
   Hop Limit  |  IPv6 Scope (and Name)
   -----------+---------------------------------
-       0     |      1      (node)
-       1     |      2      (link-local)
+        0    |      1      (node)
+        1    |      2      (link-local)
      2-15    |      5      (site-local)
-    16-32    |      8      (organisation-local)
-   33-255    |     14      (global)
+    16-31    |      8      (organisation-local)
+   32-255    |     14      (global)
 .fi
 .KE
 
@@ -199,63 +199,57 @@ SvrRqst packets MUST have an initial hop limit between 0 and 15, and
 SHOULD default to zero.  Values used SHOULD come from the set defined
 below.
 
+To reduce packet storms when many clients simultaneously attempt to
+find a server (such as when an existing server crashes, or hourly
+batch jobs start), a client MUST wait before sending a SvrRqst and
+only send its own request if no others (from other clients) are
+observed during the waiting period.  
+
+For a given hop limit, the waiting period before sending the SvrAdvt
+MUST NOT be less than the intervals defined below, and the variation
+from the base value MUST be determined randomly for each packet sent.
+
 .KS
 .nf
   Hop Limit  |  Minimum Interval
-  ------------------------------------
-       0     |     0.4 +/- 0.2 seconds
-       1     |     2.0 +/- 1.0
-       2     |     2.0 +/- 1.0
-       4     |     2.0 +/- 1.0
-       8     |     4.0 +/- 2.0
-      16     |     4.0 +/- 2.0
-      32     |     4.0 +/- 2.0
-      64     |     8.0 +/- 4.0
+  ------------------------------
+    initial  |    0.0 seconds
+       0     |    0.4 +/- 0.2
+       1     |    2.0 +/- 1.0
+       2     |    2.0 +/- 1.0
+       4     |    2.0 +/- 1.0
+       8     |    4.0 +/- 2.0
+      16     |    4.0 +/- 2.0
+      32     |    4.0 +/- 2.0
+      64     |    8.0 +/- 4.0
 .fi
 .KE
 
-For a given hop limit, the waiting period before sending the next
-SvrAdvt MUST NOT be less than the intervals defined above, and the
-variation from the base value MUST be determined randomly for each
-packet sent.
+If a version-compatible SvrRqst from another client with equal or
+greater hop limit than that to be used for the next SvrRqst is
+observed during the pre-request interval, sending of the SvrRqst MUST
+be suppressed.
 
-This serves to reduce the number of SvrRqst/SvrAdvt packets sent
-following loss of a server.  Note that the interval prior to the
-initial packet can be zero.
+If the client receives one or more version-compatible SvrAdvt packets
+during the pre-request interval, the SvrRqst MUST be postponed until
+the client application requests that further advertisements be
+solicited (because it cannot connect to the server endpoints so far
+discovered).
 
-If a compatible SvrRqst from another client with equal or greater hop
-limit than that to be used for the next SvrRqst is observed during the
-inter-request interval, at the expiry of the current interval, sending
-of the SvrRqst MUST be suppressed. The timer for the subsequent
-interval MUST be started as normal.
-
-If one or more compatible SvrAdvt packets are received in the interval
-following a SvrRqst, sending subsequent SvrRqst packets MUST be
-suppressed, but the next interval timer MUST be started.  If the
-client fails to connect to these server endpoints, discovery MUST
-recommence at the next hop limit and interval at the expiry of the
-timer or when this failure is determined, whichever occurs later.
-
-If the client succeeds in connecting, the hop limit and interval MUST
-be reset to their initial values.
-
-A single discovery agent MAY be shared by multiple Elvin protocol
-clients.  In this case, active discovery MAY continue when one client
-has connected, but one (or more) others still require a compatible
-server.  However, the hop limit and interval timing MUST continue to
-follow the normal pattern; an external observer MUST NOT be able to
-determine that multiple connections are being sought.
+If no requests for further solicitation have been received for five
+minutes, discovery MUST revert to passive mode, and the hop limit and
+pre-request intervals are reset to their starting values.
 
 Note that a SvrRqst from a downstream client can cause the suppression
 of a client's own SvrRqst with the same hop limit, even though the
 downstream SvrRqst's hop limit is exhausted, thus preventing the
 client's SvrRqst from reaching an upstream server that is within that
-hop limit.  However, either of the two client's next SvrRqst (with
-higher hop limit) will reach the server, and while the immediate
-client loses one interval period, it has no permanent impact.  This
-could be avoided by allowing the client to compare the hop limit with
-the current hop count in the packet, but this is even more
-protocol-specific, and not supported by IPv4 APIs anyway.
+scope.  However, either of the two client's next SvrRqst (with higher
+hop limit) will reach the server, and while the immediate client loses
+one interval period, it has no permanent impact.  This could be
+avoided by allowing the client to compare the hop limit with the
+current hop count in the packet, but this is even more
+protocol-specific, and not supported by the IPv4 socket API.
 
 m4_heading(3, Server Advertisement)
 
