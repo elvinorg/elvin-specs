@@ -142,6 +142,94 @@ allocation MUST ensure that no packet is sent with the same identifier
 as an outstanding request.  Also, the value zero is reserved, and MUST
 NOT be used.
 .KE
+m4_heading(3, Server Request)
+
+A client MAY request that servers advertise their available endpoints
+by multicasting a Server Request.  
+
+All attempts to send a Sever Request MUST be delayed by a random
+period of between zero (0) and five (5) seconds.  If any Server
+Request packets (from other clients) are observed during this time,
+the client MUST cancel its own pending request.
+
+If a client observes any Server Advertisements during the startup
+period, it SHOULD attempt to connect to them immediately.
+
+A client MUST NOT send a Server Request more than once in any twenty
+(20) second period.
+
+m4_pre(
+struct SvrRqst {
+  uint8  major;
+  uint8  minor;
+  uint8  initial_ttl;    
+};)m4_dnl
+
+m4_heading(3, Server Advertisement)
+
+Servers MUST respond to a SvrRqst with a multicast Server
+Advertisement, but MUST NOT send SvrAdvt more often than once every
+five (5) seconds.
+
+m4_pre(
+struct SvrAdvt {
+  uint8    major;
+  uint8    minor;
+  string   server;
+  id32     revision;
+  string   scope;
+  boolean  default;
+  string   urls[];
+};)m4_dnl
+
+The returned major and minor version numbers MUST reflect the protocol
+version of the reply packet.  Where a server is capable of using
+multiple protocol versions, this MUST be reflected in the endpoint
+URLs, and the SvrAdvt message MUST use the client's protocol version.
+
+The SvrAdvt includes a server name that MUST be globally unique.  It
+is RECOMMENDED that the fully-qualified DNS host name, server process
+number and a random integer value be used to prevent collisions.
+
+The revision number distinguishes between advertisements from the same
+server reflecting changes in the available protocols.  As a server's
+configuration is altered (at runtime), the advertisement version
+number MUST be incremented.  This allows clients to discard duplicate
+advertisements quickly.
+
+The scope name must be the string scope name for the server.  An empty
+scope name is allowed.  If this scope has been configured to be the
+default scope for a site, the default flag should be set true.
+
+The set of URLs reflect the endpoints available from the server.  A
+SvrAdvt message SHOULD include all endpoints offered by the server.
+Where the limitations of the underlying concrete protocol prevent
+this, the server cannot advertise all its endpoints.  Each SvrAdvt
+MUST contain at least one URL.
+
+Clients SHOULD maintain a cached list of all endpoint URLs it has seen
+announced.  If available, this list MUST be used to attempt connection
+before sending a SvrRqst.  Cached URLs MUST be replaced by those in a
+subsequent advertisement with higher version number from the same
+server.  URLs cached for a given server SHOULD be flushed after eight
+(8) observed SvrRqst/SvrAdvt cycles that have not included a SvrAdvt
+from that server.
+
+m4_heading(3, Server Advertisement Close)
+
+A server shutting down SHOULD send a Server Advertisement Close
+message.
+
+m4_pre(
+struct SvrAdvtClose {
+  uint8    major;
+  uint8    minor;
+  string   server;
+};)m4_dnl
+
+Caching clients MUST monitor such messages and remove all endpoints for
+the specified server from their cache.
+
 m4_heading(3, Unreliable Notification)
 
 Unreliable notifications are sent by a client to a server outside the
@@ -305,15 +393,15 @@ This MUST be the last packet sent by a server on a connection.  The
 underlying (transport) link MUST be closed immediately after this
 packet has been successfully delivered to the client.
 
-The client connection MUST NOT be closed without sending either a
-DisconnRply or Disconn packet except in the case of a protocol
+The server MUST NOT close the client connection without sending either
+a DisconnRply or Disconn packet except in the case of a protocol
 violation.  If a client detects that the server connection has been
 closed without receiving one of these packets, it should assume
 network or server failure.
 
 A client receiving a redirection via a Disconn MUST attempt to connect
 to the specified server before attempting any other servers for which
-it has address information.  If the connection is fails or is refused
+it has address information.  If the connection fails or is refused
 (via ConnRply), the default server selection process SHOULD be
 performed.
 
@@ -472,10 +560,27 @@ m4_heading(3, Drop Warning)
 Sent by servers to clients to indicate that notification packets have
 been dropped from this place in the data stream due to congestion in
 the server.  Dropped packets MAY include NotifyDeliver, SubAddNotify,
-SubModNotify and SubDelNotify.
+SubModNotify, SubDelNotify and ConfConn.
 
 m4_pre(
 struct DropWarn {
+};)m4_dnl
+
+m4_heading(3, Test Connection)
+
+Sent by clients to confirm that the server remains connected.
+
+m4_pre(
+struct TestConn {
+};)m4_dnl
+
+m4_heading(3, Confirm Connection)
+
+Sent by servers to confirm that the client connection remains
+connected.
+
+m4_pre(
+struct ConfConn {
 };)m4_dnl
 
 m4_heading(3, Quench Add Request)
@@ -581,87 +686,3 @@ struct SubDelNotify {
   id64 term_id;
 };)m4_dnl
 
-m4_heading(3, Server Request)
-
-A client MAY request that servers advertise their available endpoints
-by multicasting a Server Request.  
-
-All attempts to send a Sever Request MUST be delayed by a random
-period of between zero (0) and five (5) seconds.  If any Server
-Request packets (from other clients) are observed during this time,
-the client MUST cancel its own pending request.
-
-If a client observes any Server Advertisements during the startup
-period, it SHOULD attempt to connect to them immediately.
-
-A client MUST NOT send a Server Request more than once in any twenty
-(20) second period.
-
-m4_pre(
-struct SvrRqst {
-  uint8      major;
-  uint8      minor;
-};)m4_dnl
-
-m4_heading(3, Server Advertisement)
-
-Servers MUST respond to a SvrRqst with a multicast Server
-Advertisement, but MUST NOT send SvrAdvt more often than once every
-five (5) seconds.
-
-m4_pre(
-struct SvrAdvt {
-  uint8    major;
-  uint8    minor;
-  string   server;
-  id32     revision;
-  string   scope;
-  boolean  default;
-  string   urls[];
-};)m4_dnl
-
-The returned major and minor version numbers MUST reflect the protocol
-version of the reply packet.  Where a server is capable of using
-multiple protocol versions, this MUST be reflected in the endpoint
-URLs, and the SvrAdvt message MUST use the client's protocol version.
-
-The SvrAdvt includes a server name that MUST be globally unique.  It
-is RECOMMENDED that the fully-qualified DNS host name, server process
-number and a random integer value be used to prevent collisions.
-
-The revision number distinguishes between advertisements from the same
-server reflecting changes in the available protocols.  As a server's
-configuration is altered (at runtime), the advertisement version
-number MUST be incremented.  This allows clients to discard duplicate
-advertisements quickly.
-
-The scope name must be the string scope name for the server.  An empty
-scope name is allowed.  If this scope has been configured to be the
-default scope for a site, the default flag should be set true.
-
-The set of URLs reflect the endpoints available from the server.  A
-SvrAdvt message SHOULD include all endpoints offered by the server.
-Where the limitations of the underlying concrete protocol prevent
-this, the server cannot advertise all its endpoints.  Each SvrAdvt
-MUST contain at least one URL.
-
-Clients SHOULD maintain a cached list of all endpoint URLs it has seen
-announced.  If available, this list MUST be used to attempt connection
-before sending a SvrRqst.  Cached URLs MUST be replaced by those in a
-subsequent advertisement with higher version number from the same
-server.  URLs cached for a given server SHOULD be flushed after eight
-(8) observed SvrRqst/SvrAdvt cycles that have not included a SvrAdvt
-from that server.
-
-m4_heading(3, Server Advertisement Close)
-
-A server shutting down SHOULD send a Server Advertisement Close
-message.
-
-m4_pre(
-struct SvrAdvtClose {
-  string   server;
-};)m4_dnl
-
-Caching clients MUST monitor such messages and remove all endpoints for
-the specified server from their cache.

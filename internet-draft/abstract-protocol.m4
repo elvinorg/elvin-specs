@@ -42,13 +42,15 @@ Subscription Modify Request   SubModRqst      C -> S    U    C
 Subscription Delete Request   SubDelRqst      C -> S    U    C
 Subscription Reply            SubRply         S -> C    U    C
 Dropped Packet Warning        DropWarn        S -> C    U    C
-Quench Add Request            QnchAddRqst     C -> S    U    D
-Quench Modify Request         QnchModRqst     C -> S    U    D
-Quench Delete Request         QnchDelRqst     C -> S    U    D
-Quench Reply                  QnchRply        S -> C    U    D
-Subscription Add Notify       SubAddNotify    S -> C    U    D
-Subscription Change Notify    SubModNotify    S -> C    U    D
-Subscription Delete Notify    SubDelNotify    S -> C    U    D
+Test Connection               TestConn        C -> S    U    D
+Confirm Connection            ConfConn        S -> C    U    D
+Quench Add Request            QnchAddRqst     C -> S    U    E
+Quench Modify Request         QnchModRqst     C -> S    U    E
+Quench Delete Request         QnchDelRqst     C -> S    U    E
+Quench Reply                  QnchRply        S -> C    U    E
+Subscription Add Notify       SubAddNotify    S -> C    U    E
+Subscription Change Notify    SubModNotify    S -> C    U    E
+Subscription Delete Notify    SubDelNotify    S -> C    U    E
 -----------------------------------------------------------------
 .fi
 .KE
@@ -65,12 +67,16 @@ packet types in a subset.
 
 Subsets A, B and C are independent.  An implementation MAY suport any
 or all of subsets A, B and C.  Subset A is RECOMMENDED, subset B is
-OPTIONAL, subset C is RECOMMENDED and subset D is OPTIONAL.  Subset D
-is dependent on subset C.  An implementation supporting subset D MUST
-support subset C.
+OPTIONAL, subset C is RECOMMENDED and subset E is OPTIONAL.  Subsets D
+and E are dependent on subset C.  An implementation supporting subset
+D and/or E MUST support subset C.
 
-m4_remark(is subset C really depeneding on subset B?  i'd like the ability
-to have	quenching only clients. jb)
+m4_remark(is subset E really depeneding on subset B?  i'd like the ability
+to have	quenching only clients. jb
+
+to do that, we'd have to separate the ConnRqst/Rply, SecRqst/Rply,
+Disconn*, DropWarn and Test/ConfConn packets from Notif/Sub packets.
+it's possible, and maybe nice? da)
 
 m4_include(protocol-overview.m4)
 m4_include(protocol-details.m4)
