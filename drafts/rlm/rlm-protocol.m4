@@ -30,8 +30,8 @@ The defined types are:
 m4_pre(` 
   Packet              | Type |  Abbreviation |  Usage 
  ---------------------+------+---------------+----------
-  JoinRequest         |   1  |  JREQ         |  M -> M*
-  JoinReply           |   2  |  JRPY         |  S -> M
+  Join Request        |   1  |  JREQ         |  M -> M*
+  Join Reply          |   2  |  JRPY         |  S -> M
   Leave               |   3  |  LEAVE        |  M -> M*
   Data                |   4  |  DATA         |  M -> S*
   Accept              |   5  |  ACPT         |  S -> M*
@@ -39,8 +39,9 @@ m4_pre(`
   Synchronise         |   7  |  SYNC         |  M -> M*
   Acknowledge         |   8  |  ACK          |  M -> S
   Flush               |   9  |  FLUSH        |  S -> M*
-  LostSequencer       |  10  |  LSEQ         |  M -> M*
-  Close               |  11  |  CLOSE        |  M -> M*')m4_dnl
+  Abort               |  10  |  ABORT        |  M -> M*
+  Reset               |  11  |  RESET        |  S -> M*
+  New Sequencer       |  12  |  NSEQ         |  S -> M*')m4_dnl
 
 The flags field is 8 bits.  They are defined as
 m4_pre(`
@@ -144,7 +145,7 @@ member from its local table of acknowledged messages.
 
 If the sequencer wishes to leave the group, it should multicast the
 LEAVE.  On receiving a LEAVE from the current sequencer, the
-lowest-numbered remaining member should adopt the sequencer role, and
+highest-numbered remaining member should adopt the sequencer role, and
 multicast a NSEQ packet, containing its unicast address.  The old
 sequencer must not disconnect until it has received the NSEQ packet.
 Other members should send an ACK packet to the new sequencer, which
@@ -201,34 +202,49 @@ synchronisation (itself caused by the failure of that member to
 acknowledge ongoing traffic).  
 
 After retrying the SYNC, the sequencer can determine that a member has
-crashed.  At this point, the group must be closed.  All remaining
-members will have synchronised their buffers, and instead of a FLUSH,
-the sequencer should send a CLOSE.
+crashed.  At this point, the group must be reset, by the sequencer
+multicasting an ABORT.
 
-The using application might decide to re-create the group, but the
-incarnation number chosen will distinguish it from the previous
-instance.  Should the "crashed" member recover, the sequencer should
-unicast a NACK to the member(s), which should report this failure to
-the application.
+A member receiving an ABORT should unicast an ACK reply containing its
+highest sequence number.  The intiator will continue to send the ABORT
+until it has received an ACK from all remaining members or a timeout
+expires.
+
+The sequencer multicasts a RESET, describing the reset group.  All
+members must respond with a unicast ACK and may then re-enter normal
+operation.  The sequencer continues to multicast the RESET until all
+members have responded.  Members must ignore duplicate RESET packets.
+
+If the sequencer does not receive an ACK from one or more members, it
+should restart the reset protocol with an ABORT.
+
+Finally, the sequencer should multicast a FLUSH once all members are
+up to date.
 
 m4_heading(2, Loss of Sequencer)m4_dnl
 
 Loss of the sequencer can be detected either by repeated failure of a
-DATA message or SYNC request.  The detecting member should multicast
-an LSEQ packet to the group, and the lowest-numbered remaining member
-should adopt the role of sequencer for the shutdown process.
+DATA message or SYNC request.  The detecting member initiates the
+reset protocol, sending an ABORT.
 
-The new sequencer should respond with a multicast SYNC.  If no SYNC is
-received from the lowest-numbered member within a timeout, the
-next-lowest-numbered member should become the sequencer and multicast
-the SYNC.  Members should respond with RETRs and ACKs until all nodes
-synchronised, at which point the new sequencer multicasts the CLOSE,
-and all members return the failure to the application.
+A member receiving an ABORT should compare the sequence and member
+numbers with its own: if the member has either a higher sequence
+number, or the same sequence number and a higher member number, it
+should transmit its own ABORT, otherwise, it should send an ACK to the
+other member, and wait for a RESET.
 
-If multiple members multicast a SYNC, the lowest-numbered member
-should be treated as the sequencer by the group.  This node should
-resend its SYNC.  A new sequencer receiving a SYNC from a
-lower-numbered member must revert to normal member operation.
+At the end of this process, one member will have been selected as the
+new sequencer, and it will have a copy of all known fragments.  All
+other members will be waiting for a RESET.
+
+Once the new sequencer has received ACKs from all remaining members,
+or it has retransmitted the ABORT and had no further replies, it
+should send a RESET describing the new group.  Members should respond
+with either an ACK or, if they need additional fragments, with RETR
+requests until they have all required packets, and then an ACK.
+
+Finally, the sequencer should multicast a FLUSH once all members are
+up to date.
 
 m4_heading(2, Packet Types)m4_dnl
 
@@ -348,14 +364,42 @@ m4_heading(3, `Flush')m4_dnl
 The member_id and packet_id should be zero, and the last sequence to
 that of the last message sent to the group.
 
-m4_heading(3, `Lost Sequencer')m4_dnl
+m4_heading(3, `Abort')m4_dnl
+
+The member_id and packet_id should be zero, and the last sequence the
+calling member's last seen sequence.
+
+m4_heading(3, `Reset')m4_dnl
+
+The member number is set to that of the sender, the new sequencer.
+The incarnation is that of the new group, and the fragment number is
+the incarnation number of the old group.  The starting sequence number
+of the new group is sent in the sequence field.
+
+The number of members is followed by the member numbers of all
+members, on 16 bit boundaries, packed to 32 bits.
+
+m4_changequote([,])m4_dnl
+m4_pre([
+|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
+| Ver |   Type  |     Flags     |          Incarnation          |
+|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
+|            Member Id          |            Packet Id          |
+|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
+|                       Starting Sequence                       |
+|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
+|          Member Count         |         Member Number         |
+|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
+X         Member Number         |                               X
+|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|])m4_dnl
+m4_changequote(`,')m4_dnl
+
+m4_heading(3, `New Sequencer')m4_dnl
 
 The member_id and packet_id should be zero, and the last sequence to
 that of the last message seen.
 
-m4_heading(3, `Close')m4_dnl
 
-The member_id, packet_id and last sequence should be zero.
 
 
 
