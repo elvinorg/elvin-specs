@@ -528,14 +528,16 @@ Sent from server to clients to inform them of a new subscription
 predicate component matching the registered quench attribute name
 list for each of the identified quench registrations.
 
-If the insecure flag is set, it indicates that the matching
-subscription has no associated keys.
+The secure quench ids represent the quenches whose keys matched the
+corresponding subscription keys, whereas the insecure quenches did not
+have matching keys but both the subscription's accept_insecure and the
+quench's deliver_insecure flags were set.
 
 m4_pre(
 struct SubAddNotify {
-    id64 quench_ids[];
+    id64 secure_quench_ids[];
+    id64 insecure_quench_ids[];
     id64 term_id;
-    boolean insecure;
     SubAST sub_expr;
 };)m4_dnl
 
@@ -545,9 +547,6 @@ This packet indicates that a subscription predicate component matching
 their registered quench attribute name list changed for each of the
 identified quench registrations.
 
-If the insecure flag is set, it indicates that the matching
-subscription has no associated keys.
-
 Note that a subscription term that had a key replaced might no longer
 match a particular quench registeration.  This is notified using a
 SubDelNotify.  Similarly a key replacement might cause a SubAddNotify
@@ -556,10 +555,10 @@ request.
 
 m4_pre(
 struct SubModNotify {
-  id64 quench_ids[];
-  id64 term_id;
-  boolean insecure;
-  SubAST sub_expr;
+    id64 secure_quench_ids[];
+    id64 insecure_quench_ids[];
+    id64 term_id;
+    SubAST sub_expr;
 };)m4_dnl
 
 m4_heading(3, Subscription Delete Notification)
