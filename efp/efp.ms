@@ -440,6 +440,7 @@ m4_heading(3, FedNotifyDeliver)
 
 m4_pre(
 struct FedNotifyDeliver {
+  XXX;
   NameValue attributes[];
   boolean deliver_insecure;
   Keys keys;
@@ -449,6 +450,7 @@ m4_heading(3, FedSubAdd)
 
 m4_pre(
 struct FedSubAdd {
+  id32 client_id;
   id64 sub_id;
   SubAST expr;
   boolean accept_insecure;
