@@ -13,6 +13,56 @@ between different servers.
 This section describes the operation of the Elvin4 protocol, without
 describing any particular protocol implementation.
 
+m4_heading(2, Packet Types)
+
+The Elvin abstract protocol specifies a number of packets used in
+interactions between clients and the server.
+
+.KS
+Possible values for the type field in a packet are:
+
+.nf 
+  ---------------------------------------------------------------
+  Packet Type                   Abbreviation	Usage	Subset
+  ---------------------------------------------------------------
+  Unreliable Notification	UNotify		C -> S	 1
+
+  Negative Acknowledgement      Nack		S -> C	 2
+
+  Connect Request               ConnRqst	C -> S	 2
+  Connect Reply                 ConnRply	S -> C	 2
+
+  Disconnect Request            DisConnRqst	C -> S	 2
+  Disconnect Reply		DisConnRply	S -> C	 2
+  Disconnect	                DisConn		S -> C	 2
+
+  Security Request              SecRqst		C -> S	 2
+  Security Reply		SecRply		S -> C	 2
+
+  Notification Emit             NotifyEmit	C -> S	 2
+  Notification Deliver          NotifyDeliver	S -> C	 2
+
+  Subscription Add Request      SubAddRqst	C -> S	 2
+  Subscription Modify Request   SubModRqst	C -> S	 2
+  Subscription Delete Request   SubDelRqst	C -> S	 2
+  Subscription Reply            SubRply		S -> C	 2
+
+  Quench Add Request            QnchAddRqst	C -> S	 3
+  Quench Modify Request         QnchModRqst	C -> S	 3
+  Quench Delete Request         QnchDelRqst	C -> S	 3
+  Quench Reply                  QnchRply	S -> C	 3
+
+  Quench Add Notify		QnchAddNotify	S -> C	 3
+  Quench Change Notify		QnchModNotify	S -> C	 3
+  Quench Delete Notify		QnchDelNotify	S -> C	 3
+
+  ---------------------------------------------------------------
+.fi
+.KE
+
+A concrete protocol implementation is free to use the most suitable
+method for distinguishing packet types.  
+
 m4_heading(2, Protocol Overview)
 
 After an Elvin server has been located (see section on SLP) a client
@@ -33,32 +83,31 @@ Reply, containing the agreed parameters of the connection.
 .KE
 
 If the Elvin server cannot accept the connection itself, but is part
-of a server cluster, it MUST respond with a Redirect response and then
-close the connection on which the client made the request.  The client
-MAY then send a Connection Request to the server address supplied in
-the Redirect message.
+of a server cluster, it MUST respond with a Disconnect and then close
+the connection on which the client made the request.  The client MAY
+then send a Connection Request to the server address supplied in the
+Disconnect message.
 
 *** fixme *** may a client ignore a redirect and re-attempt the same
 server?  if not, how long until it may?
 
-
 .KS
-  +-------------+ ---ConnRqst--> +---------+
+  +-------------+ --ConnRqst--> +---------+
   | Producer or |               |  Elvin  |
   |  Consumer   |               |  Server |    REDIRECTED CONNECTION
-  +-------------+ <--Redirect-- +---------+
+  +-------------+ <--DisConn--- +---------+
 .KE
 
-If the Elvin server cannot accept the connection, it MUST send a Nack
-response and then close the connection upon which the client made the
-request.
+If the Elvin server cannot accept the connection, it MUST send a
+Negative Acknowledge response and close the connection upon which the
+client made the request.
 
 *** fixme *** under what situations will the server nack a connection
 request.  This should be under the "Failures" at the end of the
 section, but one or two examples here may be used for illustration].
 
 .KS
-  +-------------+ ---ConnRqst--> +---------+
+  +-------------+ --ConnRqst--> +---------+
   | Producer or |               |  Elvin  |
   |  Consumer   |               |  Server |        FAILED CONNECTION
   +-------------+ <----Nack---- +---------+
@@ -78,58 +127,119 @@ the event.  This allows the client library of the consumer to
 dispatch the event with out having to do any additional matching.
 
 .KS
-   +----------+            +--------+               +----------+
-   | Producer | --Notif--> | Server | --NotifDel--> | Consumer |
-   +----------+            +--------+               +----------+
-
-                                                   NOTIFICATION PATH
+   +----------+                   +--------+
+   | Producer | ---NotifyEmit---> |        |
+   +----------+                   |        |
+                                  | Server |       NOTIFICATION PATH
+   +----------+                   |        |
+   | Consumer | <--NotifyDeliver- |        |
+   +----------+                   +--------+
 .KE
 
-A Consumer descibes what events it is interested in by sending a
-predicate in the Elvin subscripton language to the Elvin server.  The
-predicate is sent in a SubAddRqst.  On receipt of the request, the
-server checks the syntatical correctness of the predicate. If valid,
-an Ack is returned.
-
-If the predicate fails to parse, a Nack is returned with the error
-code set to indicate a parser error.
+A Consumer describes the events in which it is interested by sending a
+predicate in the Elvin subscripton language (and its associated
+security keys) to the Elvin server.  The predicate is sent in a
+Subscription Add Request (SubAddRqst).  On receipt of the request, the
+server checks the syntactic correctness of the predicate. If valid, a
+Subscription Reply (SubRply) is returned.
 
 .KS
    +----------+ --SubAddRqst--> +--------+
    | Consumer |                 | Server |     ADDING A SUBSCRIPTION
-   +----------+ <-----Ack------ +--------+
+   +----------+ <---SubRply---- +--------+
+.KE
+
+If the predicate fails to parse, a Nack is returned with the error
+code set to indicate a parser error.
+
+A Consumer may alter its registered predicate or the associated keys
+using the Subscription Modify Request (SubModRqst). This alteration
+MUST occur atomically: a notification matching both the previous
+predicate and the new predicate MUST be delivered to the consumer.
+
+An attempt to modify a subscription that is not registered is a
+protocol error, and generates a Nack.
+
+.KS
+   +----------+ --SubModRqst--> +--------+
+   | Consumer |                 | Server |  MODIFYING A SUBSCRIPTION
+   +----------+ <---SubRply---- +--------+
+.KE
+
+Note that when a subscription is modified, its server-allocated
+identifier MAY change.
+
+A registered subscription is removed using Subscription Delete Request
+(SubDelRqst).  An attempt to remove a subscription that is not
+registered is a protocol error, and generates a Nack.
+
+.KS
+   +----------+ --SubDelRqst--> +--------+
+   | Consumer |                 | Server |   DELETING A SUBSCRIPTION
+   +----------+ <---SubRply---- +--------+
 .KE
 
 
 Once connected, the client may request notification of changes in the
-subscription database managed by the server.  The client lists the
-attributes of subscriptions in which it is interest using a
-QuenchRqst, and is returned an identifier for the request in a
-QuenchRply.
+subscription database managed by the server.  The client may request
+such information on subscriptions referring to named attributes.
 
-
-Subscriptions containing terms using the requested attributes are sent
-to the client using QuenchAddNtfy.  An initial set of such packets
-describes the state of the database at the time of the request.
-
-As matching subscriptions are subsequently removed, a QuenchDelNtfy
-informs the client.
-
-The set of attributes of interest can be altered using QuenchModify,
-and the interest deregistered using QuenchRemove.
-
-
+Requesting notification of changes to subscriptions referring to a set
+of named attributes uses the Quench Add Request (QnchAddRqst)
+message.  The Quench Reply (QnchRply) message returns an identifier
+for the registered request.
 
 .KS
-   +----------+            +--------+               +----------+
-   | Producer | --Notif--> | Server | --NotifDel--> | Consumer |
-   +----------+            +--------+               +----------+
-
-                                                   NOTIFICATION PATH
+   +----------+ --QnchAddRqst--> +--------+
+   | Producer |                  | Server |          ADDING A QUENCH
+   +----------+ <---QnchRply---- +--------+
 .KE
 
-The next section describes in detail the content of each packet in
-protocol and the requirements of both the server and the client 
+Changing either the set of attribute names, or the associated security
+keys for a registered quench request uses the Quench Modify Request
+(QnchModRqst) and the returned identifier.
+
+.KS
+   +----------+ --QnchModRqst--> +--------+
+   | Producer |                  | Server |       MODIFYING A QUENCH
+   +----------+ <---QnchRply---- +--------+
+.KE
+
+As for subscriptions, modifying a quench request MAY change the
+identifier used by the server to refer to the request.
+
+Removing a quench request uses Quench Delete Request (QnchDelRqst) and
+the quench identifier.
+
+.KS
+   +----------+ --QnchDelRqst--> +--------+
+   | Producer |                  | Server |        DELETING A QUENCH
+   +----------+ <---QnchRply---- +--------+
+.KE
+
+Subscriptions containing the requested quenching terms are sent to the
+client as an abstract syntax tree.  Three types of changes are
+possible: a new subscription referring to the registered attribute
+names is registered, a subscription is modified to either refer to or
+no longer refer to the specified attributes, or a matching
+subscription is removed.
+
+.KS
+   +----------+                    +--------+
+   | Producer | <--QnchAddNotify-- | Server |
+   +----------+                    +--------+
+
+   +----------+                    +--------+
+   | Producer | <--QnchModNotify-- | Server |    QUENCH NOTIFICATION
+   +----------+                    +--------+
+
+   +----------+                    +--------+
+   | Producer | <--QnchDelNotify-- | Server |
+   +----------+                    +--------+
+.KE
+
+The following sections describes in detail the content of each packet
+in protocol and the requirements of both the server and the client
 library.
 
 m4_heading(2, Errors)
@@ -147,64 +257,16 @@ closure packet exchange.
 
 A protocol error is a fault in processing a request.  Protocol errors
 are detected by the server, and the client is informed of the error
-using a reply packet.
+using the Negative Acknowledge (Nack) packet.
 
 A single protocol error MUST NOT cause the client/server connection to
 be closed.  Repeated protocol errors on a single connection MAY cause
 the server to close the client connection, giving suspected denial of
 service attack as a reason (see Disconnect packet).
 
+m4_heading(2, Packet Contents)
 
-m4_heading(2, Packet Types)
-
-The protocol specifies a number of packets used in interactions between 
-clients and the server and bewteen federated servers.
-
-.KS
-Possible values for the type field in a packet are:
-
-.nf 
-  ---------------------------------------------------------------
-  Packet Type                   Abbreviation       Packet ID
-  ---------------------------------------------------------------
-  Connect Request               ConnRqst              0
-  Connect Reply                 ConnRply              1
-  Disconnect Request            DisConnRqst           2
-  Disconnect	                DisConn               3
-  Security Request              SecRqst               4
-  QoS Request                   QosRqst               5  <removed>
-  Subscription Add Request      SubAddRqst            6
-  Subscription Modify Request   SubModRqst            7
-  Subscription Delete Request   SubDelRqst            8
-  Quench Add Request            QnchAddRqst           9
-  Quench Modify Request         QnchModRqst          10
-  Quench Delete Request         QnchDelRqst          11
-  Notification                  Notif                12
-  Notification Deliver          NotifDel             13
-  Quench Deliver                QnchDel              14  <removed>
-  Acknowledgement               Ack                  15
-  Negative Acknowledgement      Nack                 16
-  Subscription Reply            SubRply              17
-  Quench Reply                  QnchRply             18
-
-  Subscription Change Notify    SubModNotif          19
-  Subscription Remove Notify    SubDelNotif          20
-  QoS Reply                     QosRply              21  <removed>
-
-  More ... ?
-
-  ---------------------------------------------------------------
-.fi
-.KE
-
-*** fixme *** Note that the packet IDs given above are an example only.
-Each encoding is free to use the most suitbale method for distinguishing
-between different packet types.  For the default XDR encoding, an 
-enum is used with values that match the above table.
-
-m4_heading(2, Packet Descriptions)
-
-This section provides detailed descrptions of each packet used in the
+This section provides detailed descriptions of each packet used in the
 Elvin protocol. Packets are comprised of the Elvin base types and
 described in a pseudo-C style as structs made up of these types.
 
@@ -218,6 +280,37 @@ struct NameValue{
 
 Where the "Value" type is one of int32, int64, string, real64 or opaque.
 
+
+m4_heading(3, Unreliable Notification)
+
+Unreliable notifications are sent by a client to a server outside the
+context of a session.  Using the protocol and endpoint information
+obtained either directly or via server discovery, a client may send
+single UNotify packets to the server.
+
+m4_pre(
+struct UNotify {
+   uint8     client_major_version;
+   uint8     client_minor_version;
+   NameValue attributes[];
+   opaque    raw_keys[];
+};)m4_dnl
+
+m4_heading(3, Negative Acknowledgement)
+
+Within the context of a session, most requests MAY return a Negative
+Acknowledgement to indicate that although the server understood the
+request, there was an error encountered performing the requested
+operation.
+
+m4_pre(
+struct Nack {
+  int32  xid;
+  int32  error;
+  string message;
+  Value  args[]
+};)m4_dnl
+
 m4_heading(3, Connect Request)
 
 Using the protocol and endpoint information obtained either directly
@@ -225,10 +318,10 @@ or via server discovery, the client establishes a connection to the
 server endpoint.  It MUST then send a ConnRqst to establish protocol
 options to be used for the session.
 
-It is a protocol violation for the client to send anything to the
-server before a ConnRqst.  A server connection that has not received a
-ConnRqst within five (5) seconds of being opened SHOULD be closed by
-the server.
+It is a protocol violation for the client to send anything other than
+a UNotify to the server before a ConnRqst.  A server connection that
+has not received a UNotify or a ConnRqst within five (5) seconds of
+being opened SHOULD be closed by the server.
 
 *** fixme *** do we need to set a hard time limit here?  what is reasonable?
 
@@ -248,7 +341,7 @@ struct ConnRqst {
    NameValue options[];
    opaque raw_keys[];
    opaque prime_keys[];
-};)
+};)m4_dnl
 
 m4_heading(3, Connect Reply)
 
@@ -297,16 +390,29 @@ It is a protocol violation for a client to close its connection
 without sending a DisConnRqst (see protocol violations below).
 
 m4_dnl 
+m4_heading(3, Disconnect Reply)
+
+Sent by the Elvin server to a client.  This packet is sent in response
+to a Disconnect Request, prior to breaking the connection.
+
+m4_pre(
+struct DisConnRply {
+  int32  xid;
+};)m4_dnl
+
+This MUST be the last packet sent by a server on a connection.  The
+underlying (transport) link MUST be closed immediately after this
+packet has been successfully delivered to the client.
+
+m4_dnl 
 m4_heading(3, Disconnect)
 
-Sent by the Elvin server to a client.  This packet is sent in three
-different circumstances: as a response to a Disconnect Request, to
-direct the server to reconnect to another server, or to inform that
-client that the server is shutting down.
+Sent by the Elvin server to a client.  This packet is sent in two
+different circumstances: to direct the client to reconnect to another
+server, or to inform that client that the server is shutting down.
 
 m4_pre(
 struct DisConn {
-  int32  xid;
   int32  reason;
   string args;
 };)m4_dnl
@@ -318,15 +424,13 @@ where the defined values for "reason" are
 -----------------------------------------------------------------
 Reason  Definition
 -----------------------------------------------------------------
-  0     Reserved.
-  1     Server is closing down.  xid MUST be zero.
-  2     Server is closing this connection, in response to your 
-        request (DisConnRqst) with sequence number matching 
-        xid.
-  4     Server is closing this connection, and requests that
-		client makes new connection to server address in "args".  
-        xid MUST be zero.
------------------------------------------------------------------
+ 0   Reserved.
+ 1   Server is closing down.
+ 2   Server is closing this connection, and requests that client
+     makes new connection to server address in "args".  
+ 4   Server is closing this connection for repeated protocol errors.
+
+---------------------------------------------------------------
 .fi
 .KE
 
@@ -334,10 +438,11 @@ This MUST be the last packet sent by a server on a connection.  The
 underlying (transport) link MUST be closed immediately after this
 packet has been successfully delivered to the client.
 
-The client connection MUST NOT be closed without sending this packet
-except in the case of a protocol violation.  If a client detects that
-the server connection has been closed without receiving a Disconnect
-packet, it should assume network or server failure.
+The client connection MUST NOT be closed without sending either a
+DisConnRply or DisConn packet except in the case of a protocol
+violation.  If a client detects that the server connection has been
+closed without receiving one of these packets, it should assume
+network or server failure.
 
 m4_dnl
 m4_heading(3, Security Request)
@@ -361,36 +466,36 @@ struct SecRqst {
 It is a protocol error to request the addition of a key already
 registered, or the removal of a key not registered.
 
-m4_heading(3, QoS Request)
+m4_heading(3, Security Reply)
 
-Sent by clients to the Elvin server.  This packet allows the server to
-request alterations to connection options.
+Sent by the server to clients to confirm a successful change of keys.
 
 m4_pre(
-struct QosRqst {
+struct SecRply {
   int32 xid;
-  NameValue options[];
+};)m4_dnl
+
+m4_heading(3, Notification Emit)
+
+Sent by client to the Elvin server. 
+
+m4_pre(
+struct NotifyEmit {
+   NameValue attributes[];
+   opaque    raw_keys[];
 };)m4_dnl
 
 
-m4_heading(3, QoS Reply)
+m4_heading(3, Notification Deliver)
 
-Sent from server to client.  This packet specifies the results of a
-requested modification of connection options.
+Sent by the Elvin server to a client. 
 
 m4_pre(
-struct QosRply {
-  int32 xid;
-  NameValue options[];
+struct NotifyDeliver {
+   int64     insecure_matches[];
+   int64     secure_matches[];
+   NameValue attributes[];
 };)m4_dnl
-
-QosRply MUST be sent in response to a QosRqst.  For each legal option
-in the QosRqst, a matching option MUST be returned, specifying the new
-value.  If the request was unsuccessful, this value MAY NOT match the
-value requested.
-
-Unrecognised options in the QosRqst MUST NOT be returned.  The server
-MUST NOT return an option that was not included in the QosRqst.
 
 m4_heading(3, Subscription Add Request)
 
@@ -464,6 +569,17 @@ struct SubDelRqst {
   int64 subscription_id;
 };)m4_dnl
 
+m4_heading(3, Subscription Reply)
+
+Sent from the Elvin server to the client as acknowledgement of a successful
+subscription change.
+
+m4_pre(
+struct SubRply {
+  int32 xid;
+  int64 subscription_id;
+};)m4_dnl
+
 m4_heading(3, Quench Add Request)
 
 Sent by clients to the Elvin server.  Requests notification of
@@ -476,7 +592,6 @@ struct QnchAddRqst {
   boolean accept_insecure;
   opaque  raw_keys[];
 };)m4_dnl
-
 
 m4_heading(3, Quench Modify Request)
 
@@ -494,7 +609,6 @@ struct QnchModRqst {
   opaque  del_raw_keys[];
 };)m4_dnl
 
-
 m4_heading(3, Quench Delete Request)
 
 Sent by client to the Elvin server.  Requests that the server no
@@ -508,110 +622,50 @@ struct QnchDelRqst {
 };)m4_dnl
 
 
-m4_heading(3, Notification)
+m4_heading(3, Quench Add Notification)
 
-Sent by client to the Elvin server. 
+Sent from server to clients to inform them of a new subscription
+predicate component matching their registered quench attribute name
+list.
 
-m4_pre(
-struct Notif{
-   NameValue attributes[];
-   opaque    raw_keys[];
-};)m4_dnl
-
-
-m4_heading(3, Notification Deliver)
-
-Sent by the Elvin server to a client. 
+If the insecure flag is set, it indicates that the matching
+subscription has no associated keys.
 
 m4_pre(
-struct NotifDel{
-   int64     matching_ids_secure[];
-   int64     matching_ids_insecure[];
-   NameValue attributes[];
-};)m4_dnl
-
-
-headng(4, Acknowledgement)
-
-Sent by the Elvin server to a client. 
-
-m4_pre(
-struct Ack {
-  int32 xid;
-};)m4_dnl
-
-m4_heading(3, Negative Acknowledgement)
-
-Sent by the Elvin server to a client. 
-
-m4_pre(
-struct Nack {
-  int32  xid;
-  int32  error;
-  string message;
-  Value  args[]
-};)m4_dnl
-
-m4_heading(3, Subscription Reply)
-
-Sent from the Elvin server to the client as acknowledgement of a successful
-subscription change.
-
-m4_pre(
-struct SubRply {
-  int32 xid;
-  int64 subscription_id;
-};)m4_dnl
-
-m4_heading(3, Quench Reply)
-
-Sent from the Elvin server to the client as acknowledgement of a successful
-quench change.
-
-m4_pre(
-struct QnchRply {
-  int32 xid;
-  int64 quench_id;
-};)m4_dnl
-
-
-m4_heading(3, Subscription Change Notification)
-
-Sent from server to clients to inform them of a change to the set of
-subscriptions matching their registered quench attribute name list.
-
-m4_pre(
-struct SubModNotif {
+struct QnchAddNotif {
   int64   quench_id;
-  int64   sub_id;
+  int64   term_id;
   boolean insecure;
   SubAST  sub_expr;
 };)m4_dnl
 
-This packet indicates that a subscription matching the client's
-specified quench request has been registered at the server, or that a
-previously registered matching subscription has been changed.
+m4_heading(3, Quench Modify Notification)
 
-A change to the registered subscription expression or a change from
-having no associated keys to having keys (or vice versa) will generate
-this notification.
+This packet indicates that a subscription predicate component matching
+their registered quench attribute name list changed. 
 
-If the client's quench request did not have the allow_insecure flag
-set, the insecure flag MUST NOT be set. If the insecure flag is set,
-it indicates that the matching subscription has no associated keys.
-
-m4_heading(3, Subscription Removal Notification)
-
-Sent from server to clients to inform them of the removal of a
-subscription which had matched their registered quench attribute name
-list.
+If the insecure flag is set, it indicates that the matching
+subscription has no associated keys.
 
 m4_pre(
-struct SubDelNotif {
+struct QnchModNotif {
   int64   quench_id;
-  int64   sub_id;
+  int64   term_id;
+  boolean insecure;
+  SubAST  sub_expr;
 };)m4_dnl
 
+m4_heading(3, Quench Delete Notification)
+
+Sent from server to clients to inform them of the removal of a
+subscription predicate component that had matched their registered
+attribute name list.
+
+m4_pre(
+struct QnchDelNotif {
+  int64   quench_id;
+  int64   term_id;
+};)m4_dnl
 
 m4_heading(2, Protocol Errors)
 
