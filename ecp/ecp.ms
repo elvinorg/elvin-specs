@@ -162,7 +162,7 @@ of identifiers can be encoded using a single byte.
   Cluster Notify                ClusterNotify           169
   Cluster Redirect              ClusterRedirect         170
   Client Disconnect Notify      ClientDisconnNotify     171
-  Leave Request                 LeaveRqst               172
+  Leave                         Leave                   172
   ----------------------------------------------------------------
 .fi
 .KE
