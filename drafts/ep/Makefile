@@ -26,7 +26,7 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/ep/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.3 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.4 $
 #
 ################################################################
 
@@ -38,7 +38,7 @@ dd=$(shell date | cut -b9-10)
 yyyy=2000
 
 FILENAME := draft-arnold-elvin-client
-VERSION := prelim-02
+VERSION := prelim-03
 
 SOURCE_FILES:= $(wildcard *.ms)
 
