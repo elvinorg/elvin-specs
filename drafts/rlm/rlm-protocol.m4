@@ -113,12 +113,11 @@ sequence number, to all group members.
 Each member maintains a buffer of received messages, and a table of
 last sequence for each known member.  When all members have
 acknowledged a buffered message, it can be removed from the buffer and
-passed on to the application.  A message MUST NOT be passed on to the
-application until all members in the group have acknowledged receipt of
+passed on to the application.  A message MAY be passed on to the
+application before all members in the group have acknowledged receipt of
 the message.
 
 m4_heading(3, Generating Acknowledgements)m4_dnl
-
 
 After a timeout period without sending a DATA packet, a member should
 multicast an ACK, allowing the group to update their history buffers.
@@ -126,8 +125,11 @@ This applies equally to the sequencer.
 
 OR
 
-A member SHOULD NOT unduly delay the acknowledgement of data, even when
-the memeber has no data to send to the group.
+A member SHOULD NOT unduly delay the acknowledgement of data, even
+when the member has no data available to piggyback recived sequence
+numbers.  After ackthresh packets/bytes/mtus..., the member SHOULD
+send an ACK with the highest contiguous sequence number they have
+seen.
 
 m4_heading(3, Leaving a Group)m4_dnl
 
