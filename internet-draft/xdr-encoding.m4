@@ -182,12 +182,57 @@ m4_heading(4, Subscription Abstract Syntax Trees)
 
 m4_pre(
 `enum {
-    node_tc   = 0,
+    name_tc   = 0,
     int32_tc  = 1,
     int64_tc  = 2,
     real64_tc = 3,
     string_tc = 4,
-    opaque_tc = 5
+    regular_expression_tc = 5,
+
+    equals_tc = 8,
+    not_equals_tc = 9,
+    less_than_tc = 10,
+    less_than_equals_tc = 11,
+    greater_than_tc = 12,
+    greater_than_equals = 13,
+
+    or_tc = 16,
+    xor_tc = 17,
+    and_tc = 18,
+    not_tc = 19,
+
+    unary_plus_tc = 24,
+    unary_minus_tc = 25,
+    multiply_tc = 26,
+    divide_tc = 27,
+    modulo_tc = 28,
+    add_tc = 29,
+    subtract_tc = 30,
+
+    shift_left_tc = 32,
+    shift_right_tc = 33,
+    logical_shift_right_tc = 34,
+    bit_and_tc = 35,
+    bit_xor_tc = 36,
+    bit_or_tc = 37,
+    bit_negate_tc = 38,
+
+    is_int32_tc = 40,
+    is_int64_tc = 41,
+    is_real64_tc = 42,
+    is_string_tc = 43,
+    is_opaque_tc = 44,
+    is_nan_tc = 45,
+
+    begins_with_tc = 48,
+    contains_tc = 49,
+    ends_with_tc = 50,
+    wildcard_tc = 51,
+    regex_tc = 52,
+
+    exists_tc = 56,
+    equals_tc = 57,
+    size_tc = 58
 } subast_typecode;')
 
 m4_heading(4, Packet Encoding Example)
