@@ -121,14 +121,13 @@ of identifiers can be encoded using a single byte.
   WAF Request                   WAFRqst                 192
   WAF Reply                     WAFRply                 192
   WAF Modify                    WAFMod                  193
+  WAF Notify			WAFNotify		194
 
   Disconnect Request            DisconnRqst             xxx
   Disconnect                    Disconn                 xxx
   Acknowledge                   Ack                     xxx
   Negative Acknowledge          Nack                    xxx
   
-  Notify Deliver                Notify                  xxx
-
   ----------------------------------------------------------------
 .fi
 .KE
@@ -190,9 +189,31 @@ The receiving server MUST process the request, and return either an
 Ack or a Nack, depending on the validity of the SubAST.
 
 
+m4_heading(3, WAF Notify)
 
+Notification traffic is sent between the servers using the WAFNotify
+packet.  
 
+m4_pre(
+struct WAFNotify {
+  NameValue attributes[];
+  boolean deliver_insecure;
+  Keys keys;
+  NameValue routing;
+};)m4_dnl
 
+The routing hashtable consists of the unique signatures of domains
+that have previously seen this packet.  For those servers with
+multiple WAF links, packets MUST NOT be forwarded through links whose
+registered signature is already present in the routing hash.
+
+Before forwarding a WAFNotify, a server MUST insert its own signature
+intot he routing hash to prevent it being delivered again.  However,
+if a notification is received where the routing hash contains the
+signature of the receiving server, it MUST be silently dropped.
+
+For this version of the protocol, the contents of the hashtable
+elements MUST be ignored.
 
 
 
