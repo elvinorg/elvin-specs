@@ -72,8 +72,7 @@ bool-pred		= "exists" / "int32" / "int64" /
 function-pred		= "begins-with" / "ends-with" / 
 			  "contains" / "wildcard" / "regex" /
 			  "equals" / "size" /
-			  "to-lower" / "to-upper" /
-			  "primary" / "secondary" / "tertiary" /
+			  "fold-case" /
 			  "decompose" / "decompose-compat"
 
 ;
