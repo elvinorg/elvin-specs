@@ -150,7 +150,7 @@ sequencer must not disconnect until it has received the NSEQ packet.
 Other members should send an ACK packet to the new sequencer, which
 will continue to multicast NSEQ packets until it has received this.
 
-The last member remaining in a group will be the sequenver.  It can
+The last member remaining in a group will be the sequencer.  It can
 obviously leave at any time.
 
 m4_heading(2, Synchronisation)m4_dnl
