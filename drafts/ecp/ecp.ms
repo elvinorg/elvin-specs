@@ -855,10 +855,10 @@ m4_heading(1, Limitations)
 The protocol provides very limited means for individual routers to
 share there local configuration information.  Currently, the scope
 if the cluster will be the scope of the first Master node.   The scope
-cannot be changed without chutting down all servers within the cluster.
+cannot be changed without shutting down all servers within the cluster.
 
 No current scheme is defined to use more than one RLM group to partition
-traffic.  This would be useul to seperate sections of the cluster with
+traffic.  This would be useful to separate sections of the cluster with
 an IP router so that not every node needs to see every data packet.
 
 m4_remark(
@@ -879,10 +879,10 @@ to the access of the machines from outside the cluster, eg the
 Internet.
 
 The __title is designed for Elvin router nodes operating on a LAN.
-The protocol is designed to allow cluster nodes shre information
+The protocol is designed to allow cluster nodes share information
 via RLM and multicast.  Any traffic not originating from a cluster
 node within the cluster SHOULD be blocked from entering any
-LAN segements that a cluster is running on, all traffic for 
+LAN segments that a cluster is running on, all traffic for 
 239.255.123.0/24.  Multicast client traffic for router discovery
 MAY be allowed to enter the LAN and MUST be if clients are to
 find nodes in the cluster dynamically.
