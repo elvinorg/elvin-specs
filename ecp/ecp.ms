@@ -165,52 +165,68 @@ of identifiers can be encoded using a single byte.
 
 m4_heading(2, Management Packets)
 
-Remote management of an Elvin server is implemented using a secure
-connection to the server in question.  
+Management of an Elvin server is implemented using a secure connection
+either directly to the server in question, or to any server in the
+cluster of which it is a member.
 
-.nf
-*** Is this true?  do we want all mgmt operations to be
-*** point-to-point, or should they be multicast?  If they are
-*** multicast, can they affect multiple servers at once?  how?
+All management operations are considered privileged, and may require
+that the identity of the requestor be authenticated prior to
+authorisation of the request.
 
-*** i'm assuming for the moment that these packets are unicast, and
-*** generate an Ack/Nack reply.
-.fi
+The management protocol provides a number of operations.  The packets
+are unicast to a server, which should check the server_id and if it
+doesn't match, the server should forward the packet to the cluster's
+multicast address.
 
-The management protocol provides a number of operations.
+In response to these packets, the affected server(s) should return a
+ServerStatusNotify packet via the delivery channel (either uni- or
+multicast) describing their new state and containing the XID of the
+causal request.  If a server forwarded the request, it MUST also
+return the reply to the connected management client.
+
+m4_heading(3, ServerStatusNotify)
+
+Describe the status of a server.  Sent in response to a (successful)
+request to change a server's status.
+
+m4_pre(
+struct ServerStatusNotify {
+  id32 xid;
+  id32 server_id;
+  id32 status;
+};)m4_dnl
 
 m4_heading(3, Activate)
 
-A standby server process may be made active by sending this message.
-The server begins to accept client connections.
-
-m4_pre(
-struct Activate {
-  id32 xid;
-  id32 server_id;
-};)m4_dnl
-
-m4_heading(3, Standby)
-
-A server process operates in two modes: active, or standby.  A standby
-server remains an active process, and continues to process management
+A server process operates in two modes: active, or standby.  A server
+in standby state remains an active process, and continues to process management
 requests, but it suspends any activity via the Elvin client protocol.
 This is used to provision servers for periods of greater activity, in
 a hot-standby role for reliability, etc.
 
-The Go Standby message forces a server from active into standby mode.
+A standby server process may be made active by sending this message.
+
+m4_pre(
+struct Activate {
+  id32 xid;
+  id32 server_ids[];
+};)m4_dnl
+
+m4_heading(3, Standby)
+
+The Standby message forces a server from active into standby mode.
 Any clients currently connected to the server are disconnected and no
 further connections are accepted.
 
-The Go Standby packet MAY include a redirection specification,
-allowing the server to direct connected clients to a specific
-alternative server.  If the redirection string is zero-length, clients
-MUST NOT be redirected
+The Standby packet MAY include a redirection specification, allowing
+the server to direct connected clients to a specific alternative
+server.  If the redirection string is zero-length, clients MUST NOT be
+redirected.
 
 m4_pre(
 struct Standby {
   id32  xid;
-  id32 server_id;
+  id32 server_ids[];
   string redirection;
 };)m4_dnl
 
@@ -224,18 +240,18 @@ current process.
 m4_pre(
 struct Restart {
   id32 xid;
-  id32 server_id;
+  id32 server_ids[];
 };)m4_dnl
 
 m4_heading(3, Shutdown)
 
 Shut down the server.  Once a server has been shut down, it cannot be
-restarted by a cluster controller.
+restarted via the Elvin protocols.
 
 m4_pre(
 struct Shutdown {
   id32 xid;
-  id32 server_id;
+  id32 server_ids[];
 };)m4_dnl
 
 
