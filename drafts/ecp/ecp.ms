@@ -153,13 +153,14 @@ of identifiers can be encoded using a single byte.
   Cluster Join Request          ClstJoinRqst            160
   Clister Join Reply            ClstJoinRply            161
 
-  Cluster Subscription Add      ClstSubAdd              162
-  Cluster Subscription Modify   ClstSubMod              163
-  Cluster Subscription Delete   ClstSubDel              164
-  Cluster Notify                ClstNotify              165
-  Cluster Redirect              ClstRedir               166
-  Cluster Client Notify         ClstCliNotify           167
-  Cluster Leave                 ClstLeave               168
+  Cluster Term Add              ClstTermAdd             162
+  Cluster Term Delete           ClstTermDel             163
+
+  Cluster Notify                ClstNotify              164
+
+  Cluster Redirect              ClstRedir               165
+  Cluster Client Notify         ClstCliNotify           166
+  Cluster Leave                 ClstLeave               167
   ----------------------------------------------------------------
 .fi
 .KE
@@ -354,41 +355,27 @@ m4_heading(3, Cluster Notify)
 m4_pre(
 struct ClstNotify {
   id32 server_id;
-  id32 client_id;
+  id32 server_ids[];
   NameValue attributes[];
-  id64 secure_matches[];
-  id64 insecure_matches[];
   boolean deliver_insecure;
+  Keys conn_keys;
   Keys nfn_keys;
 };)m4_dnl
 
-m4_heading(3, Cluster Subscription Add)
+m4_heading(3, Cluster Term Add)
 
 m4_pre(
-struct ClstSubAdd {
-  id32 client_id;
-  id64 sub_id;
-  SubAST expr;
-  boolean accept_insecure;
-  Keys sub_keys;
+struct ClstTermAdd {
+  id32 server_id;
+  string names[];
 };)m4_dnl
   
-m4_heading(3, Cluster Subscription Modify)
-
-m4_pre(
-struct ClstSubMod {
-  id64 sub_id;
-  SubAST expr;
-  boolean accept_insecure;
-  Keys add_sub_keys;
-  Keys del_sub_keys;
-};)m4_dnl
-  
-m4_heading(3, Cluster Subscription Delete)
+m4_heading(3, Cluster Term Delete)
 
 m4_pre(
 struct ClstSubDel {
-  id64 sub_id;
+  id32 server_id;
+  string names[];
 };)m4_dnl
 
 m4_heading(3, Cluster Client Notify)
