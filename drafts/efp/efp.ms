@@ -243,13 +243,16 @@ into the routing list to prevent it being delivered again.  However,
 if a notification is received where the routing list contains the
 signature of the receiving server, it MUST be silently dropped.
 
-A server SHOULD NOT forwarding a FedNotify to a server that has not
+A server SHOULD NOT forward a FedNotify to a server that has not
 requested it i.e. a notification that does not match the server's most
-recently positively acknowledged outgoing_filter.
+recently positively acknowledged pull_filter.
 
-A server MAY NOT forward a FedNotify to a server that has requested it
-(i.e. a notification that matches the server's most recently positively
-acknowledged outgoing_filter).
+A server MAY choose to not forward a FedNotify to a server that has
+requested it (i.e. a notification that matches the server's most
+recently positively acknowledged pull_filter). Some cases in which a
+server might choose to do this are if the server or its network
+connections are overloaded, or if it has been configured not to send
+this type of notification.
 
 
 m4_heading(2, Configuration)
