@@ -39,3 +39,7 @@ the supplied element identifier exceeds the maximum allowed length.
 .IP "Bad Identifier" 4
 the supplied element identifier contains illegal characters. Remember
 that the first character must be only a letter or underscore.
+
+
+m4_heading(2, Protocol Errors)
+

@@ -378,9 +378,35 @@ struct Nack {
     Value args[]
 };)m4_dnl
 
-m4_remark(we need to refer to the definition of errors here.  we also need to
-decide what to do wrt the error numbers, as discussed in jun00 design
-meetings.)
+The error value is structured in two components: a general category
+that indicates what action should be taken by the client, and a
+specific error number that identifies the problem.
+
+Three categories of action are defined:
+
+.KS
+.nf
+  Error  |  Action Required
+  -------+---------------------------------------
+   0xxx  |  Handle a failed connection attempt
+   1xxx  |  Handle closure of existing connection
+   2xxx  |  Handle failure of requested operation
+.fi
+.KE
+
+An error value outside these ranges MUST be treated as a protocol
+error.  An implementation MAY define specific error codes within these
+categories, specifying in more detail the nature of the problem.
+
+The message field is a Unicode string template containing embedded
+tokens of the form %n, where n is an index into the args array.  When
+preparing the error message for presentation to the user, each %n
+should be replaced by the appropriately formatted value from the args
+array.
+
+Servers MAY support error messages in multiple languages.  The
+language in which the message template is returned SHOULD be
+negotiated during connection.
 
 m4_heading(3, Connect Request)
 
