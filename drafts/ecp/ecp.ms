@@ -172,14 +172,11 @@ of identifiers can be encoded using a single byte.
 
   Cluster Join Request          ClstJoinRqst            160
   Clister Join Reply            ClstJoinRply            161
+  Cluster Terms                 ClstTerms               162
+  Cluster Notify                ClstNotify              163
 
-  Cluster Term Add              ClstTermAdd             162
-  Cluster Term Delete           ClstTermDel             163
-
-  Cluster Notify                ClstNotify              164
-
-  Cluster Redirect              ClstRedir               165
-  Cluster Leave                 ClstLeave               167
+  Cluster Redirect              ClstRedir               164
+  Cluster Leave                 ClstLeave               165
 
   
   ----------------------------------------------------------------
@@ -454,22 +451,15 @@ struct ClstNotify {
 *** what's the first server_id for ?  the source?
 .fi
 
-m4_heading(3, Cluster Term Add)
+m4_heading(3, Cluster Terms)
 
 m4_pre(
-struct ClstTermAdd {
+struct ClstTerms {
   id16 server_id;
-  string names[];
+  string add_names[];
+  string del_names[];
 };)m4_dnl
   
-m4_heading(3, Cluster Term Delete)
-
-m4_pre(
-struct ClstSubDel {
-  id16 server_id;
-  string names[];
-};)m4_dnl
-
 .KS
 .ti 0
 .NH 1
