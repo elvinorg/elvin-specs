@@ -31,7 +31,7 @@ m4_include(macros.m4)m4_dnl
 .in 0
 Elvin Project                                                  D. Arnold
 Internet Draft                                                      DSTC
-Expires:  aa bbb cccc                                        dd mmm yyyy
+Expires: aa bbb cccc                                         dd mmm yyyy
                      
 
 .ce

@@ -26,7 +26,7 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/elvin-url/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.3 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.4 $
 #
 ################################################################
 
@@ -36,6 +36,8 @@
 mmm=$(shell date +%b)
 dd=$(shell date +%d)
 yyyy=$(shell date +%Y)
+exp=$(shell date -d "6 months" "+%d %b %Y")
+
 
 all: main.txt
 
@@ -55,7 +57,7 @@ clean:
 ################################################################
 
 %.txt : %.ms
-	nroff -ms $< | ./fix.pl | sed -e 's/_//g' -e 's/.//g' -e 's/dd mmm/${dd} ${mmm}/g' -e 's/yyyy/${yyyy}/g'  > $@
+	nroff -ms $< | ./fix.pl | sed -e 's/_//g' -e 's/.//g' -e 's/dd mmm/${dd} ${mmm}/g' -e 's/yyyy/${yyyy}/g' -e 's/aa bbb cccc/${exp}/g'  > $@
 
 %.ms : %.m4
 	m4 -P $< > $@
