@@ -1,3 +1,7 @@
+m4_dnl  -*- nroff -*-
+m4_dnl
+m4_dnl  xdr-encoding
+
 The standard Elvin 4 transport uses XDR encoding (see RFC 1832) to
 marshal base data types.  Each packet is a sequence of encoded XDR
 types.

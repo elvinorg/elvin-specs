@@ -59,8 +59,8 @@ interactions between clients and the server.
 .KE
 
 A concrete protocol implementation is free to use the most suitable
-method for distinguishing packet types.  If a packet type number is
-used, it SHOULD reflect the above ordering.
+method for distinguishing packet types.  If a packet type number or
+enumeration is used, it SHOULD reflect the above ordering.
 
 The subset numbers in the above table reflect capabilities of an
 implementation.  An implementation MUST implements all or none of the
@@ -274,10 +274,15 @@ The following definitions are used in several packets:
 m4_pre(
 struct NameValue{
    string name;
-   Value  value;
+   union {
+     int32   i;
+     int64   l;
+     string  str;
+     real64  f;
+     opaque  blob;
+   } value;
 };)m4_dnl
 
-Where the "Value" type is one of int32, int64, string, real64 or opaque.
 
 m4_pre(
   xid
