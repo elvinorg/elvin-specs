@@ -145,13 +145,13 @@ Sent by client to the Elvin server.  Includes protocol version of the client lib
 per-connection security keys, quality of service specifications, etc.
 
 m4_pre(
-  struct ConRqst {
-     int32 major_version;
-     int32 minor_version;
-     string protocol_preferences[];
-     string qos_preferences[];
-     opaque keys[];
-  }
+struct ConRqst {
+   int32 major_version;
+   int32 minor_version;
+   string protocol_preferences[];
+   string qos_preferences[];
+   opaque keys[];
+}
 )
 
 *** fixme *** whats the format of protocol_preferences strings? URLs
@@ -164,11 +164,11 @@ Includes connection identifier, available QoS, and protocol version
 agreed.
 
 m4_pre(
-  struct ConRply {
-     int32 major_version;
-     int32 minor_version;
-     string protocol_used;
-  }
+struct ConRply {
+   int32 major_version;
+   int32 minor_version;
+   string protocol_used;
+}
 )
 
 "protocol_used" tells the client
@@ -178,9 +178,9 @@ m4_heading(4, Disconnect Request)
 Sent by client to the Elvin server.  Requests disconnection.  This message is not acknowledged.
 
 m4_pre(
-  struct DisConRqst {
+struct DisConRqst {
     
-  }
+}
 )
 
 m4_heading(4, Security Request)
@@ -194,12 +194,14 @@ m4_heading(4, Subscription Add Request)
 Sent by client to the Elvin server.  if your are going to get a ack
 back, events may start arriving before the return of the sendSubscribe
 
-  struct SubAddRqst {
-    int32 sequence_no;
-    int32 subscription_id;
-    string expression;
-    opaque keys[];
-  }
+m4_pre(
+struct SubAddRqst {
+  int32 sequence_no;
+  int32 subscription_id;
+  string expression;
+  opaque keys[];
+}
+)
 
 m4_heading(4, Subscription Modify Request)
 

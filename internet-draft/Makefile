@@ -26,7 +26,7 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/internet-draft/Attic/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.2 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.3 $
 #
 ################################################################
 
@@ -34,10 +34,13 @@
 
 all: main.txt
 
-main.txt: *.m4 macros
+main.txt: main.ms
 
-macros: macros.m4
+main.ms: *.m4
+	m4 -P main.m4 > $@
 
+clean:
+	rm -f main.txt main.ms
 
 ################################################################
 
@@ -48,3 +51,6 @@ macros: macros.m4
 	m4 -P $< > $@
 
 ################################################################
+
+
+
