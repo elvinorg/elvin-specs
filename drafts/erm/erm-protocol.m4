@@ -17,7 +17,7 @@ m4_pre(`
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
 |            Member Id          |            Packet Id          |
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
-|                        Sequence Number                        |
+|                         Last Sequence                         |
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
 ')m4_dnl
 
@@ -42,6 +42,26 @@ m4_pre(`
   LostSequencer       |  10  |  LSEQ         |  M -> M*
   Close               |  11  |  CLOSE        |  M -> M*')m4_dnl
 
+The flags field is 8 bits.  They are defined as
+m4_pre(`
+  Bit |  Meaning
+ -----+--------------------------
+   0  |  Client buffer space LSB
+   1  |  Client buffer space MSB
+   2  |  ACK buffer space LSB
+   3  |  ACK buffer space MSB
+   4  |  Reserved
+   5  |  Reserved
+   6  |  Reserved
+   7  |  Reserved')m4_dnl
+
+These flags are used on packets from members to the sequencer as part
+of the congestion avoidance mechanism.  There are two quantities
+specified: the amount of buffer space used for unacknowledged packets,
+and the amount used by packets yet to be retrieved by the client
+application.  Both quantities are a scalar measure of the space in
+use.
+
 The incarnation field is used to prevent members isolated by a network
 partition, or otherwise separated from the group for a period of time,
 from re-joining the group after it has been reformed.  The 16 bit
@@ -56,11 +76,11 @@ it with the packet sent by the sequencer with an assigned sequence
 number.  This means that a member cannot have more than 65535 packets
 outstanding at any one time.
 
-The sequence number is used as a group-wide identifier and ordering
-for a packet.  It is allocated by the sequencer, and may roll over if
-the 32 bit limit is exceeded.  Members should accept a packet with
-matching incarnation number and a sequence number of 1 if their
-previous sequence number was greater than 2^31.
+The last sequence is used as a group-wide identifier and ordering for
+a packet.  It is allocated by the sequencer, and may roll over if the
+32 bit limit is exceeded.  Members should accept a packet with
+matching incarnation number and a last sequence of 1 if their previous
+last sequence was greater than 2^31.
 
 m4_heading(2, Normal Operation)m4_dnl
 
@@ -77,7 +97,7 @@ sequencer.  The current group sequencer responds with a JRPY.  If no
 JRPY is received within 1 second, the JREQ is resent up to 4 times,
 with a doubling backoff.  If no response is received, the initiating
 node assumes the role of sequencer, selects an incarnation number, and
-resets the packet sequence number to zero.
+resets the packet last sequence to zero.
 
 Alternatively, if a JRPY is received, the incarnation and sequence
 numbers are saved, along with the unicast address of the sequencer.
@@ -91,7 +111,7 @@ multicasts the data as an ACCEPT packet, together with an allocated
 sequence number, to all group members.
 
 Each member maintains a buffer of received messages, and a table of
-sequence numbers for each known member.  When all members have
+last sequence for each known member.  When all members have
 acknowledged a buffered message, it can be removed from the buffer.
 
 After a timeout period without sending a DATA packet, a member should
@@ -151,7 +171,7 @@ If a sender has not seen the matching ACCEPT packet within a timeout
 The sequencer, receiving a duplicate DATA packet, re-multicasts the
 ACCEPT.  A member receiving a duplicate ACCEPT can ignores it.
 
-On receiving a packet with a sequence number greater than expected
+On receiving a packet with a last sequence greater than expected
 (ie. having missed a packet), a member unicasts a RETR packet to the
 sequencer requesting a retransmission.
 
@@ -213,7 +233,7 @@ m4_heading(3, `Join Reply')m4_dnl
 
 The member_id value is allocated by the sequencer, and may reuse
 values of previous members.  The packet_id is set to match that of
-the member's request. The sequence number is that of the last message
+the member's request. The last sequence is that of the last message
 sent by the sequencer, thus initialising the member to the state of
 the group at the time it joins.
 
@@ -223,7 +243,7 @@ should allocate space in their history buffer for the new member.
 m4_heading(3, `Leave')m4_dnl
 
 The member_id is set to that of the leaving member (as specified in
-JRPY).  The packet_id should be 0, and the sequence number the last
+JRPY).  The packet_id should be 0, and the last sequence the last
 message seen by the member.
 
 m4_heading(3, `Data')m4_dnl
@@ -231,15 +251,15 @@ m4_heading(3, `Data')m4_dnl
 The member_id is set to that of the sending member, and the packet_id
 should be sequentially allocated by the member.
 
-The sequence number should be the highest, contiguous sequence number
-seen so far by the sending member.
+The last number should be the highest, contiguous sequence number seen
+so far by the sending member.
 m4_pre(`
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
 | Ver |   Type  |     Flags     |          Incarnation          |
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
 |            Member Id          |            Packet Id          |
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
-|                         Sequence Number                       |
+|                          Last Sequence                        |
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
 |                             Length                            |
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
@@ -249,8 +269,8 @@ X                              Data                             X
 m4_heading(3, `Accept')m4_dnl
 
 The member_id and packet_id should be set from the triggering DATA
-packet.  The sequence number should be set from the DATA packet, and
-the message sequence allocated sequentially by the sequencer.
+packet.  The last sequence should be set from the DATA packet, and the
+message sequence allocated sequentially by the sequencer.
 
 m4_pre(`
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
@@ -258,7 +278,7 @@ m4_pre(`
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
 |            Member Id          |            Packet Id          |
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
-|                         Sequence Number                       |
+|                          Last Sequence                        |
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
 |                        Message Sequence                       |
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
@@ -271,14 +291,14 @@ X                              Data                             X
 m4_heading(3, `Retransmit')m4_dnl
 
 The member_id is set to that of the requesting member.  The packet_id
-should be zero.  The sequence number is that of the missing packet.
+should be zero.  The last sequence is that of the missing packet.
 
 m4_heading(3, `Synchronise')m4_dnl
 
 The member_id is set to that of the requesting group member.  The
 packet_id should be 0.  The requesting member should set the sequence
-number to 0, and the sequencer should set the sequence number to that
-of the last message sent to the group.
+number to 0, and the sequencer should set the last sequence to that of
+the last message sent to the group.
 
 m4_heading(3, `Acknowledge')m4_dnl
 
@@ -287,17 +307,17 @@ number to that of the last packet seen.  The packet_id should be 0.
 
 m4_heading(3, `Flush')m4_dnl
 
-The member_id and packet_id should be zero, and the sequence number to
+The member_id and packet_id should be zero, and the last sequence to
 that of the last message sent to the group.
 
 m4_heading(3, `Lost Sequencer')m4_dnl
 
-The member_id and packet_id should be zero, and the sequence number to
+The member_id and packet_id should be zero, and the last sequence to
 that of the last message seen.
 
 m4_heading(3, `Close')m4_dnl
 
-The member_id, packet_id and sequence number should be zero.
+The member_id, packet_id and last sequence should be zero.
 
 
 
