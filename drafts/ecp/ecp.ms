@@ -201,10 +201,24 @@ struct ClstJoinRqst {
   id32 xid; 
   uint8 version_major;
   uint8 version_minor;
-  id16 server_id;        /* unique id requested for server */
-  string urls[];         /* set of URLs for server */
+  id16 server_id;
+  string urls[];
   string mgmt_url;
 };)m4_dnl
+
+The xid field should contain a random number which used to identify
+corresponding ClstJoinRply packets.  The major version should be set
+to 4 and the minor version should be 0.
+
+The server_id value is a unique identifier the server has selected
+to use.  This MUST be set the the RLM member identifier generated
+my the RLM library during its connection process.
+
+The urls field contains the Elvin URLs the server is configured 
+with and will offer to clients when the server is activated.
+
+The mgmt_url field is the secure HTTP URL which can be accessed
+using a standard web browser for administration of the server.
 
 On initial startup, a server configured to join a cluster MUST join
 the RLM group specified.  The server MUST then send its ClstJoinRqst.
@@ -272,10 +286,15 @@ struct ClstJoinRply {
   } servers[];
   struct {
     string attr_name;
-    SubAST sub_expr;      /* not used at present - set to (int32)0 */
+    int32 reserved;
     id16 server_ids[];
   } subscriptions[];
 };)m4_dnl
+
+m4_remark(
+*** all the bits exaplained
+*** rant about shared initial state 
+)
 
 m4_heading(2, Leaving the Cluster)
 
@@ -532,6 +551,39 @@ field contains any session keys the client may have registered for its
 connection which are implicitly added to each notification sent by
 the client.  Note that these key lists are NOT transformed before
 being multicast to other servers in the cluster.
+
+m4_heading(2, Packet Encoding)
+
+Elvin cluster packets are encoded using XDR [RFC1832] for each element in the
+packet.  This mapping is as for the standard Elvin client-server XDR encoding.
+
+* do some examples - the whole lot?
+
+m4_heading(1, LIMITATIONS)
+
+* managment protocol is weak
+
+* security of network
+
+* distribution of configuration information (eg scope)
+
+m4_heading(1, REFERENCES)
+
+.IP [RFC1832] 12
+Srinivasan, R.,
+"XDR: External Data Representation Standard",
+RFC 1832, August 1995.
+
+.IP [ELVIN] 12
+Arnold, D., et al,
+"Elvin - Content-Addressed Messaging Client Protocol",
+April 2001.
+
+.IP [RLM] 12
+Arnold, D., Boot, J.,
+"Reliable Local Multicast"
+April 2001.
+
 
 .KS
 .ti 0
