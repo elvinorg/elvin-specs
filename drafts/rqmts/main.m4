@@ -1,0 +1,9 @@
+m4_include(../macros.m4)m4_dnl
+m4_include(header.m4)m4_dnl
+m4_include(abstract.m4)m4_dnl
+m4_include(toc.m4)m4_dnl
+m4_include(intro.m4)m4_dnl
+m4_include(consider.m4)m4_dnl
+m4_include(bib.m4)m4_dnl
+m4_include(contact.m4)m4_dnl
+m4_include(copyright.m4)m4_dnl
