@@ -47,6 +47,7 @@ no unsigned integer types, nor an explicit boolean type.
 
 .KE
 .KS
+m4_pre(`
 struct Keys {
     struct KeySetList {
 	id32 scheme;
@@ -54,7 +55,7 @@ struct Keys {
 	    opaque keys[];
 	} key_sets[];
     } key_set_lists[];
-};
+};')m4_dnl
 
 Keys and keysets are explained more fully in a later section.
 .KE
