@@ -1,6 +1,6 @@
-m4_dnl  abstract-protocol
+m4_dnl  -*- nroff -*-
 m4_dnl
-m4_dnl  -*-nroff-mode-*-
+m4_dnl  abstract-protocol
 
 m4_heading(1, ABSTRACT PROTOCOL)
 
@@ -176,15 +176,45 @@ struct ConRply {
 
 m4_heading(3, Disconnect Request)
 
-Sent by client to the Elvin server.  Requests disconnection.  This message is not acknowledged.
+Sent by client to the Elvin server.  Requests disconnection.
 
 m4_pre(
 struct DisConRqst {
-    
+   int32 sequence_no;    
 }
 )
 
 m4_heading(3, Disconnect)
+
+Sent by the Elvin server to a client.  This packet is sent in three
+different circumstances: as a response to a Disconnect Request, to
+direct the server to reconnect to another server, or to inform that
+client that the server is shutting down.
+m4_pre(
+struct DisCon {
+   int32 why;
+   int32 sequence_no;
+   string args;
+}m4_dnl
+)
+where the defined values for "why" are
+
+.KS
+.nf
+-----------------------------------------------------------------
+Why  Definition
+-----------------------------------------------------------------
+ 0   Reserved.
+ 1   Server is closing down.  sequence_no MUST be zero.
+ 2   Server is closing this connection, in response to your 
+     request (DisConRqst) with sequence number matching 
+     sequence_no.
+ 4   Server is closing this connection, and requests that client
+     makes new connection to server address in "args".  
+     sequence_no MUST be zero.
+---------------------------------------------------------------
+.fi
+.KE
 
 m4_heading(3, Security Request)
 
@@ -262,6 +292,7 @@ Sent by the Elvin server to a client.
 m4_heading(3, Add Link)
 m4_heading(3, Update Link)
 m4_heading(3, Delete Link)
+
 
 m4_heading(2, Failures)
 
