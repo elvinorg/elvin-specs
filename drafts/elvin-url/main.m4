@@ -35,7 +35,7 @@ Expires:  aa bbb cccc                                        dd mmm yyyy
                      
 
 .ce
-Elvin URL Scheme
+Elvin URI Scheme
 .ce
 draft-arnold-elvin-url-00pre.txt
 
@@ -143,19 +143,74 @@ The scheme name is: elvin
 
 m4_heading(1, Syntax)
 
-elvin:<version>/<protocol>/<endpoint>;<option>;<option=value>
+The 'elvin' URI scheme is defined using a formal syntax derived from
+that of the URI Generic Syntax, as defined in RFC2396.  They differ
+from most RFCs in that the grammars are defined not in terms of bytes,
+but characters, independent of their representation.
+
+In addition, the format used for IPv6 addresses is that defined in
+RFC2732, itself an extension of RFC2396.
+
+Some of the definitions of RFC2396 and RFC2732 are used in this
+specification, without elaboration.
+
+m4_heading(2, `Base Syntax')
+
+The Elvin URI scheme is opaque, and SHOULD NOT be interpreted as
+hierarchical.  It sub-classes the definition of RFC2396 opaque_part to
+define the a scheme-specific opaque part.
+
+m4_pre(
+elvin_opaque_part = [ version ] "/" protocol "/" endpoint [ options ]
+version = 1*digit [ "." 1*digit ]
+)m4_dnl
+m4_dnl
+The version specification uses a two part major.minor format to
+describe the protocol version implemented by the described resource.
+Elvin URI exported from an Elvin router MUST include the version
+component, describing the implemented protocol.  Where multiple
+versions of the protocol are supported, separate URI MUST be used.
+
+URI supplied to an Elvin client MAY include the version component.  If
+no version is supplied, the SHOULD initiate connection to the
+specified endpoint, and negotiate version compatibility upon
+connection as described in [EP].
+
+m4_pre(
+protocol = protocol_name *( "," protocol_name )
+protocol_name = official_name | experimental_name
+official_name = alpha *( alphanum | "-" )
+experimental_name = "x-" official_name
+)m4_dnl
+m4_dnl
+The protocol specification describes the stack of protocol modules
+required to make a connection to the identified resource.  Protocol
+module names must be unique.  Official names are allocated by IANA,
+within the Elvin Protocol registry.
+
+Experimental protocol names should follow the guidelines for official
+names, within a leading "x-" prefix to distinguish them as an
+unmanaged registry.
+
+m4_pre(
+options = ";" option_name [ "=" option_value ]
+option_name = alpha *( unreserved | escaped )
+option_value = *( unreserved | escaped )
+)m4_dnl
+m4_dnl
+The options component is used to define parameters to be interpreted
+by the Elvin client or its protocol modules to select variant
+behaviour required to connect to the Elvin resource.
+
 
 m4_heading(2, `TCP Endpoint Syntax')
+
 
 <hostname|IPv4-addr|IPv6-addr>[:port]
 
 m4_heading(2, `UDP Endpoint Syntax')
 
 <hostname|IPv4-addr|IPv6-addr>[:port]
-
-m4_heading(2, `HTTP Endpoint Syntax')
-
-[username[:password]@]<hostname|IPv4-addr|IPv6-addr>[:port]
 
 m4_heading(2, `Unix Endpoint Syntax')
 
@@ -177,25 +232,64 @@ advertisements of server endpoints emitted by an Elvin server.
 
 m4_heading(1, `Applications and/or Protocols Using the Scheme')
 
-The scheme is used by the Elvin access protocol.
+The scheme is used by implementations of the Elvin protocol to
+identify Elvin router endpoints.  This usage includes advertisement by
+Elvin routers using the Elvin router discovery protocol [ERDP], and
+user input for Elvin client applications, similarly to URL used for
+HTTP-accessable resources.
+
+It is not intended that 'elvin' scheme URI be used by a web browser,
+not that Elvin clients use existing web proxy networks.  
 
 m4_heading(1, `Interoperability Considerations')
 
-hmmmm.
+The 'elvin' scheme has several features designed to promote
+interoperability between implementations of the Elvin protocols.
+
+The inclusion of the protocol version number as a distinct syntactic
+element allows future revisions of the scheme to alter the definition
+of the scheme's opaque component while ensuring continued correct
+operation of previous versions' implementations.
+
+Compatibility between different protocol versions can be determined
+using the algorithm specified in [EP].
+
+The scheme's protocol component allows multiple implementations of the
+abstract protocol.  This enables different protocol properties to be
+selected by users and administrators within the scheme definition.
 
 m4_heading(1, `Security Considerations')
 
-????
+Multiple concrete implementations of the abstract protocol mean that
+the Elvin protocol endpoint described by an 'elvin' URI can have many
+different properties, depending upon the protocol stack(s) offered.
+
+Elvin clients should be careful to select only endpoints offered using
+protocols with the desired properties, especially those providing
+appropriate security.
+
+Similarly, administrators of Elvin routers, should be careful to
+ensure that only appropriate combinations of protocols are offered by
+their routers.
+
+The ability of client programs to specify both the protocol modules to
+be used, and the address at which that protocol is expected gives
+wide-ranging ability to reach an offered host.
 
 m4_heading(1, `IANA Considerations')
 
-Are discussed in the Elvin Client Protocol.
+Scheme registration.
 
 m4_heading(1, `Relevant Publications')
 
 m4_heading(1, `Contact for further information')
 
+elvin@dstc.com
+
 m4_heading(1, `Author/Change controller')
+
+Elvin
+DSTC
 
 m4_dnl  bibliography
 m4_dnl
@@ -244,9 +338,25 @@ L. Masinter, H. Alvestrand, D. Zigmond, R. Petke,
 "Guidelines for new URL Schemes"
 RFC2718, November 1999
 
+.IP [RFC2732] 12
+R. Hinden, B.Carpenter, L.Masinter,
+"Format for Literal IPv6 Addresses in URL's"
+RFC2732, December 1999
 
-RFC2396
+.IP [RFC2396] 12
+R. Fielding, L. Masinter, T.Berners-Lee
+"Uniform Resource Indentifiers: Generic Syntax",
+RFC2396, August 1998
 
+.IP [EP] 12
+D.Arnold, et al
+"Elvin Client Protocol",
+Work in progress
+
+.IP [ERDP] 12
+D.Arnold, et al
+"Elvin Router Discovery Protocol",
+Work in progress
 
 .KS
 m4_heading(1, Contact)
