@@ -116,10 +116,23 @@ This test is expressed as a predicate using the Elvin subscription
 language, described in this section.  
 
 
-m4_heading(3, Truth values, Predicates and Logical operators)
+m4_heading(3, Boolean values, Predicates and arithmetic operators)
 
-The result of applying a subscription expression to a notification is
-a truth value, true or false.  However, it should be emphasized that:
+The elvin subscription language uses a ternary logic when evaluating
+expressions.  The value `bottom' is added to the usual true and false
+to represent undefined values.  For example, a comparison involving an 
+attribute which is not present in a notification evaluates to bottom.
+
+With respect to boolean operations, bottom's behavior is quite similar
+to that of false with the notable exception that the negation of
+bottom (! bottom) is still bottom.
+
+A subscription expression is a boolean expression which refers to the
+fields of a notification.  If the expression evaluates to true then
+the notification is delivered, if it evaluates to false or bottom then 
+it it not delivered.  
+
+It should be emphasized that:
 .IP - 2
 There is neither an explicit boolean type nor are there boolean
 constants for true or false.
@@ -129,7 +142,7 @@ implicit conversion from numeric values to truth values (zero means
 false, nonzero means true), the Elvin subscription language requires
 such a conversion to be made explicit, for example 
 .QP
-(iHaveBeenNotified != 0)
+(i-have-been-notified != 0)
 
 m4_heading(4, Grouping)
 
@@ -154,16 +167,12 @@ operators are
 ^^   Logical Exclusive-OR
 !    Logical NOT (unary)
 .DE
-In the absence of other constraints, evaluation of these operators
-proceeds left to right, stopping as soon as a result is determined
-("short circuit" evaluation).  Logical NOT has highest precedence,
-following by AND, with OR and XOR equal.
-
+Logical NOT has highest precedence, followed by AND, XOR and then OR.
 .KS
 m4_heading(4, General predicates)
 .LP
-The subscription language defines a number of predicates that return truth
-values.
+The subscription language defines a number of predicates that return
+boolean values.
 .KE
 
 Any predicate may be applied to any attribute name. If the named attribute
@@ -500,7 +509,7 @@ any particular naming conventions.  ie like the different packet types
 are current defined. Is this the Failures section in
 abstract-protocol.m4?  jb
 
-Errors are reported as numbers so that language-specific error
+vErrors are reported as numbers so that language-specific error
 messages may be used by the client. This section shows symbols from
 the C language binding; for the corresponding error numbers, please
 see <elvin4/errors.h> or documentation for your language binding.
