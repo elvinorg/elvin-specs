@@ -277,7 +277,8 @@ The data field must be packed to a 4 byte boundary with NUL
 (zero-valued) bytes.  The total and (last) fragment length fields must
 specify that actual length, not the packed length.
 
-m4_pre(`
+m4_changequote([,])m4_dnl
+m4_pre([
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
 | Ver |   Type  |     Flags     |          Incarnation          |
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
@@ -294,7 +295,8 @@ m4_pre(`
 |                        Fragment Offset                        |
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
 X                              Data                             X
-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|')m4_dnl
+|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|])m4_dnl
+m4_changequote(`,')m4_dnl
 
 m4_heading(3, `Accept')m4_dnl
 
@@ -303,7 +305,8 @@ fragment length, fragment offset and data fields should be set from
 the triggering DATA packet.  The message sequence should be allocated
 sequentially by the sequencer.
 
-m4_pre(`
+m4_changequote([,])m4_dnl
+m4_pre([
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
 | Ver |   Type  |     Flags     |          Incarnation          |
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
@@ -320,8 +323,8 @@ m4_pre(`
 |                        Fragment Offset                        |
 |-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
 X                              Data                             X
-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|
-')m4_dnl
+|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|])m4_dnl
+m4_changequote(`,')m4_dnl
 
 m4_heading(3, `Retransmit')m4_dnl
 
