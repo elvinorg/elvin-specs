@@ -102,13 +102,13 @@ m4_heading(5, Connection Request)
 
 m4_heading(5, Connection Reply)
 
-m4_heading(5, Connection Close Request)
+m4_heading(5, Disconnection Request)
+
+m4_heading(5, DisConnection)
 
 m4_heading(5, Security Request)
 
 m4_heading(5, QoS Request)
-
-m4_heading(5, Management Request)
 
 m4_heading(5, Subscription Add Request)
 
@@ -190,7 +190,9 @@ at the server.
  sub #       (int32)  number identifier for the subscription to 
                         delete.
 .KE
-m4_heading(5, Quench Request)
+m4_heading(5, Quench Add Request)
+m4_heading(5, Quench Modify Request)
+m4_heading(5, Quench Delete Request)
 
 m4_heading(5, Notification)
 

@@ -108,19 +108,20 @@ Possible values for the type field in a packet are:
   Connect Request               ConRqst               0
   Connect Reply                 ConRply               1
   Disconnect Request            DisConRqst            2
-  Security Request              SecRqst               3
-  QoS Request                   QosRqst               4
-  Management Request            MgmtRqst              5
+  Disconnect		        DisCon                3
+  Security Request              SecRqst               4
+  QoS Request                   QosRqst               5
   Subscription Add Request      SubAddRqst            6
   Subscription Modify Request   SubModRqst            7
   Subscription Delete Request   SubDelRqst            8
-  Quench Request                QnchRqst              9
-  Notification                  Notif                10
-  Notification Deliver          NotifDel             11
-  Quench Deliver                QnchDel              12
-  Acknowledgement               Ack                  13
-  Negative Acknowledgement      Nack                 14
-  Redirect                      Redir                15
+  Quench Add Request            QnchAddRqst           9
+  Quench Modify Request         QnchModRqst          10
+  Quench Delete Request         QnchDelRqst          11
+  Notification                  Notif                12
+  Notification Deliver          NotifDel             13
+  Quench Deliver                QnchDel              14
+  Acknowledgement               Ack                  15
+  Negative Acknowledgement      Nack                 16
 
   More...
 
@@ -183,11 +184,11 @@ struct DisConRqst {
 }
 )
 
+m4_heading(3, Disconnect)
+
 m4_heading(3, Security Request)
 
 m4_heading(3, QoS Request)
-
-m4_heading(3, Management Request)
 
 m4_heading(3, Subscription Add Request)
 
@@ -225,7 +226,15 @@ Sent by client to the Elvin server.  An Nack will be returned if the subscriptio
     int32 subscription_id;
   }
 
-m4_heading(3, Quench Request)
+m4_heading(3, Quench Add Request)
+
+Sent by client to the Elvin server. 
+
+m4_heading(3, Quench Modify Request)
+
+Sent by client to the Elvin server. 
+
+m4_heading(3, Quench Delete Request)
 
 Sent by client to the Elvin server. 
 
