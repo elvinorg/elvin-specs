@@ -1,11 +1,11 @@
 m4_dnl
 m4_dnl macros for easier nroff editting
 m4_dnl
-m4_dnl $Id: macros.m4,v 1.4 2001/03/05 03:18:07 arnold Exp $
+m4_dnl $Id: macros.m4,v 1.5 2001/06/28 13:07:19 julian Exp $
 m4_dnl
 m4_dnl MACRO FOR THE DEFAULT INDENTATION
 m4_dnl
-m4_define(_default_in, 0)m4_dnl
+m4_define(_default_in, 3)m4_dnl
 m4_dnl
 m4_dnl SECTION HEADING
 m4_dnl
@@ -36,14 +36,4 @@ $*
 .fi
 </FIXME>')m4_dnl
 m4_dnl m4_define(m4_remark, `')m4_dnl
-m4_dnl
-m4_dnl
-m4_dnl
-m4_dnl
-m4_dnl DATES
-m4_dnl
-m4_define(_yr_, `2001')m4_dnl
-m4_define(_date_, `dd mmmm _yr_')m4_dnl
-m4_dnl
-m4_dnl
 
