@@ -147,3 +147,9 @@ events, building a profile of the notifications emitted.  This profile
 is registered with the server as a quench filter (as for manual
 quenching).  The server's updates of matching subscriptions are used
 to filter notifications within the client library.
+
+m4_remark( auto quench seems to have nothing to do with the
+the client protocol and is just an implementaions issue of the
+client library. does is need to be in the spec at all? is the
+distinction useful at this level? j)
+
