@@ -1,4 +1,3 @@
-.bp
 m4_heading(1, INTRODUCTION)
 
 Undirected communication, where the sender is unaware of the identity,
@@ -9,7 +8,7 @@ service.
 
 Notification service clients can be characterised as producers, which
 detect conditions, and emit notifications; and consumers, which
-request delivery of notifications from the service.  Comsumers
+request delivery of notifications from the service.  Consumers
 normally subscribe to receive notifications matching some supplied
 criteria.
 

@@ -10,7 +10,7 @@ describe the basic concepts of notification, subscription, evaluation
 of subscriptions, delivery. 
 
 Elvin has two components: a client and a server.  Within an Elvin
-system, mutliple clients may exist, supported by a single server.
+system, multiple clients may exist, supported by a single server.
 
 *** FIXME ***
 
@@ -80,8 +80,8 @@ clients.
 
 *** FIXME ***
 
-perhaps we should not use the term "queuing" in ths context - it has
-the conentation of message queues and persistence.
+perhaps we should not use the term "queuing" in this context - it has
+the connotation of message queues and persistence.
 
 *** FIXME ***
 

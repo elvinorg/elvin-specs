@@ -3,19 +3,20 @@ m4_dnl
 m4_dnl  xdr-encoding
 m4_heading(3, Marshalling)
 
-The standard Elvin 4 transport uses XDR encoding (see RFC 1832) to
-marshal base data types.  Messages sent between the a client and
-and Elvin server are encoded as a packet  sequence of encoded XDR
-types.
+The standard Elvin 4 marshalling uses XDR [RFC1832] to encode data.
+Messages sent between the a client and and Elvin server are encoded as
+a sequence of encoded XDR types.
 
-In most illustrations, each box (delimited by a plus sign at the 4
-corners and vertical bars and dashes) depicts a 4 byte block as XDR is
-4 byte aligned.  Ellipses (...) between boxes show zero or more
-additional bytes where required. Some packet diagrams extend over
-multiple lines.  '>>>>' at the end of the line indicates continuation
-to the next line.  '<<<<' at the beginning of a line indicates a
-segment has some preceding blocks on the previous line.  Numbers used
-along the top line of packet diagrams indicate byte lengths.
+This section uses diagrams to illustrate clearly certain segment and
+packet layouts.  In most illustrations, each box (delimited by a plus
+sign at the 4 corners and vertical bars and dashes) depicts a 4 byte
+block as XDR is 4 byte aligned.  Ellipses (...) between boxes show
+zero or more additional bytes where required. Some packet diagrams
+extend over multiple lines.  In these cases, '>>>>' at the end of the
+line indicates continuation to the next line and '<<<<' at the
+beginning of a line indicates a segment has some preceding blocks on
+the previous line.  Numbers used along the top line of packet diagrams
+indicate byte lengths.
 
 .nf
         +---------+---------+---------+...+---------+
@@ -23,49 +24,104 @@ along the top line of packet diagrams indicate byte lengths.
         +---------+---------+---------+...+---------+
 .fi
 
+m4_heading(4, Packet Identification)
+
+The abstract packet descriptions deliberately leave the method for
+identifying packets to the concrete encoding.  For XDR, each packet is
+identified by the pkt_id enumeration below:
+
+m4_pre(
+`enum {
+    UNotify        = 1,    Nack           = 2,
+    ConnRqst       = 3,    ConnRply       = 4,
+    DisConnRqst    = 5,    DisConnRply    = 6,
+    DisConn        = 7,    SecRqst        = 8,
+    SecRply        = 9,    NotifyEmit     = 10,
+    NotifyDeliver  = 11,   SubAddRqst     = 12,
+    SubModRqst     = 13,   SubDelRqst     = 14,
+    SubRply        = 15,   QnchAddRqst    = 16,
+    QnchModRqst    = 17,   QnchDelRqst    = 18,
+    QnchRply       = 19,   QnchAddNotify  = 20,
+    QnchModNotify  = 21,   QnchDelNotify  = 22
+} pkt_id;')
+
+In XDR, enumerations are marshalled as 32 bit integral values.  For
+Elvin, each packet marshalled using XDR starts with a value from
+the above pkt_id enumeration.  The format for the remainder of the
+packet is then specific to the value of the packet identifer.
+
+       0   1   2   3    
+     +---+---+---+---+---+---+---+...+---+---+---+
+     |     pkt_id    |         remainder         |    ENCODED PACKET
+     +---+---+---+---+---+---+---+...+---+---+---+
+     |<---header---->|<-----------data---------->|
+
+Note that the XDR marshalling layer does NOT indicate the length of the
+packet.  This is left to the underlying transport layer being used. For
+example, a UDP transport could use the fact that a datagram contains the
+length of data in the packet.
 
 m4_heading(4, Base Types)
 
-The XDR encoding for Elvin relies on seven basic types used to
-construct each packet: booelan, int8, int32, int64, real64, opaque.
+The Elvin protocol relies on seven basic types used to construct each
+packet: boolean, uint8, int32, int64, real64, string, byte[].
+
+Below is a summary of how these types are represented when using XDR
+encoding.Each datatype used in the abstract descriptions of the
+packets has a one-to-one mapping to a corresponsing XDR data type as
+defined in [RFC1832].
 
 .KS
-Below is a summary of encodings for the different base types
-used in the protocol.  Implementors should refer to RFC 1832 for
-details.
-
 .nf
-  ---------------------------------------------------------------
-  Base Type  Type ID  XDR Type   Encoding Summary
-  ---------------------------------------------------------------
-  reserved      0     -          -
+  -------------------------------------------------------------------
+  Elvin Type  XDR Type       Encoding Summary
+  -------------------------------------------------------------------
+  boolean     bool           4 bytes, last byte is 0 or 1
 
-  int32         1     int        4 bytes, MSB first
+  uint8       unsigned int   4 bytes, last byte has value
 
-  int64         2     hyper      8 bytes, MSB first
+  int32       int            4 bytes, MSB first
 
-  real64        3     double     64-bit double precision float
+  int64       hyper          8 bytes, MSB first
 
-  string        4     string     4 byte length, UTF8 encoded 
-                                 string, zero padded to next four 
-                                 byte boundary
+  real64      double         64-bit double precision float
 
-  opaque        5     opaque     4 byte length, data, zero padded
-                                 to next four byte boundary
-  ---------------------------------------------------------------
+  string      string         4 byte length, UTF8 encoded string, zero 
+                             padded to next four byte boundary
+
+  byte[]      variable-      4 byte length, data, zero padded to next
+              length opaque  four byte boundary
+  -------------------------------------------------------------------
 .fi
 .KE
 
 When the type of following data needs to be described in a packet (eg,
-the value in a name-value pair used in NotifEmit packets), one of the
+the value in a name-value pair used in NotifyEmit packets), one of the
 base type ID's is encoded as an XDR enumeration.  This is often needed
-when a value in a packet is one of a number of possible types.
+when a value in a packet is one of a number of possible types.  In these
+cases, the encoded value is preceded a type code from the following
+enumeration:
 
+m4_pre(
+`enum {
+    int32_tc  = 1,
+    int64_tc  = 2,
+    real64_tc = 3,
+    string_tc = 4,
+    opaque_tc = 5
+} value_typecode;')
+
+Note that the above enumeration does not include all of the datatypes
+used in the protocol.  It only describes data which can be contained
+in the abstract Value segment of a packet.  A Value in an encoded
+packet is thus typed by prepending four bytes which encode the type
+code:
+    
 .KS
 .nf
-       0           4  
+       0  1  2  3 
      +--+--+--+--+--+--+--+--+...+--+--+--+--+
-     | type id   |          value            |        TYPED VALUE
+     | typecode  |          value            |        TYPED VALUE
      +--+--+--+--+--+--+--+--+...+--+--+--+--+
      |<--enum--->|<--format depends on enum-->
 .fi
@@ -77,164 +133,64 @@ and eight bytes for the value.
 
 .KS
 .nf
-      0           4           8          12
+       0  1  2  3  4  5  6  7  8  9 10 11  
      +--+--+--+--+--+--+--+--+--+--+--+--+
-     |    0x01   |        0x400          |           INT64 EXAMPLE
+     |    0x02   |        0x0400         |           INT64 EXAMPLE
      +--+--+--+--+--+--+--+--+--+----+---+
      |<--enum--->|<--------hyper-------->|
 .fi
 .KE
 
+m4_heading(4, Encoding Arrays)
 
-m4_heading(4, Packet Identification)
+All arrays in the abstract protocol are of variable length.  Arrays of
+objects are encoded by prepending the length of the array as an int32
+- the items are in the array are then each encoded in sequence
+starting at item 0.  The 32bit length places a theoretical limit of
+(2**32) - 1 items per list.  In practice, implementations are expected
+to have much lower maximums for the number of items in a list
+transmitted per packet.  For example, an implemenation may restrict
+the number of fields in a notification to 1024.  Such limitations
+SHOULD be documented for each implemenation.  Service offers and
+connection replys SHOULD also provide such limitations.  See the
+section X on Connection Establishment.
 
-The abstract deliberatly leaves the method for identifying packets
-to the concrete encoding.  For XDR, packets are 
+.KS
+.nf
+       0  1  2  3  
+     +--+--+--+--+--+--+--+--+--+--+--+--+...+--+--+--+--+
+     |     n     |  item 0   |  item 1   |...| item n-1  |  ARRAY
+     +--+--+--+--+--+--+--+--+--+--+--+--+...+--+--+--+--+
+     |<--int32-->|<----------------n items-------------->|
+                                                          
+.fi
+.KE
+
+For illustration, *** FIXME *** ....
+
+.KS
+.nf
+      0           4           8          12
+     +--+--+--+--+--+--+--+--+--+--+--+--+
+     |    0x01   |        0x400          |           ARRAY EXAMPLE
+     +--+--+--+--+--+--+--+--+--+----+---+
+     |<--enum--->|<--------hyper-------->|
+.fi
+.KE
+
+m4_heading(4, Subscription Abstract Syntax Trees)
 
 m4_pre(
-enum {
-    UNotify = 1,
-    Nack = 2,
-    ConnRqst = 3,
-    ConnRply = 4,
-    DisConnRqst = 5,
-    DisConnRply = 6,
-    DisConn = 7,
-    SecRqst = 8,
-    SecRply = 9,
-    NotifyEmit = 10,
-    NotifyDeliver = 11,
-    SubAddRqst = 12,
-    SubModRqst = 13,
-    SubDelRqst = 14,
-    SubRply = 15,
-    QnchAddRqst = 16,
-    QnchModRqst = 17,
-    QnchDelRqst = 18,
-    QnchRply = 19,
-    QnchAddNotify = 20,
-    QnchModNotify = 21,
-    QnchDelNotify = 22
-};)
+`enum {
+    node_tc   = 0,
+    int32_tc  = 1,
+    int64_tc  = 2,
+    real64_tc = 3,
+    string_tc = 4,
+    opaque_tc = 5
+} subast_typecode;')
 
-m4_heading(4, Packet Encodings)
-
-This section describes the layout of each packet sent in the Elvin
-protocol when using XDR encoding.
-
-Each packet transmitted using the Elvin protocol starts
-with a standard header of a packet type and a packet sequence 
-identifier.  In the XDR encoding, the packet type is encoded as
-an enumeration, the value being the appropriate Packet ID.  The
-sequence identfier is a 32-bit integer.  Using XDR, both values
-are represented in four bytes each.  Following the eight byte
-header is the remainder of the packet.  The format of the rest
-of the packet varies and is determined by the packet type.
-
-      0           4          8        ...
-     +--+--+--+--+--+--+--+--+--+--+--+...+--+--+--+
-     | packet id |sequence # |      remainder      |
-     +--+--+--+--+--+--+--+--+--+--+--+...+----+---+
-     |<----8 byte header---->|<--------data------->|
-
-                                                      ENCODED PACKET
-m4_heading(5, Connection Request)
-
-m4_heading(5, Connection Reply)
-
-m4_heading(5, Disconnection Request)
-
-m4_heading(5, DisConnection)
-
-m4_heading(5, Security Request)
-
-m4_heading(5, QoS Request)
-
-m4_heading(5, Subscription Add Request)
-
-.nf
-   0      4      8     12      ...
-  +------+------+------+------+...+------+
-  |pkt id| xid  |sub # |    expression   | >>>>
-  +------+------+------+------+...+------+
-
-           +------+------+...+------+...+------+...+------+
-      <<<< |len n |      key 0      |   |     key n-1     |
-           +------+------+...+------+...+------+...+------+
-                  |<----------------n keys--------------->|
-
-   pkt id      (enum)   packet type for SubAddRqst
-   xid         (int32)  transaction number for this packet
-   sub #       (int32)  number identifier for this subscription, 
-                        allocated by the client library
-   expression  (string) the predicate to be used to select
-                        notifications.
-   len n       (int32)  number of security keys in the packet
-   key x       (opaque) uninterpreted bytes of a security key.  
-                        There will be n keys where n >= 0.
-.fi
-
-m4_heading(5, Subscription Modify Request)
-
-It is an error to send a SubModRqst with an id not currently held at
-the server.
-
-.KS
-   0      4      8     12      ...
-  +------+------+------+------+...+------+
-  |pkt id| xid  |sub # |    expression   | >>>>
-  +------+------+------+------+...+------+
-.KE
-
-.KS
-           +------+------+...+------+...+------+...+------+
-      <<<< |len n |    add key 0    |   |  add key n-1    | >>>>
-           +------+------+...+------+...+------+...+------+
-                  |<------------n keys to add------------>|
-.KE
-
-.KS
-           +------+------+...+------+...+------+...+------+
-      <<<< |len m |    del key 0    |   |  del key m-1    |
-           +------+------+...+------+...+------+...+------+
-                  |<----------m keys to delete----------->|
-
-                                                 SUBSCRIPTION MODIFY
-.KE
-
-.KS
- pkt id      (enum)   packet type for SubModRqst
- xid         (int32)  transaction number for this packet
- sub #       (int32)  number identifier for the subscription to 
-                      modify
- expression  (string) new predicate
- len n       (int32)  number of security keys to add
- add key x   (opaque) uninterpreted bytes of a security key
- len m       (int32)  number of security keys to remove
- del key x   (opaque) uninterpreted bytes of a security key   
-.KE
-
-m4_heading(5, Subscription Delete Request)
-
-It is an error to send a SubDelRqst with an sub id not currently held
-at the server.
-.KS
-                   0      4      8     12
-                  +------+------+------+
-                  |pkt id| xid  |sub # |         SUBSCRIPTION DELETE
-                  +------+------+------+
-.KE
-.KS
- pkt id      (enum)   packet type for SubDelRqst
- xid         (int32)  transaction number for this packet
- sub #       (int32)  number identifier for the subscription to 
-                        delete.
-.KE
-m4_heading(5, Quench Add Request)
-m4_heading(5, Quench Modify Request)
-m4_heading(5, Quench Delete Request)
-
-m4_heading(5, Notification)
+m4_heading(4, Packet Encoding Example)
 
 An Elvin notification is a list of name-value pairs, where
 the value is one of the five base types of int32, int64, real64,
@@ -285,7 +241,7 @@ int32.
    pkt id        (enum)   packet type for Notif
    xid           (int32)  transaction number for this packet
    len n         (int32)  number of name-type-value triples in the 
-                          notification.
+                          notification. n MUST be greater than zero.
    ntv x         [block]  encoded as a name-type-value triple, 
                           described above. There MUST be n 
                           name-type-value blocks where n > 0.
@@ -294,79 +250,4 @@ int32.
                           MUST be m keys where m >= 0.
 .fi
 .KE
-
-
-m4_heading(5, Notification Deliver)
-
-  0      4      8     12      ...
- +------+------+------+------+...+------+...+------+...+------+
- |pkt id| xid  |len n |  name-value 0   |   | name-value n-1  | >>>>
- +------+------+------+------+...+------+...+------+...+------+
-                       |<-------------n name-values----------->|
-
-           +------+-------------+...+--------------+
-      <<<< |len m |   sub id 0  |   |  sub id m-1  |
-           +------+-------------+...+--------------+
-                  |<-----------m sub ids---------->|
-                                                NOTIFICATION DELIVER
-
- pkt id        (enum)   packet type for NotifDel
- xid           (int32)  transaction number for this packet
- len n         (int32)  number of name-value pairs in the 
-                        notification.
- name-value x  [block]  encoded as a name-type-value triple, 
-                        described above. There will be n 
-                        name-value blocks where n > 0.
- len m         (int32)  number of subscription ids this 
-                        notification matched.
- sid x         (int64)  there MUST be m sub ids where m > 0
-
-m4_heading(5, Quench Deliver)
-
-m4_heading(5, Acknowledgement)
-
-                     0      4      8
-                    +------+------+
-                    |pkt id| xid  |                              ACK
-                    +------+------+
-
- pkt id      (enum)   packet type for Ack
- xid         (int32)  transaction number of the request this packet
-                      is acknowledging
-
-m4_heading(5, Negative Acknowledgement)
-
-.KS
-  0     4     8    12     ...
- +-----+-----+-----+-----+...+-----+
- |pktid| xid |error|    message    | >>>>  
- +-----+-----+-----+-----+...+-----+
-
-          +-----+-----+----+...+----+...+-----+----+...+-----+
-     <<<< |len n| t 0 |   param 0   |   |t n-1|  param n-1   |
-          +-----+-----+----+...+----+...+-----+----+...+-----+
-                |<-----------n type-value parameters-------->|
-                                                               NACK
-.KE
-.KS
- pkt id      (enum)   packet type for Nack
- xid         (int32)  transaction number of the request this packet
-                      is responding to.
- error       (int32)  error code indicating the reason for this
-                      response. error != 0.
- message     (string) default description of the error causing the Nack.
-                      This is in the language of the server and is used
-                      if the local error string for the client library
-                      is unavailable. 
- len n       (int32)  number of parameters following
- t x         (enum)   base type of the next encoded parameter. 
-                      0ne of int32, int64, string, real64.  The value 
-                      cannot be of type opaque.
- value        -       the encoded value for this parameter.
-.KE
-
-
-
-
-
 
