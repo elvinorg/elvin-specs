@@ -295,7 +295,7 @@ basic character.
 In order to compare two Unicode strings, you might want to ensure that
 two different representations of the same character compare as equal.
 In order to do this, pre-composed characters (consisting of a base
-character and some combining characters, can be decomposed to a
+character and some combining characters), can be decomposed to a
 canonical representation.
 
 For example,
