@@ -396,7 +396,7 @@ struct SubDBRply {
   int32 xid;
   struct {
     int64 sub_id;
-    string sub_expr;
+    SubAST sub_expr;
     boolean accept_insecure;
     opaque keys[];    
   }  subscriptions[];
@@ -417,7 +417,7 @@ m4_heading(3, FedSubAdd)
 m4_pre(
 struct FedSubAdd {
   int64 sub_id;
-  string sub_expr;
+  SubAST sub_expr;
   boolean accept_insecure;
   opaque prime_keys[];
 };)m4_dnl
@@ -427,7 +427,7 @@ m4_heading(3, FedSubMod)
 m4_pre(
 struct FedSubMod {
   int64 sub_id;
-  string sub_expr;
+  SubAST sub_expr;
   boolean accept_insecure;
   opaque add_prime_keys[];
   opaque del_prime_keys[];
