@@ -186,6 +186,21 @@ requiring traffic containing those element names.  On receiving a
 forwarded notification, a server performs further evaluation,
 delivering the notification to the subscriptions it matches.
 
+.KS
+                                  +--------------+ Elvin
+   +----------+                   | +----------+ | Cluster
+   | Producer | ---NotifyEmit------>| Server 1 | |
+   +----------+                   | +----------+ |
+                                  |      |       |
+                                  |      |       |
+                                  |      V       |
+   +----------+                   | +----------+ |
+   | Consumer | <--NotifyDeliver--- | Server 2 | |
+   +----------+                   | +----------+ |
+                                  +--------------+
+                                                   NOTIFICATION PATH
+.KE
+
 In addition to this basic data traffic, the clustered servers are able
 to be managed from any individual server in the cluster.  This
 management includes both reporting and control functions.  Individual
@@ -391,7 +406,9 @@ On receiving a Shutdown or Restart request, the server MUST withdraw
 all client protocol offers, send a Disconn (with no redirect) to all
 remaining clients, multicast a ServerReport for the final state
 (either Shutdown or Restart), and exit or restart the process as
-required.
+required.  If redirection of clients to another node in the
+cluster is required, a ClstRedir packet SHOULD be sent to server
+before the Shutdown or Redirect command.
 
 m4_heading(3, Server Report)
 
