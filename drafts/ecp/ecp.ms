@@ -168,6 +168,7 @@ of identifiers can be encoded using a single byte.
   Shutdown                      Shutdown                131
   Server Report                 ServerReport            132
   Server Negative Acknowledge   ServerNack              133
+  Server Statistics Report      ServerStatsReport	134
 
   Cluster Join Request          ClstJoinRqst            160
   Clister Join Reply            ClstJoinRply            161
