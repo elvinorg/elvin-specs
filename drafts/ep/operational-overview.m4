@@ -4,7 +4,7 @@ m4_dnl  operational-overview
 
 m4_heading(2, `Operational Overview')
 
-Interactions between client application and the Elvin server can be
+Interactions between client applications and the Elvin server can be
 characterised as either session-oriented or session-less.
 Session-less operation is very restricted in its capabilitites.  It is
 provided for specialised clients and is not the general mode of
