@@ -431,11 +431,18 @@ m4_heading(3, Drop Warning)
 Sent by servers to clients to indicate that notification packets have
 been dropped from this place in the data stream due to congestion in
 the server.  Dropped packets MAY include NotifyDeliver, SubAddNotify,
-SubModNotify, SubDelNotify and ConfConn.
+SubModNotify and SubDelNotify.
 
 m4_pre(
 struct DropWarn {
 };)m4_dnl
+
+The server may also drop ConnConf packets, but this MUST NOT result in
+in a DropWarn being sent to the client.  As a ConnConf is only sent to
+confirm the connection between a client and the server is still
+active, a ConnConf will be dropped if there is any other pending data
+to be sent ot the client.  The client can determine from the fact that
+other packets have arrived that the connection still works.
 
 m4_heading(3, Test Connection)
 
