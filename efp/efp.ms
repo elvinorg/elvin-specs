@@ -366,15 +366,11 @@ m4_pre(
 struct SubDBRply {
   int32 xid;
   struct {
-    int64 client_id;
-    opaque keys[];
-    struct {
-      int64 sub_id;
-      string sub_expr;
-      boolean accept_insecure;
-      opaque keys[];    
-    }  subscriptions[];
-  }  clients[];
+    int64 sub_id;
+    string sub_expr;
+    boolean accept_insecure;
+    opaque keys[];    
+  }  subscriptions[];
 };)m4_dnl
 
 
