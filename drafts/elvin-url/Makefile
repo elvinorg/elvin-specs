@@ -26,15 +26,15 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/elvin-url/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.5 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.6 $
 #
 ################################################################
 
 .PHONY: all macros outline
 
 #  create date string
-mmm=$(shell date +%b)
 dd=$(shell date +%d)
+mmm=$(shell date +%b)
 yyyy=$(shell date +%Y)
 exp=$(shell date -d "6 months" "+%d %b %Y")
 
@@ -61,11 +61,5 @@ clean:
 
 %.ms : %.m4
 	m4 -P $< > $@
-
-################################################################
-
-install: main.txt
-	cp main.txt ../draft-arnold-elvin-url-01.txt
-
 
 ################################################################
