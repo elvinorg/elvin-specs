@@ -26,7 +26,7 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/edp/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.2 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.3 $
 #
 ################################################################
 
@@ -35,7 +35,7 @@
 #  create date string
 dd=$(shell date | cut -b9-10)
 mmm=$(shell date | cut -b5-7)
-yyyy=2000
+yyyy=$(shell date +%Y)
 exp=$(shell date -d "6 months" "+%d %b %Y")
 
 
@@ -48,7 +48,7 @@ outline.txt: main.ms
 
 main.txt: main.ms
 
-main.ms: *.m4
+main.ms: *.m4 Makefile
 	m4 -P main.m4 > $@
 
 clean:
