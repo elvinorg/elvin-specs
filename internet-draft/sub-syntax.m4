@@ -28,123 +28,108 @@ The specification is written using ABNF [RFC2234].
 ;  expressions
 ;
 
-sub-expr		= owsp truth-value owsp
 
-truth-value		= simple-truth-value / 
-			  simple-truth-value wsp boolean-operator wsp simple-truth-value /
-			  unary-boolean-op owsp simple-truth-value /
-			  "(" owsp truth-value owsp ")"
+sub-exp			= sub-exp bool-op sub-exp /
+			  bool-exp
 
-simple-truth-value	= general-truth-value / string-truth-expr / numeric-truth-value
+bool-exp		= value "==" value /
+			  value "!=" value /
+			  value "<" value /
+			  value "<=" value /
+			  value ">" value /
+			  value ">=" value /
+			  bool-function-exp /
+			  "!" bool-exp /
+			  "(" sub-exp ")"
 
-general-truth-value	= general-predicate-func "(" owsp attribute owsp ")"
+value			= string-literal /
+			  math-exp
 
-string-truth-value	= string-predicate-func "(" owsp string-expr owsp "," owsp string-expr owsp ")" /
-			  string-expr wsp string-predicate-op wsp string-expr
+math-exp		= math-exp math-op math-exp /
+			  num-value
 
-numeric-truth-value	= arithmetic-expr wsp numeric-predicate-op wsp arithmetic-expr
+num-value		= num-literal /
+			  name /
+			  function-exp /
+			  unary-math-op num-value /
+			  "(" value ")"
 
-string-expr		= string-literal /
-			  attribute /
-			  string-value-func
+name			= id-literal
 
-arithmetic-expr		= numeric-literal / 
-			  attribute /
-			  sizeof-function / 
-			  ( arithmetic-expr wsp binary-numeric-op wsp arithmetic-expr )
+bool-function-exp	= bool-pred "(" args ")"
 
-;
-;  predicates
-;
-
-general-predicate-func	= "exists" / "int32" / "int64" / "real64" /
-			  "string" / "opaque"
-
-string-predicate-func	= "equals" / "contains" / "begins_with" /
-			  "ends_with" / "wildcard" / "regex"
-
-numeric-predicate-op	= "==" / "!=" / "<=" / "<" / ">" / ">="
-
-string-predicate-op	= "~~" / "!~"
+function-exp		= function-pred "(" args ")"
 
 
 ;
-;  functions
+; predicates
 ;
 
-sizeof-function		= "sizeof" "(" owsp attribute owsp ")"
+bool-pred		= "exists" / "int32" / "int64" /
+			  "real64" / "string" / "opaque" /
+			  "nan"
 
-string-value-func	= string-func-name "(" owsp (attribute / string-literal) owsp ")"
-
-string-func-name	= "icase" / "iaccent" / "iencoding"
+function-pred		= "begins-with" / "ends-with" / 
+			  "contains" / "wildcard" / "regex" /
+			  "equals" / "size" /
+			  "to-lower" / "to-upper" /
+			  "primary" / "secondary" / "tertiary" /
+			  "decompose" / "decompose-compat"
 
 ;
-;  literals
+; operators
 ;
 
-string-literal		= DQUOTE 0*(string-char / quote)  DQUOTE /
-			  quote  0*(string-char / DQUOTE) quote
+bool-op			= "&&" / "^^" / "||"
 
-string-char		= safe-utf8-char / backslash safe-utf8-char / magic-char
+math-op			= "&" / "^" / "|" /
+			  "<<" / ">>" / ">>>" /
+			  "+" / "-" / "*" / "/" / "%"
 
-magic-char		= backslash DQUOTE / backslash quote / backslash backslash
+unary-math-op		= "+" | "-" | "~"
+
+
+;
+; literals
+;
+
+string-literal		= DQUOTE 0*(string-char / quote) DQUOTE /
+			  quote 0*(string-char / DQUOTE) quote
+
+string-char		= safe-utf8-char /
+			  backslash safe-utf8-char /
+			  magic-char
+
+magic-char		= backslash DQUOTE /
+			  backslash quote /
+			  backslash backslash
 
 safe-utf8-char		= %x00-21 / %x23-26 / %x28-5b / %x5d-ff
-			; not single quote, double quote or backslash
+			; not single quote, double quote and backslash
 
 
-numeric-literal		= int32-literal / int64-literal / real64-literal
+num-literal		= int32-literal / int64-literal / real64-literal
 
+int32-literal		= decimal-literal / octal-literal / hex-literal
 
 int64-literal		= int32-literal "l"
-			; ABNF is case insensitive, so we get "L" too
+			; ABNF is case insensitive so this includes "L"
 
-int32-literal		= decimal-literal / hex-literal
+real64-literal		= 1*DIGIT "." 1*DIGIT [exponent]
 
-decimal-literal		= [unary-numeric-op] owsp 1*DIGIT
-
-hex-literal		= "0x" 1*HEXDIGIT
-
-
-real64-literal		= [unary-numeric-op] owsp 1*DIGIT "." 1*DIGIT [exponent]
-
-exponent		= "e" [unary-numeric-op] 1*DIGIT]
-			; ABNF is case insensitive, so we get "E" too
-
-
-;
-;  operators
-;
-
-binary-boolean-op	= log-and / log-or / log-xor
-unary-boolean-op	= log-not
-
-log-and			= "&&"
-log-or			= "||"
-log-xor			= "^^"
-log-not			= "!"
-
-
-binary-numeric-op	= "+" / "-" / "*" / "/" / "%" / "<<" / ">>" / 
-			  ">>>" / "&" / "|" / "^" / "~"
-unary-numeric-op	= "-" / "+"
-
-;
-;  lexical elements
-;
-
-attribute		= 1*attr-char
-
-attr-first		= ALPHA / "#" / "$" / "%" / "&" / "*" / "." / 
-			  "/" / ":" / ";" / "<" / "=" / ">" / "?" / 
-			  "@" / "[" / "]" / "^" / "_" / "{" / "|" / 
-			  "}" / "~" / backslash / backquote
-
-attr-rest		= attr-first / DIGIT / "-" / "+" / "!"
+exponent		= "e" [ "+" | "-" ] 1*DIGIT
+			; ABNF is case insensitive so this includes "E"
 
 backslash		= %x5c
-backquote		= %x60
+
 quote			= %x27
+
+id-literal		= id-first 0*id-char
+
+id-first		= ALPHA / "_" / backslash safe-utf8-char
+
+id-char			= %x21 / %x23-26 / %x28 / %x2a-2b /
+			  %x2d-5a / %5e-ff / backslash safe-utf8-char
 
 owsp			= 0*swsp
 wsp			= 1*swsp
