@@ -71,8 +71,8 @@ whether its request was successful.  The response from the proxy
 server consists of CRLF-delimited lines of text, terminated by a blank
 line.  Note that this text can be a substantial length.
 
-The text is a properly formatted HTTP repsonse, and should be parsed
-according to XXX.  Common repsonse codes are 200, 404 and 407.  As an
+The text is a properly formatted HTTP response, and should be parsed
+according to XXX.  Common response codes are 200, 404 and 407.  As an
 example,
 
    HTTP/1.0 200 Connection established
