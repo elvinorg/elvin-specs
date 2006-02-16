@@ -26,32 +26,26 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/ep/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.4 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.5 $
 #
 ################################################################
 
-.PHONY: all macros outline
+.PHONY: all outline ps
 
-#  create date string
-mmm=$(shell date | cut -b5-7)
-dd=$(shell date | cut -b9-10)
-yyyy=2000
-
-FILENAME := draft-arnold-elvin-client
-VERSION := prelim-03
-
-SOURCE_FILES:= $(wildcard *.ms)
-
+FILENAME := draft-elvin-ecp
+VERSION := 00
 PUBLISHED := $(FILENAME)-$(VERSION).txt
 
+# Get current date
 DATE := $(shell date +"%B %Y")
 YEAR := $(shell date +"%Y")
 MTH := $(shell date +"%b")
 DAY := $(shell date +"%e")
 
+# Calulate expiry date 6 months in future
 EXP=$(shell date -d "6 months" "+%d %b %Y")
 
-
+# Set M4 macros for date substitution in the document
 M4FLAGS := \
 	-D__file="$(PUBLISHED)" \
 	-D__yr="$(YEAR)" \
@@ -59,7 +53,7 @@ M4FLAGS := \
 	-D__m="$(MTH)" \
 	-D_d="$(DAY)"
 
-all: main.txt
+all: ps
 
 outline: outline.txt
 
@@ -68,11 +62,14 @@ outline.txt: main.ms
 
 main.txt: main.ms
 
-main.ms: *.m4
-	m4 -P -I ../ $(M4FLAGS) main.m4 > $@
+main.ms: main.m4
+	m4 -P -I ../ $(M4FLAGS) $< > $@
+
+ps: main.txt
+	a2ps -m main.txt --center-title="Elvin Client Protocol" -o main.ps
 
 clean:
-	rm -f main.txt main.ms
+	rm -f main.txt main.ms main.ps
 
 publish: $(PUBLISHED)
 
@@ -82,9 +79,10 @@ $(PUBLISHED): main.txt
 ################################################################
 
 %.txt : %.ms
-	nroff -ms $< | ./fix.pl | sed -e 's/_//g' -e 's/.//g'  > $@
+	nroff -c -ms $< | ./fix.pl | sed -e 's/_//g' -e 's/.//g'  > $@
 
 %.ms : %.m4
 	m4 -P $< > $@
 
 
+################################################################
