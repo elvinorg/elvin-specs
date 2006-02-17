@@ -1,30 +1,32 @@
-m4_define(__title, `Elvin Client Access Protocol')
+m4_define(__title, `Elvin Client Protocol')m4_dnl
 m4_include(macros.m4)m4_dnl
-.pl 10.0i
+.pl 11.0i
 .po 0
 .ll 7.2i
 .lt 7.2i
 .nr LL 7.2i
 .nr LT 7.2i
+.nr PI 3n
 .ds LF Arnold, ed.
 .ds RF PUTFFHERE[Page %]
 .ds CF Expires in 6 months
 .ds LH Internet Draft
 .ds RH __date
-.ds CH Elvin
+.ds CH __title
 .hy 0
 .ad l
-.in 0
 Elvin.Org                                              D. Arnold, Editor
-Preliminary INTERNET-DRAFT                              Mantara Software
+Preliminary INTERNET-DRAFT                                  Mantara, Inc
 
 Expires: aa bbb cccc                                         _d __m __yr
 
-.ce
+.DS C
 __title
-.ce
 __file
-
+m4_dnl
+m4_dnl Header macros end an indent, so make sure we have one operating here
+.RS
+m4_dnl
 m4_heading(1, Status of this Memo)
 
 This document is an Internet-Draft and is NOT offered in accordance
@@ -45,7 +47,7 @@ http://www.ietf.org/1id-abstracts.html
 
 The list of Internet-Draft Shadow Directories can be accessed at
 http://www.ietf.org/shadow.html
-
+m4_dnl
 m4_heading(1, ABSTRACT)
 
 This document describes a client access protocol for the Elvin
@@ -53,12 +55,17 @@ notification service.  It includes a general overview of the system
 architecture, and defines an access protocol in terms of operational
 semantics, an abstract protocol, and a default concrete implementation
 of the abstract protocol.
-
+m4_dnl
 m4_dnl .ti 0
 m4_dnl TABLE OF CONTENTS
 m4_dnl (tdb) (probably last ;-)
-.bp
-
+m4_dnl
+m4_dnl .bp
+m4_dnl
+m4_dnl
+m4_dnl  INTRODUCTION
+m4_dnl
+m4_dnl
 m4_heading(1, INTRODUCTION)
 
 Elvin is a content-based publish/subscribe messaging service.  An
@@ -66,91 +73,76 @@ Elvin implementation is comprised of Elvin routers which forward and
 deliver messages after evaluating their contents against a body of
 registered subscriptions.
 
-To facilitate evaluation of subscriptions, Elvin messages are
-collections of named, typed values.  Subscriptions are a logical
-predicate expression which the router evaluates for each received
-message.  Messages are delivered to the subscriber if the result of
-the predicate evaluation is true.
+Elvin messages are collections of named, typed values.  Subscriptions
+are logical predicate expressions that the router evaluates for each
+received message.  Messages are delivered to the subscriber if the
+result of the predicate evaluation is true.
 
-There is no requirement that 
-
-Publishers generate 
-Undirected communication, where the sender is unaware of the identity,
-location or even existence of the receiver, is not currently provided
-by the Internet protocol suite.  This style of messaging, sometimes
-called "publish/subscribe", is typically implemented using a
-notification service.
-
-Notification service clients can be characterised as producers, which
-detect conditions, and emit notifications; and consumers, which
-request delivery of notifications from the service.  Consumers
-normally subscribe to receive notifications matching some supplied
-criteria.
+Elvin clients can be characterised as producers or publishers, which
+send notifications; and consumers or subscribers, which request
+delivery of notifications from the service.  Consumers normally
+subscribe to receive notifications matching some supplied criteria.
 
 While directed communication is well serviced by the Internet protocol
-suite, undirected communications is limited to UDP multicast.  While
-UDP multicast is appropriate for many applications, it is inherently
-channel-based: a particular address and port must be shared by the
-communicating applications.
+suite, undirected communications, where the sender is unaware of the
+identity, location or even existence of the receiver, is limited to
+the various forms of multicast.  While multicast is appropriate for
+many applications, it is inherently channel-based: a particular
+address and port must be shared by the communicating applications.
 
-Elvin is a notification service which provides fast, simple,
-undirected messaging, using content-based selection of delivered
-messages.  It has been show to work on a wide-area scale and is
-designed to complement the existing Internet protocols.
+Elvin is a notification service that provides fast, simple, undirected
+messaging, using content-based selection of delivered messages.  It
+has been show to work on a wide-area scale and is designed to
+complement the existing Internet protocols.
 
-
-
-The Elvin protocol is designed to provide undirected, content-routed
-messaging.  The raw protocol is expected to be accessed via an
-interface library, not unlike the Berkeley sockets interface.  Unlike
-sockets, however, the use of message content for routing requires that
-the message body be structured.
-
-The messages are routed from their source to required destinations by
-Elvin server(s).  Delivery has best-effort, at-most-once semantics.
-Under no circumstances will an Elvin client receive duplicate
+Elvin messages are routed from their source to required destinations
+by Elvin router(s).  Delivery has best-effort, at-most-once semantics.
+Under no circumstances should an Elvin client receive duplicate
 messages.  Messages from a single source must be delivered in order,
 but interleaving of messages from different sources is allowed in any
 order.
 
-Inter-server routing is not specified by this document.  It is noted,
-however, that messages are routed between servers, and that such
-journeys are subject to filtering and greater latency than messages
-between clients of a single router process.
+The inter-router protocol is not specified by this document.  It is
+noted, however, that messages are forwarded between routers, and that
+such journeys are subject to filtering and greater latency than
+messages between clients of a single router process.
+m4_dnl
+m4_dnl
+m4_dnl  TERMINOLOGY
 m4_dnl
 m4_dnl  terminology for both Elvin and the RFC series
 m4_dnl
-m4_dnl
 m4_heading(1, TERMINOLOGY)
 
-This document discusses clients, client libraries, servers, producers,
+This document discusses clients, client libraries, routers, producers,
 consumers, quenchers, messages, and subscriptions.
 
-An Elvin server is a daemon process that runs on a single machine.  It
-acts as a distribution mechanism for Elvin message. A client is a
-program that uses the Elvin server, via a client library for a
+An Elvin router is a daemon process that runs on a single machine.  It
+acts as a distribution mechanism for Elvin messages. An Elvin client is a
+program that uses the Elvin router, via a client library for a
 particular programming language.  A client library implements the
-Elvin protocol and manages clients' connections to an Elvin server.
+Elvin protocol and manages clients' connections to an Elvin router.
 
 Clients can have three roles: producer, consumer or quencher.
 Producer clients create structured messages and send them, using a
-client library, to an Elvin server.  Consumer clients establish a
-session with an Elvin server and register a request for delivery of
+client library, to an Elvin router.  Consumer clients establish a
+session with an Elvin router and register a request for delivery of
 messages matching a subscription expression.  Quenching clients also
-establish a session with a server, and register a request for
-notification of changes to the server's subscription database that
+establish a session with an Elvin router, and register a request for
+notification of changes to the router's subscription database that
 match criteria supplied by the quencher.
 
 Clients MAY take any number of the producer, consumer and quencher
 roles concurrently.
-
+m4_dnl
 m4_heading(2, Notation Conventions)
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
 "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
 document are to be interpreted as described in RFC 2119.
-
-m4_dnl  architecture.m4
+m4_dnl
+m4_dnl
+m4_dnl  ARCHITECTURE
 m4_dnl
 m4_dnl  system architecture overview.  should introduce all system
 m4_dnl  components and their basic relationships.
@@ -158,14 +150,14 @@ m4_dnl
 m4_heading(1, ARCHITECTURE)
 
 This document describes a protocol used by lightweight clients to
-access the Elvin service provided by one or more Elvin routers.
-Typically, such clients are implemented as a library or class for a
-particular programming language.  An Elvin router implementation can
-support up to many thousands of clients, depending on service usage.
+access the Elvin service provided by an Elvin router.  Typically, such
+clients are implemented as a library module for a particular
+programming language.  An Elvin router implementation can support many
+concurrent clients.
 
 Additional protocols, not specified in this document, enable
-clustering of Elvin routers [ERCP] and federation [ERFP] of routers to
-form a wide-area Elvin routing network.
+federation [ERFP] of routers to form a message routing network, and
+configuration of redundant routers [EFOP].
 
 The client protocol is defined as an abstract specification, which may
 be made available in any number of concrete specifications using
@@ -175,8 +167,10 @@ The client protocol is broken into several subsets.  An implementation
 may choose which subsets to provide, depending upon the needs of its
 intended application programs and the resources available from its
 host platform.
-
-m4_heading(2, Abstract Communication Model)
+m4_dnl
+m4_dnl  Abstract Communcations Channel
+m4_dnl
+m4_heading(2, Abstract Communications Channel)
 
 Elvin clients communicate with an Elvin router using a communications
 channel.  A client process MAY open multiple simultaneous channels to
@@ -184,218 +178,128 @@ a one or more Elvin routers, but they remain distinct logical
 entities.
 
 Concrete implementations of this abstract channel MUST provide
-ordered, reliable delivery of packets of known length, consisting of a
-sequence of arbitrary octets.  The number of octets in a packet MAY be
-constrained, but an implementation MUST allow packets of XXX octets at
-minimum.
+ordered, reliable bi-directional delivery of messages of known size;
+there is no requirement for streaming data.
 
-The minimal functionality subset (unreliable notification) requires
-only unidirectional transmission, but all other functionality requires
-bidirectional communications.
-
-In addition to basic octet transmission, a concrete channel MAY
-provide facilities for security and marshalling.  These facilities MAY
-be provided as part of the concrete channel implementation, or as
-separate, layered functions.
-
-m4_heading(2, Endpoints)
+Once created, a channel remains available for exchange of messages
+until it is closed by either the Elvin client or router.
+m4_dnl
+m4_heading(3, Endpoints)
 
 Elvin router endpoints are stable, advertised entities to which
-clients connect, establishing a channel.  This channel is used either
-for a single packet (unreliable notification) or an ongoing
-bidirectional packet exchange.
+clients can connect, creating a channel.
 
 Endpoints are described using a Uniform Resource Identifier (URI).
-The format of this URI is completely defined in [EURI].  In overview,
-it describes the Elvin protocol version, the type and ordering of the
-concrete modules forming the channels it offers, appropriate
-addressing information and any other parameters required to establish
-a connection.
-
-As an example,
-
-m4_pre(`elvin:/tcp,krb5,xdr/router.example.com:2917')
-
-defines an endpoint using concrete protocol modules "tcp", "krb5" and
-"xdr", and offered at an address "router.example.com:2917".
-
-
-
-UNotify
-sessions
-
-An Elvin client must maintain a connection to its server.  If the
-connection is closed (or lost), the registered subscriptions are freed
-and all information about that client is destroyed.
-
-The Elvin protocol is designed to be implemented over multiple
-transport, security and marshalling options.  An implementation SHOULD
-provide the standard protocol, and MAY provide alternatives better
-suited to other application domains.
-
-Clients MAY use the Elvin Router Discovery Protocol [ERDP] to locate
-a suitable server.  Establishment of a connection can involve
-negotiation of the server's capabilities, including underlying
-protocol options, supported limits on notification content, and
-available qualities of service.
-
-m4_heading(3, Protocol Layers)
-m4_heading(4, Marshalling)
-m4_heading(4, Security)
-m4_heading(4, Transport) 
-m4_heading(2, Security)
-
-Security of Elvin traffic is optional.  If required, the client can
-select a protocol which will provide mutual authentication of the
-server connection, and optional privacy of the channel.  
+The format of this URI is completely defined in [EURI].  An endpoint's
+URI specifies the concrete channel implementation offered by the
+endpoint, and appropriate addressing and any other information
+required to establish a channel.
 m4_dnl
-m4_heading(3, Requirements)
+m4_heading(3, Messages)
 
-Access control of content-routed traffic is a complex issue.
-Obviously, the router process must have access to the message content
-in order to perform routing decisions, and must therefore be trusted.
-
-The principle difficulty comes because the server ensures that the
-client does not know the identity of the message's receivers.
-m4_dnl
-m4_heading(3, Client-Server)
-m4_dnl
-m4_heading(4, Authentication)
-m4_dnl
-m4_heading(4, Privacy and Integrity)
-m4_dnl
-m4_heading(4, Access Control)
-m4_dnl
-m4_heading(3, Message Protection)
-m4_dnl
-m4_heading(2, Messages)
-
-An Elvin message consists of a sequence of named, typed, attribute
-values.  The client libraries support the creation of such messages
-using idioms suited to the various languages.
-
-An implementation MAY limit the number of attributes in a message
-and/or the total size of the message data.  See section X on
-Server Features.
-m4_dnl
-m4_heading(3, Message Attributes)
+An abstract Elvin message consists of a sequence of attributes.  Each
+attribute is comprised of a name and a typed value.
 
 An attribute name is a string value from a subset of the printable
 ASCII character set.  The maximum length of an attribute name is 1024
 bytes.  An attribute name may have any value comprised of legal
 characters; there are no reserved values.
+
+Attribute values may be any of a signed 32 bit integer, signed 64 bit
+integer, 64 bit IEEE-954 floating point number, Unicode string, or an
+ordered sequence of arbitrary octets of known length.
 m4_dnl
-m4_heading(3, Data Types)
-
-Elvin specifies a set of simple, platform-independent types for
-communication of message data.  The types have been chosen to enable
-implementation using a wide range of marshalling standards and
-programming languages.  They are
+m4_dnl  Concrete Communcations Channel
 m4_dnl
-m4_heading(2, Subscription)
+m4_heading(2, Concrete Communications Channels)
 
+An implementation of the abstract channel provides a mechanism for
+transporting messages between Elvin clients and routers.  This
+mechanism may be composed of several parts, cooperating to provide the
+abstract channel semantics and various qualities of service.  Each of
+these components is referred to as a protocol module, and the
+combination as the protocol stack.
+
+More specifically, the minimum functionality required of a concrete
+channel is conversion of Elvin messages into a form suitable for
+transfer, and the transfer of that message form to its destination,
+where the orginal message must be reconstructed.
+
+This document describes two such concrete protocol modules: a means of
+data transfer using TCP streams, and a means of message encoding and
+decoding using XDR.  Protocol modules are named with a sequence of
+ASCII characters.  These names must uniquely identify the mechanism
+implemented by the protocol module.
+
+A concrete endpoint is advertised using a URI.  An example of such a
+URL might be,
+m4_pre(`elvin:/tcp,krb5,xdr/router.example.com:2917')
+specifying an endpoint using concrete protocol modules "tcp", "krb5"
+and "xdr", and offered at an address of "router.example.com:2917".
+
+As this example shows, protocol modules that provide additional
+functionality, such as encryption, authentication, compression, etc,
+may form part of the concrete channel's protocol stack.
+
+A concrete channel MAY limit the size of messages, but MUST otherwise
+support the full functionality of the abstract channel.
 m4_dnl
-m4_heading(2, Quenching)
-
-description of quenching: problem, what it is, how it works, impact on
-security, impact on federation
-
-Quenching is a facility named for its ability to reduce notification
-traffic by preventing the propagation of unwanted notifications.  It
-has two components: manual and automatic.  Both cases use the server's
-knowledge of consumers subscriptions to prevent producer clients from
-notifying events for which no subscription exists.
-
-m4_heading(3, Manual Quench)
-
-Some types of producer clients must perform significant work to detect
-events.  As an example, consider a file system monitor that reports
-changes to the monitored file system.  Indiviually checking each
-directory and file for modification would not only place significant
-loading on the host processor, but would be unable to detect changes
-within useful time bounds.
-
-Manual quenching provides a mechanism through which the producer can
-specify a filter over the set of subscriptions registered at the
-server, and be informed of changes to the matching set of
-subscriptions.
-
-In this way, to continue our example above, the file and directory
-names that are to be monitored can be isolated from the subscriptions
-registered by consumers, and only those particular files need be
-monitored for changes.
-
-m4_heading(3, Automatic Quench)
-
-Manual quench requires that clients take explicit action to filter the
-registered subscriptions and determine what events to detect and
-notify.
-
-Automatic quench is an extension to the Elvin client library which
-peforms quenching on behalf of the client code.  It monitors notified
-events, building a profile of the notifications emitted.  This profile
-is registered with the server as a quench filter (as for manual
-quenching).  The server's updates of matching subscriptions are used
-to filter notifications within the client library.
-
-m4_remark( auto quench seems to have nothing to do with the
-the client protocol and is just an implementaions issue of the
-client library. does is need to be in the spec at all? is the
-distinction useful at this level? j)
-
-
-This specification describes the client/server protocol and semantic
-requirements for client libraries and the server daemon.  It does not
-describe any inter-server protocol.  The Elvin Router Cluster Protocol
-[ERCP] describes how Elvin routers may be configured on a LAN as a cluster.
-The Elvin Router Federation Protocol [ERFP] describes how single routers
-or clusters may be linked across the Internet.
-
+m4_dnl  Protocol Overview
 m4_dnl
-m4_dnl  operational-overview
-m4_dnl
+m4_heading(2, `Protocol Overview')
 
-m4_heading(2, `Operational Overview')
-
-Interactions between client applications and the Elvin server can be
+Interactions between client applications and the Elvin router can be
 characterised as either session-oriented or session-less.
+
 Session-less operation is very restricted in its capabilitites.  It is
 provided for specialised clients and is not the general mode of
-operation.  Clients usually establish as session with the Elvin server
+operation.  Clients usually establish a session with an Elvin router
 and maintain that session as long as required.
 
-This section provides a high level overview of the protocol and the
-basic operations that MAY occur in establishing a session, sharing
-information with an Elvin server and also the limitaions of session-less
-interactions.  The details of each specific packet and semantics is
-convered in Protocol Details section.
+This section provides a high level overview of the protocol and its
+basic operations.  The details of each specific packet and its
+semantics is convered later, in the Protocol Details section.
+m4_dnl
+m4_heading(3, Session-less Notification)
 
+Client libraries MAY implement session-less transfer of messages from
+the client to the router.  It is not possible for clients to receive
+notifications outside of a session.
+
+.KS
+  +-------------+                  +---------+
+  |  Producer   | ----UNotify----> |  Router |          NOTIFICATION
+  +-------------+                  +---------+
+.KE
+
+No other packets are allowed during session-less operation.
+m4_dnl
 m4_heading(3, Establishing a Session)
 
-A Elvin client-server session is a bi-directional communciations link.
-It is used by the client to set delivery criteria at the server. The
-server uses the same link to acknowledge client changes and to
+A Elvin client-router session is a bi-directional communciations link.
+It is used by the client to set delivery criteria at the router. The
+router uses the same link to acknowledge client changes and to
 asynchronously deliver the messages selected by the client.
 
-When a client requests a connection, the server MUST respond with
+When a client requests a connection, the router will respond with
 either a Connection Reply, a Disconnect or a Negative Acknowledgement.
 
-If the server accepts the request, it MUST respond with a Connection
+If the router accepts the request, it will respond with a Connection
 Reply, containing the agreed parameters of the connection.
 
 .KS
   +-------------+ ---ConnRqst--> +---------+
   | Producer or |                |  Elvin  |  
-  |  Consumer   |                |  Server |   SUCCESSFUL CONNECTION 
+  |  Consumer   |                |  Router |   SUCCESSFUL CONNECTION 
   +-------------+ <---ConnRply-- +---------+
 .KE
-
+m4_dnl
 m4_heading(3, Sending Notifications)
 
 After a successful connection exchange, the session is active and a
-client may start emitting notifications by sending them to the server
+client may start emitting notifications by sending them to the router
 for distribution. If the attributes in the notification match any
-subscriptions held at the server for consumers, the consumers matching
+subscriptions held at the router for consumers, the consumers matching
 those subscriptions SHALL be be sent a notification deliver message
 with the content of the original notification.
 
@@ -409,50 +313,56 @@ the event with out having to do any additional filtering.
    +----------+                   +--------+
    | Producer | ---NotifyEmit---> |        |
    +----------+                   | Elvin  |
-                                  | Server |       NOTIFICATION PATH
+                                  | Router |       NOTIFICATION PATH
    +----------+                   |        |
    | Consumer | <--NotifyDeliver- |        |
    +----------+                   +--------+
 .KE
-
+m4_dnl
 m4_heading(3, Setting Subscriptions)
 
-When a session is first established, the server MUST NOT send any
+When a session is first established, the router MUST NOT send any
 Notify Deliver packets until at least one subscription has been added
 by the client.
 
 A Consumer client describes the events it is interested in by sending
 a predicate in the Elvin subscripton language (and its associated
-security keys) to the Elvin server.  The predicate is sent in a
+security keys) to the Elvin router.  The predicate is sent in a
 Subscription Add Request (SubAddRqst).  On receipt of the request, the
-server checks the syntactic correctness of the predicate. If valid, a
-Subscription Reply (SubRply) is returned which includes a server
+router checks the syntactic correctness of the predicate. If valid, a
+Subscription Reply (SubRply) is returned which includes a router
 allocated indentifier for the subscription.
 
 .KS
    +----------+ --SubAddRqst--> +--------+
-   | Consumer |                 | Server |     ADDING A SUBSCRIPTION
+   | Consumer |                 | Router |     ADDING A SUBSCRIPTION
    +----------+ <---SubRply---- +--------+
 .KE
 
-If the predicate fails to parse, the server MUST send Nack to the
+If the predicate fails to parse, the router MUST send Nack to the
 client with the error code set to indicate a parser error.  This is
 effectively and RPC-style interaction.  All operations that modify
-a clients session information at the server use this RPC-style.
+a clients session information at the router use this RPC-style.
 
 A client may alter its registered predicate using the Subscription
 Modify Request or remove it entirley by sending a Subscription Delete
 Request. Such requests use the subscription-ID returned from the
-SubAddRqst.  The server MAY allocate a new subscription-id when a
+SubAddRqst.  The router MAY allocate a new subscription-id when a
 subscription is changed.  An attempt to modify or delete a
 subscription-id that is not registered is a protocol error, and
-the server MUST send a Nack to the client.
+the router MUST send a Nack to the client.
+m4_dnl
+m4_heading(3, Quenching)
 
-m4_heading(3, Using Quench)
+Quenching is a facility named for its ability to reduce notification
+traffic by preventing the propagation of unwanted notifications.  It
+enables clients to use therouter's knowledge of consumers
+subscriptions to prevent producers from notifying events for which no
+subscription exists.
 
 Once connected, the client MAY request that it be notified when there
-are changes in the subscription database managed by the server.  The
-client may request such information on subscriptions referring to
+are changes in the subscription database managed by the router.  The
+client can request such information on subscriptions referring to
 named attributes.
 
 Requesting notification of changes to subscriptions referring to a set
@@ -462,13 +372,13 @@ for the registered request.
 
 .KS
    +----------+ --QnchAddRqst--> +--------+
-   | Producer |                  | Server |          ADDING A QUENCH
+   | Producer |                  | Router |          ADDING A QUENCH
    +----------+ <---QnchRply---- +--------+
 .KE
 
 As for subscriptions a quench MAY be modified and/or removed later by a
 client using the quench-id.  Modifying a quench request MAY change the
-identifier used by the server to refer to the request.
+identifier used by the router to refer to the request.
 
 Subscriptions containing the requested quenching terms are sent to the
 client as an abstract syntax tree.  Three types of changes are
@@ -481,223 +391,75 @@ subscription is removed.
    +----------+ ----SubAddRqst---> +--------+
    | Consumer |                    |        |
    +----------+ <----SubRply------ |        |
-                                   | Server |
+                                   | Router |
    +----------+                    |        |
    | Producer | <--SubAddNotify--- |        |
    +----------+                    +--------+
                                        SUBSCRIPTION ADD NOTIFICATION
 .KE
-
+m4_dnl
 m4_heading(3, Lost Packets)
 
-The server may choose to drop notification packets (NotifyEmit,
+The router may choose to drop notification packets (NotifyEmit,
 SubAddNotify, SubModNotify, SubDelNotify) packets if a client is not
-reading them quickly enough.  If this happens, the server is obliged
+reading them quickly enough.  If this happens, the router is obliged
 to send a DropWarn packet to the client, indicating that one or more
 notification packets were dropped.
 
 .KS
    +----------+                 +--------+
-   | Consumer | <---DropWarn--- | Server |   DROPPED PACKET WARNING
+   | Consumer | <---DropWarn--- | Router |   DROPPED PACKET WARNING
    +----------+                 +--------+
 .KE
-
+m4_dnl
 m4_heading(3, Ending a Session)
 
-At any time after a receiving a Connection Reply, the server can
+At any time after a receiving a Connection Reply, the router can
 inform the client that it is to be disconnected.  The Disconn packet
 includes an explanation for the disconnection, and optionally, directs
-the client to reconnect to an alternative server.
+the client to reconnect to an alternative router.
 
 .KS
   +-------------+                  +---------+
-  |   Client    | <----Disconn---- |  Server |        DISCONNECTION 
+  |   Client    | <----Disconn---- |  Router |        DISCONNECTION 
   +-------------+                  +---------+
 .KE
 
-To disconnect from the server, the client sends a Disconnect Request.
-It SHOULD then wait for the server's response Disconnect Reply, which
+To disconnect from the router, the client sends a Disconnect Request.
+It SHOULD then wait for the router's response Disconnect Reply, which
 ensures that both directions of the communication channel have been
 flushed. 
 
-The server MUST NOT refuse to disconnect a client (ie. using a Nack).
+The router MUST NOT refuse to disconnect a client (ie. using a Nack).
 
 .KS
   +-------------+ ---DisconnRqst--> +---------+
   | Producer or |                   |  Elvin  |  
-  |  Consumer   |                   |  Server |       DISCONNECTION 
+  |  Consumer   |                   |  Router |       DISCONNECTION 
   +-------------+ <--DisconnRply--- +---------+
 .KE
-
-m4_heading(3, Session-less Operation)
-
-Client libraries MAY implement session-less transfer of messages from
-the client to the server.  It is not possible to receive messages or
-quench notifications outside of a session.
-
-.KS
-  +-------------+                  +---------+
-  |  Producer   | ----UNotify----> |  Server |          NOTIFICATION
-  +-------------+                  +---------+
-.KE
-
-No other packets are allowed during session-less operation.
-
-
-m4_dnl  communication-model.m4
 m4_dnl
-m4_heading(2, Communication Model)
-
-UNotify
-sessions
-
-An Elvin client must maintain a connection to its server.  If the
-connection is closed (or lost), the registered subscriptions are freed
-and all information about that client is destroyed.
-
-The Elvin protocol is designed to be implemented over multiple
-transport, security and marshalling options.  An implementation SHOULD
-provide the standard protocol, and MAY provide alternatives better
-suited to other application domains.
-
-Clients MAY use the Elvin Router Discovery Protocol [ERDP] to locate
-a suitable server.  Establishment of a connection can involve
-negotiation of the server's capabilities, including underlying
-protocol options, supported limits on notification content, and
-available qualities of service.
-
-m4_heading(3, Protocol Layers)
-m4_heading(4, Marshalling)
-m4_heading(4, Security)
-m4_heading(4, Transport) 
-m4_heading(2, Security)
-
-Security of Elvin traffic is optional.  If required, the client can
-select a protocol which will provide mutual authentication of the
-server connection, and optional privacy of the channel.  
-m4_dnl
-m4_heading(3, Requirements)
-
-Access control of content-routed traffic is a complex issue.
-Obviously, the router process must have access to the message content
-in order to perform routing decisions, and must therefore be trusted.
-
-The principle difficulty comes because the server ensures that the
-client does not know the identity of the message's receivers.
-m4_dnl
-m4_heading(3, Client-Server)
-m4_dnl
-m4_heading(4, Authentication)
-m4_dnl
-m4_heading(4, Privacy and Integrity)
-m4_dnl
-m4_heading(4, Access Control)
-m4_dnl
-m4_heading(3, Message Protection)
-m4_dnl
-m4_heading(2, Messages)
-
-An Elvin message consists of a sequence of named, typed, attribute
-values.  The client libraries support the creation of such messages
-using idioms suited to the various languages.
-
-An implementation MAY limit the number of attributes in a message
-and/or the total size of the message data.  See section X on
-Server Features.
-m4_dnl
-m4_heading(3, Message Attributes)
-
-An attribute name is a string value from a subset of the printable
-ASCII character set.  The maximum length of an attribute name is 1024
-bytes.  An attribute name may have any value comprised of legal
-characters; there are no reserved values.
-m4_dnl
-m4_heading(3, Data Types)
-
-Elvin specifies a set of simple, platform-independent types for
-communication of message data.  The types have been chosen to enable
-implementation using a wide range of marshalling standards and
-programming languages.  They are
-m4_dnl
-m4_heading(2, Subscription)
-
-m4_dnl
-m4_heading(2, Quenching)
-
-description of quenching: problem, what it is, how it works, impact on
-security, impact on federation
-
-Quenching is a facility named for its ability to reduce notification
-traffic by preventing the propagation of unwanted notifications.  It
-has two components: manual and automatic.  Both cases use the server's
-knowledge of consumers subscriptions to prevent producer clients from
-notifying events for which no subscription exists.
-
-m4_heading(3, Manual Quench)
-
-Some types of producer clients must perform significant work to detect
-events.  As an example, consider a file system monitor that reports
-changes to the monitored file system.  Indiviually checking each
-directory and file for modification would not only place significant
-loading on the host processor, but would be unable to detect changes
-within useful time bounds.
-
-Manual quenching provides a mechanism through which the producer can
-specify a filter over the set of subscriptions registered at the
-server, and be informed of changes to the matching set of
-subscriptions.
-
-In this way, to continue our example above, the file and directory
-names that are to be monitored can be isolated from the subscriptions
-registered by consumers, and only those particular files need be
-monitored for changes.
-
-m4_heading(3, Automatic Quench)
-
-Manual quench requires that clients take explicit action to filter the
-registered subscriptions and determine what events to detect and
-notify.
-
-Automatic quench is an extension to the Elvin client library which
-peforms quenching on behalf of the client code.  It monitors notified
-events, building a profile of the notifications emitted.  This profile
-is registered with the server as a quench filter (as for manual
-quenching).  The server's updates of matching subscriptions are used
-to filter notifications within the client library.
-
-m4_remark( auto quench seems to have nothing to do with the
-the client protocol and is just an implementaions issue of the
-client library. does is need to be in the spec at all? is the
-distinction useful at this level? j)
-
-m4_dnl
-m4_dnl  this is the basic implementation details
-m4_dnl
-
 m4_heading(1, SUBSCRIPTION LANGUAGE)
 
-Consumer clients register subscription expressions with a server to
+Consumer clients register subscription expressions with a router to
 request delivery of messages.  The language used for these expressions
 is defined in this section.  The subscription language syntax and
-semantics are considered part of the protocol: all servers supporting
+semantics are considered part of the protocol: all routers supporting
 a particular protocol version will understand the same subscription
 language.  There is no provision for alternative languages.
 
-A consumer client registers a subscription expression that the server
-evaluates on its behalf for each message delivered to the server. If
+A consumer client registers a subscription expression that the router
+evaluates on its behalf for each message delivered to the router. If
 the expression evaluates to true then the notification is delivered,
 otherwise, it it not delivered.
 m4_dnl
 m4_heading(2, Subscription Expressions)
-
 m4_heading(3, Logic)
 
 The evaluation of a subscription uses Lukasiewicz's tri-state logic
 that adds the value bottom (which represents "undecideable" or
 "indefinite") to the familiar true and false.
-
-.nf
-.KS
+.DS I 6
  ---------------------------------------------------------
            Lukasiewicz tri\-state logic table
  ---------------------------------------------------------
@@ -713,9 +475,8 @@ that adds the value bottom (which represents "undecideable" or
  false    bottom |  true      false     bottom    bottom 
  false    false  |  true      false     false     false
  ----------------+----------------------------------------
-.KE
-.fi
-
+.DE
+.ID 3
 Any subscription expression that refers to a name that is not present in the
 notification being evaluated results in bottom.
 
@@ -729,6 +490,7 @@ Notifications are delivered only if the result of subscription evaluation is
 true.
 
 It should be emphasized that:
+.DE
 .QP
 There is neither an explicit boolean type nor are there boolean
 constants for true or false.
@@ -739,6 +501,7 @@ false, nonzero means true), the Elvin subscription language requires
 such a conversion to be made explicit, for example 
 .QP
 (i-have-been-notified != 0)
+.ID 3
 m4_dnl
 m4_heading(3, Grouping)
 
@@ -750,48 +513,52 @@ identifiers or literal values by whitespace.
 An implementation MAY limit the depth of nesting able to be evaluated
 in subscription expressions; an expression which exceeds this limit
 MUST generate a NESTING_TOO_DEEP error in response to registration
-with the server.
+with the router.
 m4_dnl
 m4_heading(3, Logical Operators)
 
 A subscription expression may be a single predicate, or it may consist
 of multiple predicates composed by logical operators. The logical
 operators are
-.ID 2
+.ID 3
 &&   Logical AND
 ||   Logical OR
 ^^   Logical Exclusive-OR
 !    Logical NOT (unary)
 .DE
 Logical NOT has highest precedence, followed by AND, XOR and then OR.
-
+m4_dnl
 m4_heading(3, Literal Syntax)
 .LP
 A subscription expression may include literal values for most of the
 message data types.  These types are
+
 .KS
 Integer Numbers
-m4_dnl ***FIXME*** we lose our indent here  ***
+.RS
 .IP int32 10
 A 32 bit, signed, 2's complement integer.
 .IP int64 10
 A 64 bit, signed, 2's complement integer.
+.RE
 .LP
 Integer literals can be expressed in decimal (the default) or
 hexadecimal, using a 0x prefix.  In either case, an optional leading
 minus sign negates the value, and a trailing "l" or "L" indicates that
 the value should be of type int64.
 .KE
-.LP
+
 Literal values too large to be converted to an int32, but without the
 suffix specifying an int64 type, are illegal.  Similarly, values with
 the suffix, too large to be converted to an int64, are illegal.
-
 .KS
 Real Numbers
+.RS
 .IP real64 10
 An IEEE 754 double precision floating point number.
+.RE
 .LP
+
 Real literals can be expressed only in decimal, and must include a
 decimal point and both whole and fractional parts.  An optional
 integer exponent may be added following an "e" or "E" after the
@@ -800,9 +567,11 @@ fractional part.
 
 .KS
 Character Strings
+.RS
 .IP string 10
 A UTF-8 encoded Unicode string of known length, with no NUL (0x00)
 bytes.
+.RE
 .LP
 String literals must be quoted using either the UTF-8 single or double
 quote characters.  Within the (un-escaped) quotes, a backslash
@@ -815,8 +584,10 @@ to achieve this.
 
 .KS
 Opaque Octet Data
+.RS
 .IP opaque 10
 An opaque octet string of known length.
+.RE
 .LP
 The subscription language does not support opaque literals; reference
 to opaque attributes in a subscription expression is limited to use of
@@ -829,7 +600,7 @@ using the existing types and structured naming.
 
 String and opaque data values have known sizes (ie. they don't use a
 termination character).  An implementation MAY enforce limits on these
-sizes; see section X on Server Features.
+sizes; see section X on Router Features.
 m4_dnl
 m4_heading(3, Reference Syntax)
 
@@ -1123,7 +894,7 @@ Otherwise, both operands must be int32, and no promotion is required.
 m4_dnl
 m4_heading(2, Subscription Errors)
 
-Elvin subscriptions are compiled by the server after submission at runtime.
+Elvin subscriptions are compiled by the router after submission at runtime.
 Various errors are possible; this section documents the error conditions.
 
 Errors are reported as numbers so that language-specific error
@@ -1175,17 +946,13 @@ either argument is NaN. (What about other magic numbers, e.g.
 underflow?) Does 754 specify behaviour of != with NaN, and how does
 that compare to Elvin semantics?)
 
-m4_dnl
-m4_dnl  abstract-protocol
-m4_dnl
-
 m4_heading(1, ABSTRACT PROTOCOL)
 
 The Elvin4 protocol is specified at two levels: an abstract
 description, able to be implemented using different marshalling and
 transport protocols, and a concrete specification of one such
 implementation, mandated as a standard protocol for interoperability
-between different servers.
+between different routers.
 
 This section describes the operation of the Elvin4 protocol, without
 describing any particular protocol implementation.
@@ -1194,7 +961,7 @@ m4_dnl
 m4_heading(2, Packet Types)
 .LP
 The Elvin abstract protocol specifies a number of packets used in
-interactions between clients and the server.
+interactions between clients and the router.
 
 .nf 
 -------------------------------------------------------------
@@ -1251,14 +1018,6 @@ to do that, we'd have to separate the ConnRqst/Rply, SecRqst/Rply,
 Disconn*, DropWarn and Test/ConfConn packets from Notif/Sub packets.
 it's possible, and maybe nice? da)
 
-m4_dnl
-m4_dnl  protocol-overview
-m4_dnl
-
-m4_heading(2, `Protocol Overview')
-
-m4_remark(is there anythong that needs to be here anyore? j)
-
 m4_heading(2, Protoccol Errors)
 
 Two types of errors are recognised: protocol violations, and protocol
@@ -1268,22 +1027,18 @@ A protocol violation is behaviour contrary to that required by this
 specification.  Examples include marshalling errors, packet
 corruption, and protocol sequence constraint violations.
 
-In all cases of protocol violation, a client or server MUST
+In all cases of protocol violation, a client or router MUST
 immediately terminate the connection, without performing a connection
 closure packet exchange.
 
 A protocol error is a fault in processing a request.  Protocol errors
-are detected by the server, and the client is informed of the error
+are detected by the router, and the client is informed of the error
 using the Negative Acknowledge (Nack) packet.
 
-A single protocol error MUST NOT cause the client/server connection to
+A single protocol error MUST NOT cause the client/router connection to
 be closed.  Repeated protocol errors on a single connection MAY cause
-the server to close the client connection, giving suspected denial of
+the router to close the client connection, giving suspected denial of
 service attack as a reason (see the Disconnect packet).
-
-m4_dnl
-m4_dnl  protocol-details
-m4_dnl
 
 m4_heading(2, Packet Details)
 
@@ -1325,7 +1080,7 @@ struct NameValue {
 };')m4_dnl
 
 Arrays of NameValue elements are used for notification data and
-description of server options.  The value type defines the range of
+description of router options.  The value type defines the range of
 data that may be exchanged using Elvin messages.  Note that there are
 no unsigned integer types, nor an explicit boolean type.
 
@@ -1425,15 +1180,16 @@ NOT be used.
 .KE
 m4_heading(3, Unreliable Notification)
 
-Unreliable notifications are sent by a client to a server outside the
+Unreliable notifications are sent by a client to a router outside the
 context of a session (see ConnRqst below).  Using the protocol and
-endpoint information obtained either directly or via server discovery,
-a client may make a transport level connection to the server.  Over
-this connection, one or more UNotify packets MAY be to the server.
+endpoint information obtained either directly or via router discovery,
+a client creates a channel to the router.  Over this channel, one or
+more UNotify packets MAY be sent to the router.
 
-The server MUST NOT send any data to the client over the transport
-connection (if the the trasport is bi-directional, etc TCP).  However,
-The server MAY 
+The router MUST NOT send any data to the client over the channel.  The
+router MAY close the channel after receiving a single UNotify packet.
+UNotify packets with an incompatible version number MUST be silently
+discarded by the router.
 
 m4_pre(
 struct UNotify {
@@ -1447,7 +1203,7 @@ struct UNotify {
 m4_heading(3, Negative Acknowledgement)
 
 Within the context of a session, many requests can return a Negative
-Acknowledgement to indicate that although the server understood the
+Acknowledgement to indicate that although the router understood the
 request, there was an error encountered performing the requested
 operation.
 
@@ -1467,7 +1223,7 @@ SHOULD present meaningful information to the application derived from
 the defined error values.
 
 Clients MAY interpret implementation specific error codes, on the
-basis of server identity determined during connection negotiation.
+basis of router identity determined during connection negotiation.
 Unrecognised codes MUST be reported using the undefined category error
 (ie. value x000).
 
@@ -1540,7 +1296,7 @@ preparing the error message for presentation to the user, each %n
 should be replaced by the appropriately formatted value from the args
 array.
 
-The language in which the Nack message is sent by a server MAY be
+The language in which the Nack message is sent by a router MAY be
 negotiated during connection establishment.  Alternatively, clients
 MAY provide local templates to be used for generating the formatted
 text for presentation to the application.
@@ -1548,25 +1304,24 @@ text for presentation to the application.
 m4_heading(3, Connect Request)
 
 Using the protocol and endpoint information obtained either directly
-or via server discovery, a client MAY initiate a session with the
-server endpoint.  It MUST then send a ConnRqst to establish protocol
-options to be used for the session.
+or via router discovery, a client can establish a channel to a router,
+via an endpoint.  It MAY then send a ConnRqst to establish protocol
+options to be used for the session, and MUST send either a ConnRqst or
+UNotify.  
 
-Concrete protocols MAY choose not to provide an implementation of the
-concept of a session.  Such protocols MUST NOT support ConnRqst or any
-other packets from subsets B or C.
-
-An initiated session that has not received a ConnRqst within a limited
-time period SHOULD be closed by the server.  This time period MUST NOT
-be less than five (5) seconds.
+A router SHOULD close a channel from which it has received neither a
+ConnRqst or a UNotify within a reasonable time period.
 
 The ConnRqst MAY contain requests for various protocol options to be
 used by the connection.  These options are identified using a string
-name.  Some options refer to properties of the server, while others
+name.  Some options refer to properties of the router, while others
 MAY be used by the protocol layers.
 
 Legal option names, their semantics, and allowed range of values are
-defined later in this document.
+defined later in the Connection Options section.
+
+A router receiving a ConnRqst MUST send a ConnRply, a Nack or a
+disconnect in reply.
 
 m4_pre(
 struct ConnRqst {
@@ -1580,8 +1335,9 @@ struct ConnRqst {
 
 m4_heading(3, Connect Reply)
 
-Sent by the Elvin server to a client.  Confirms a connection request.
-Specifies the connection option values agreed by the server.
+Sent by the Elvin router to a client, a ConnRply accepts the client's
+connection request. and specifies the connection option values to be
+provided by the router.
 
 m4_pre(
 struct ConnRply {
@@ -1589,20 +1345,20 @@ struct ConnRply {
     NameValue options[];
 };)m4_dnl
 
-For each legal option included in the ConnRqst, a matching response
-MUST be present in the ConnRply.  Where the value returned differs from
-that requested, the client MUST either use the returned value, or
-request closure of the connection.  Unrecognised options MUST NOT be
-returned by the server.
+For each legal, understood option included in the ConnRqst, a matching
+response MUST be present in the ConnRply.  Where the value returned
+differs from that requested, the client MUST either use the returned
+value, or request closure of the session (using a DisconnRqst).
+Unrecognised options MUST NOT be returned by the router.
 
-Option values not requested by the client are dictated by the server.  If
-an option has the specified default value, it MAY be sent to the client.
-Where the server implementation uses a non-default value, it MUST be sent
-to the client.
+Additional option values, not requested by the client, MAY be dictated
+by the router.  If an option has the specified default value, it MAY
+be sent to the client, but where the router implementation uses a
+non-default value, it MUST be sent to the client.
 
 m4_heading(3, Disconnect Request)
 
-Sent by client to the Elvin server.  Requests disconnection.
+Sent by clients to the Elvin router to request closure of the session.
 
 m4_pre(
 struct DisconnRqst {
@@ -1610,24 +1366,23 @@ struct DisconnRqst {
 };)m4_dnl
 
 A client MUST send this packet and wait for confirmation via
-Disconnect before closing the connection to the server.  The client
-library MUST NOT send any further messages to the server once this
+DisconnRply before closing the channel to the router.  The client
+library MUST NOT send any further messages to the router once this
 message has been sent.  The client library MUST continue to read from
-the server connection until a Disconnect packet is received.
+the channel until a DisconnRply packet is received.
 
-A server receiving a DisconnRqst should suspend further evaluation of
-subscriptions and notification of subscription changes for this
-client.  A Disconnect packet should be appended to the client's output
-buffer, and finally, the output buffer flushed before the connection
-is closed.
+A router receiving a DisconnRqst MUST suspend further evaluation and
+notification of subscriptions and quenches for this client.  A
+DisconnRply packet MUST be sent to the client's channel, the channel
+then flushed before being closed.
 
-It is a protocol violation for a client to close its connection
-without sending a DisconnRqst (see protocol violations below).
+It is a protocol violation for a client to close its channel without
+sending a DisconnRqst (see protocol violations below).
 
 m4_dnl 
 m4_heading(3, Disconnect Reply)
 
-Sent by the Elvin server to a client.  This packet is sent in response
+Sent by the Elvin router to a client.  This packet is sent in response
 to a Disconnect Request, prior to breaking the connection.
 
 m4_pre(
@@ -1635,16 +1390,16 @@ struct DisconnRply {
     id32 xid;
 };)m4_dnl
 
-This MUST be the last packet sent by a server on a connection.  The
-underlying (transport) link MUST be closed immediately after this
-packet has been successfully delivered to the client.
+This MUST be the last packet sent by a router in a session.  The
+underlying channel MUST be closed immediately after this packet has
+been successfully delivered to the client.
 
 m4_dnl 
 m4_heading(3, Disconnect)
 
-Sent by the Elvin server to a client.  This packet is sent in two
+Sent by the Elvin router to a client.  This packet is sent in two
 different circumstances: to direct the client to reconnect to another
-server, or to inform that client that the server is shutting down.
+router, or to inform that client that the router is shutting down.
 
 m4_pre(
 struct Disconn {
@@ -1659,41 +1414,40 @@ where the defined values for "reason" are
   Reason  |  Definition
   --------+--------------------------------------------------------
      0    |  Reserved.
-     1    |  Server is closing down.
-     2    |  Server is closing this connection, and directs the
-          |  client to connect to the server address in "args".  
-     4    |  Server is closing this connection for repeated 
+     1    |  Router is closing down.
+     2    |  Router is closing this connection, and directs the
+          |  client to connect to the router address in "args".  
+     4    |  Router is closing this connection for repeated 
           |  protocol errors.
 .fi
 .KE
 
-This MUST be the last packet sent by a server on a connection.  The
-underlying (transport) link MUST be closed immediately after this
-packet has been successfully delivered to the client.
+This MUST be the last packet sent by a router in a session.  The
+underlying channel MUST be closed immediately after this packet has
+been successfully delivered to the client.
 
-The server MUST NOT close the client connection without sending either
-a DisconnRply or Disconn packet except in the case of a protocol
-violation.  If a client detects that the server connection has been
-closed without receiving one of these packets, it should assume
-network or server failure.
+The router MUST NOT close the client's session (or channel) without
+sending either a DisconnRply or Disconn packet except in the case of a
+protocol violation.  If a client detects that the router channel has
+been closed without receiving one of these packets, it should assume
+network or router failure.
 
 A client receiving a redirection via a Disconn MUST attempt to connect
-to the specified server before attempting any other servers for which
-it has address information.  If the connection fails or is refused
-(via ConnRply), the default server selection process SHOULD be
+to the specified router before attempting any other routers for which
+it has address information.  If the channel establishment fails or is
+refused (via ConnRply), the default router selection process SHOULD be
 performed.
 
 A client MAY perform loop detection for redirection to cater for a
-misconfiguration of servers redirecting a client indefinitely.  If a
-loop is detected, the default server selection process SHOULD be
+misconfiguration of routers redirecting a client indefinitely.  If a
+loop is detected, the default router selection process SHOULD be
 performed.
-
 
 m4_dnl
 m4_heading(3, Security Request)
 
-Sets the keys associated with the connection.  Two sets of keys are
-maintained by the server: those used when sending notifications, and
+Sets the keys associated with the session.  Two sets of keys are
+maintained by the router: those used when sending notifications, and
 those used for registered subscriptions.
 
 This packet allows keys to be added or removed from either or both
@@ -1708,68 +1462,80 @@ struct SecRqst {
     Keys del_sub_keys;
 };)m4_dnl
 
-It is a protocol error to request the addition of a key already
-registered, or the removal of a key not registered.
+A client MUST NOT request the addition of a key already registered, or
+the removal of a key not registered.  Such an action is treated as a
+protocol error.
+
+The client's session keys MUST be updated prior to processing any
+further packets in this session.  A notification sent immediately
+after a SecRqst within the same session MUST match a subscription
+requiring the updated keys.
 
 m4_heading(3, Security Reply)
 
-Sent by the server to clients to confirm a successful change of keys.
+Sent by the router to clients to confirm a successful change of keys.
 
 m4_pre(
 struct SecRply {
     id32 xid;
 };)m4_dnl
 
+A router MUST respond to a client's SecRqst by sending a SecRply, if
+the request was successful, or a Nack if the request was unable to be
+completed successfully.
+
+All notifications and quench notifications delivered within the
+session after the SecRply MUST match the changes acknowledged by the
+SecRply.
+
 m4_heading(3, Drop Warning)
 
-Sent by servers to clients to indicate that notification packets have
+Sent by routers to clients to indicate that notification packets have
 been dropped from this place in the data stream due to congestion in
-the server.  Dropped packets MAY include NotifyDeliver, SubAddNotify,
+the router.  Dropped packets MAY include NotifyDeliver, SubAddNotify,
 SubModNotify and SubDelNotify.
 
 m4_pre(
 struct DropWarn {
 };)m4_dnl
 
-The server may also drop ConnConf packets, but this MUST NOT result in
+The router may also drop ConnConf packets, but this MUST NOT result in
 in a DropWarn being sent to the client.  As a ConnConf is only sent to
-confirm the connection between a client and the server is still
+confirm the connection between a client and the router is still
 active, a ConnConf will be dropped if there is any other pending data
 to be sent ot the client.  The client can determine from the fact that
 other packets have arrived that the connection still works.
 
 m4_heading(3, Test Connection)
 
-A client's connection to the Elvin server can be inactive for long
+A client's connection to the Elvin router can be inactive for long
 periods.  This is especially the case for subscribers for whom
-matching messages are seldom generated.  Clients and servers MUST
+matching messages are seldom generated.  Clients and routers MUST
 implement Test Connection and Confirm Connection packets to allow
 verification of connectivity.
 
-This application-level functionality is an alternative to a protocol
-level connectivity-loss reporting mechanism.  If an Elvin transport
-protocol does not provide support for lost connection detection, this
-mechanism can be used.  In particular, it is defined because of the
-lack of wide support for the TCP_KEEPALIVE socket option used to
-control the interval of inactivity that triggers a keep-alive exchange
-in TCP/IP.
+This application-level functionality is an alternative to a channel
+level carrier-loss reporting mechanism.  If an Elvin channel does not
+provide support for carrier loss detection, this mechanism can be
+used.
 
 m4_pre(
 struct TestConn {
 };)m4_dnl
 
-A Test Connection packet MAY be sent by either client or server to
-verify that it is still connected after a period where no packets have
-been received.  After a TestConn has been sent, but no traffic has
-been received from the peer within the standard synchronous operation
-timeout period, the connection is assumed dead, and MUST be closed as
-for a protocol error.
+A Test Connection packet MAY be sent by either client or router to
+verify that the channel remains active after a period during which no
+packets have been received.  
 
-For clients, a TestConn MUST NOT be sent within 30 seconds of
-receiving other traffic from the server.  This delay period MUST be
-configurable, sending MUST be able to be disabled, and SHOULD be
-disabled by default.  These restrictions serve to limit the load on
-servers servicing TestConn requests.
+If, after a TestConn has been sent, no traffic has been received on
+the channel within a timeout period, the channel is assumed to have
+failed and the session MUST be closed as for a protocol violation.
+
+A TestConn MAY be sent if no packets have been received within a
+configured timeout period.  This period MUST be configurable, sending
+MUST be able to be disabled, and SHOULD be disabled by default.  These
+restrictions serve to limit the load on routers servicing TestConn
+requests.
 
 m4_heading(3, Confirm Connection)
 
@@ -1777,26 +1543,26 @@ m4_pre(
 struct ConfConn {
 };)m4_dnl
 
-Clients and servers MUST implement support for ConfConn.
+Clients and routers MUST implement support for ConfConn.
 
-A server receiving a TestConn packet MUST queue a ConfConn response if
+A router receiving a TestConn packet MUST queue a ConfConn response if
 there are no other packets waiting for the client to read.  If other
 packets are waiting for the client to service its connection, the
-server MUST NOT send the ConfConn (since the client's reading of the
+router MUST NOT send the ConfConn (since the client's reading of the
 other packets will indicate that its connection is active).
 
-Servers MAY drop ConfConn packets queued for delivery to a client if
+Routers MAY drop ConfConn packets queued for delivery to a client if
 there is any other packet about to be sent to the client.  The client
-MUST use use the fact that any packet arriving from the server indicates
+MUST use use the fact that any packet arriving from the router indicates
 an active connection.
 
 Clients MUST send a ConfConn in response to a TestConn from the
-server.
+router.
 
 m4_heading(3, Notification Emit)
 
-Sent by client to the Elvin server.  There are two possible delivery
-modes, determining how the server should match supplied security keys.
+Sent by client to the Elvin router.  There are two possible delivery
+modes, determining how the router should match supplied security keys.
 Delivery can be specified as requiring the consumer to have a matching
 key (deliver_insecure is not set).  Alternatively, the producer can
 not require that the consumer have a key, but if one or more are
@@ -1812,7 +1578,7 @@ struct NotifyEmit {
 
 m4_heading(3, Notification Deliver)
 
-Sent by the Elvin server to a client. 
+Sent by the Elvin router to a client. 
 
 m4_pre(
 struct NotifyDeliver {
@@ -1823,7 +1589,7 @@ struct NotifyDeliver {
 
 m4_heading(3, Subscription Add Request)
 
-Sent by client to the Elvin server.  Requests delivery of
+Sent by client to the Elvin router.  Requests delivery of
 notifications which match the supplied subscription expression.
 
 m4_pre(
@@ -1834,20 +1600,20 @@ struct SubAddRqst {
     Keys keys;
 };)m4_dnl
 
-If successful, the server MUST respond with a SubRply.
+If successful, the router MUST respond with a SubRply.
 
-If the client has registered too many subscriptions, the server MUST
+If the client has registered too many subscriptions, the router MUST
 return a Nack with error code X.
 
-If the server has too many registered subscriptions, it MUST return a
+If the router has too many registered subscriptions, it MUST return a
 Nack with error code X.
 
-If the subscription expression fails to parse, the server MUST return
+If the subscription expression fails to parse, the router MUST return
 a Nack with errors codes 1, 2, 3 or 4.
 
 m4_heading(3, Subscription Modify Request)
 
-Sent by client to the Elvin server.  Update the specified subscription
+Sent by client to the Elvin router.  Update the specified subscription
 to request notifications matching a different subscription expression,
 or to alter the security keys associated with the subscription.
 
@@ -1864,7 +1630,7 @@ struct SubModRqst {
 Any (and all) of the expression, add_keys and del_keys field MAY be
 empty.  The accept_insecure field cannot be empty: it must always be
 set to the required value. If the accept_insecure field value is
-unchanged from that registered at the server, and all other fields are
+unchanged from that registered at the router, and all other fields are
 empty, the modification SHALL be considered successful.
 
 A successful modification of the subscription MUST return a SubRply to
@@ -1873,7 +1639,7 @@ the client.
 A Nack, with error code 5, MUST be returned if the subscription_id is
 not valid.
 
-If the subscription expression fails to parse, the server MUST return
+If the subscription expression fails to parse, the router MUST return
 a Nack describing the error.  Allowed error codes are 1, 2, 3 or 4.
 An invalid expression MUST NOT alter the current state of the
 specified subscription.
@@ -1886,7 +1652,7 @@ ignored is returned to the client.
 
 m4_heading(3, Subscription Delete Request)
 
-Sent by client to the Elvin server.  A Nack will be returned if the
+Sent by client to the Elvin router.  A Nack will be returned if the
 subscription identifier is not valid.
 
 m4_pre(
@@ -1897,7 +1663,7 @@ struct SubDelRqst {
 
 m4_heading(3, Subscription Reply)
 
-Sent from the Elvin server to the client as acknowledgement of a successful
+Sent from the Elvin router to the client as acknowledgement of a successful
 subscription change.
 
 m4_pre(
@@ -1908,7 +1674,7 @@ struct SubRply {
 
 m4_heading(3, Quench Add Request)
 
-Sent by clients to the Elvin server.  Requests notification of
+Sent by clients to the Elvin router.  Requests notification of
 subscriptions referring to the specified attributes.
 
 m4_pre(
@@ -1921,7 +1687,7 @@ struct QnchAddRqst {
 
 m4_heading(3, Quench Modify Request)
 
-Sent by client to the Elvin server.  Requests changes to the list of
+Sent by client to the Elvin router.  Requests changes to the list of
 attribute names associated with a quench identifier.
 
 m4_pre(
@@ -1937,7 +1703,7 @@ struct QnchModRqst {
 
 m4_heading(3, Quench Delete Request)
 
-Sent by client to the Elvin server.  Requests that the server no
+Sent by client to the Elvin router.  Requests that the router no
 longer notify the client of changes to subscriptions with the
 associated attribute names.
 
@@ -1949,7 +1715,7 @@ struct QnchDelRqst {
 
 m4_heading(3, Quench Reply)
 
-Sent from the Elvin server to the client as acknowledgement of a successful
+Sent from the Elvin router to the client as acknowledgement of a successful
 quench requirements change (QnchAddRqst, QnchModRqst, QnchDelRqst):
 
 m4_pre(
@@ -1960,7 +1726,7 @@ struct QnchRply {
 
 m4_heading(3, Subscription Add Notification)
 
-Sent from server to clients to inform them of a new subscription
+Sent from router to clients to inform them of a new subscription
 predicate component matching the registered quench attribute name
 list for each of the identified quench registrations.
 
@@ -1999,7 +1765,7 @@ struct SubModNotify {
 
 m4_heading(3, Subscription Delete Notification)
 
-Sent from server to clients to inform them of the removal of a
+Sent from router to clients to inform them of the removal of a
 subscription predicate component that had matched their registered
 attribute name list for each of the identified quench registrations.
 
@@ -2009,17 +1775,13 @@ struct SubDelNotify {
   id64 term_id;
 };)m4_dnl
 
-m4_dnl
-m4_dnl  connection-opts
-m4_dnl
-
 m4_heading(2, Connection Options)
 
-Connection options control the behaviour of the server for the
+Connection options control the behaviour of the router for the
 specified connection.  Set during connection, they may also be
 modified during the life of the connection using QosRqst.
 
-A server implementation MUST support the following options.  It MAY
+A router implementation MUST support the following options.  It MAY
 support additional, implementation-specific options.
 
 .KS
@@ -2029,7 +1791,7 @@ support additional, implementation-specific options.
   attribute_max               |  int32   |    64     256     2**31
   attribute_name_len_max      |  int32   |    64    2048     2**31
   byte_size_max               |  int32   |    1K      1M     2**31  
-  lang                        |  string  |   (server defined)
+  lang                        |  string  |   (router defined)
   notif_buffer_drop_policy    |  string  | { "oldest", "newest",
                                              "largest", "fail" }
   notif_buffer_min            |  int32   |    1       1K     2**31
@@ -2039,23 +1801,24 @@ support additional, implementation-specific options.
   sub_max                     |  int32   |    1K      8K     2**31
 .fi
 .KE
+
 m4_heading(1, PROTOCOL IMPLEMENTATION)
 
 The abstract protocol described in the previous section may be
 implemented by multiple concrete protocols.  The concrete protocols
-used to establish a connection can be specified at run time, and
-selected from the intersection of those offered by the client and
-server-side implementations.
+used to establish a channel can be specified at run time, and selected
+from the intersection of those offered by the client and router-side
+implementations.
 
 m4_heading(2, Layering and Modules)
 
-A connection supporting the Elvin protocol can be comprised of
-multiple, layered components, referred to as protocol modules.  These
-modules are layered to form a protocol stack, providing a connection
-over which the abstract protocol packets are carried.
+A channel supporting the Elvin protocol can be comprised of multiple,
+layered components, referred to as protocol modules.  These modules
+are layered to form a protocol stack, providing the channel over which
+the abstract protocol packets are carried.
 
-The combined stack must provide marshalling, security and data
-transport facilities.
+The combined stack MUST provide marshalling and data transport
+facilities, and MAY provide other features.
 
 m4_heading(2, Standard Protocol)
 
@@ -2077,9 +1840,6 @@ Additional protocol layers must be proposed and registered via the
 IETF RFC series, either as a revision to this document, or as a
 separate specification.
 
-m4_dnl
-m4_dnl  tcp-transport
-m4_dnl
 m4_heading(3, TCP Protocol)
 
 The default Elvin transport module uses a TCP connection to link
@@ -2135,7 +1895,7 @@ establishment of connections via HTTP proxies, SHOULD support basic
 authentication and MAY support alternative authentication mechanisms.
 
 A proxy connection is established by connecting first to an endpoint
-offered by the proxy server, and requesting that it tunnel further
+offered by the proxy router, and requesting that it tunnel further
 data on the connection to the specified Elvin router endpoint.
 
 This request takes the form of
@@ -2145,9 +1905,9 @@ This request takes the form of
 
 with the optional parameter lines terminated by a blank line.
 
-The client then waits for a response from the proxy server, indicating
+The client then waits for a response from the proxy router, indicating
 whether its request was successful.  The response from the proxy
-server consists of CRLF-delimited lines of text, terminated by a blank
+router consists of CRLF-delimited lines of text, terminated by a blank
 line.  Note that this text can be a substantial length.
 
 The text is a properly formatted HTTP response, and should be parsed
@@ -2157,8 +1917,6 @@ example,
    HTTP/1.0 200 Connection established
 
 is a successful response.
-
-
 
 
 m4_heading(3, Security)
@@ -2171,7 +1929,7 @@ m4_dnl
 m4_heading(3, Marshalling)
 
 The standard Elvin 4 marshalling uses XDR [RFC1832] to encode data.
-Messages sent between the a client and and Elvin server are encoded as
+Messages sent between the a client and and Elvin router are encoded as
 a sequence of encoded XDR types.
 
 This section uses diagrams to illustrate clearly certain segment and
@@ -2467,7 +2225,6 @@ int32.
 .fi
 .KE
 
-
 m4_heading(2, Environment)
 
 .nf
@@ -2480,6 +2237,7 @@ file usage
 - /etc/slp.conf
 registry
 .fi
+
 m4_heading(1, SECURITY CONSIDERATIONS)
 
 m4_heading(1, IANA CONSIDERATIONS)
@@ -2488,7 +2246,6 @@ protocol module names
 
 key mechanism identifiers
 
-m4_dnl
 m4_dnl sub-syntax
 m4_dnl
 .bp
@@ -2629,8 +2386,6 @@ swsp			=  SP / HTAB / CR / LF
 .DE
 
 m4_dnl
-m4_dnl  bibliography
-m4_dnl
 .bp
 m4_heading(1, REFERENCES)
 
@@ -2687,25 +2442,18 @@ Author's Address
 David Arnold
 Julian Boot
 Michael Henderson
+Ian Lister
 Ted Phelps
 Bill Segall
 
-Distributed Systems Technology Centre
-Level7, General Purpose South
-Staff House Road
-University of Queensland
-St Lucia QLD 4072
-Australia
-
-Phone:  +617 3365 4310
-Fax:    +617 3365 4311
-Email:  elvin@dstc.edu.au
+Email:  specs@elvin.org
 .fi
 .KE
+
 .KS
 m4_heading(1, FULL COPYRIGHT STATEMENT)
 
-Copyright (C) 2003-__yr Mantara Software
+Copyright (C) 2003-__yr Elvin.Org
 All Rights Reserved.
 
 This specification may be reproduced or transmitted in any form or by
@@ -2715,24 +2463,15 @@ providing that the content remains unaltered, and that such
 distribution is under the terms of this licence.
 
 While every precaution has been taken in the preparation of this
-specification, Mantara Software assumes no responsibility for errors
-or omissions, or for damages resulting from the use of the information
+specification, Elvin.Org assumes no responsibility for errors or
+omissions, or for damages resulting from the use of the information
 herein.
 
-Mantara Software welcomes comments on this specification.  Please address
-any queries, comments or fixes (please include the name and version of
-the specification) to the address below:
+Elvin.Org welcomes comments on this specification.  Please address any
+queries, comments or fixes (please include the name and version of the
+specification) to the address below:
 
 .nf
-    Mantara Software
-    PO Box 1820
-    Toowong QLD 4066
-    Australia
-    Tel: +61 7 3876 8844
-    Fax: +61 7 3876 8843
-    Email: support@mantara.com
+    Email: specs@elvin.org
 .fi
-
-Elvin is a trademark of Mantara Software.  All other trademarks and
-registered marks belong to their respective owners.
 .KE
