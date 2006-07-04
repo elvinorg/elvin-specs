@@ -1,5 +1,5 @@
 m4_dnl -*- nroff -*-
-m4_define(__title, `Elvin Client Protocol')m4_dnl
+m4_define(__title, `Elvin Client Protocol 4.0')m4_dnl
 m4_include(macros.m4)m4_dnl
 .pl 11.0i
 .po 0
