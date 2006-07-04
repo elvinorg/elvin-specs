@@ -351,7 +351,7 @@ Request. Such requests use the subscription-ID returned from the
 SubAddRqst.  The router MAY allocate a new subscription-id when a
 subscription is changed.  An attempt to modify or delete a
 subscription-id that is not registered is a protocol error, and
-the router MUST send a Nack to the client.
+the router MUST send a Nack to the client (see Protocol Errors).
 m4_dnl
 m4_heading(3, Quenching)
 
@@ -1048,7 +1048,7 @@ Disconn*, DropWarn and Test/ConfConn packets from Notif/Sub packets.
 it's possible, and maybe nice? da)
 .\"
 .\"
-m4_heading(2, Protocol Errors)
+m4_heading(2, Errors)
 
 Several types of errors are recognised in the protocol specification.
 This section describes each type of error, and its required handling.
@@ -1296,50 +1296,69 @@ Clients MUST handle error values according to their category, and
 SHOULD present meaningful information to the application derived from
 the defined error values.
 
-Clients MAY interpret implementation specific error codes, on the
+.KS
+.nf
+ Range       | Category
+-------------+------------------------------------------------------------
+       0     | Reserved value.
+             | 
+   1 - 999   | A connection establishment error.
+             | 
+1000 - 1999  | An error has been detected in a protocol message.
+             | This might imply corruption of the connection or
+             | an implementation error.
+             |
+2000 - 2999  | An error has been detected in a request.  This is
+             | likely a programming error in the client application.
+             |
+3000 - 65535 | Reserved values.
+.fi
+.KE
+
+Clients MAY interpret implementation-specific error codes, on the
 basis of router identity determined during connection negotiation.
-Unrecognised codes MUST be reported using the undefined category error
-(ie. value x000).
+Unrecognised codes MUST be handled according to their general
+category.
 
 Receiving a reserved error code SHOULD be handled as a protocol error.
 
-.KS
 .nf
- Code  |  Name              | Arguments        | Meaning / Action
+ Code  | Name               | Arguments        | Description
 -------+--------------------+------------------+--------------------------
- 0     | NO_ERROR           | None             | No error - Illegal value
-       |                    |                  |
  1     | PROT_INCOMPAT      | None             | ConnRqst rejected due to
        |                    |                  | protocol incompatibility
  2     | AUTHZ_FAIL         | None             | Authorisation failure
  3     | AUTHN_FAIL         | None             | Authentication failure
+       |                    |                  | 
  4     |                    |                  | Reserved
  -499  |                    |                  |
  500   |                    |                  | Implementation-specific
  -999  |                    |                  | connection establishment
        |                    |                  | error
        |                    |                  |
- 1000  |                    |                  | Undefined protocol error
-       |                    |                  | Requires connection abort
  1001  | PROT_ERROR         | None             | Protocol error
  1002  | NO_SUCH_SUB        | subid, id64      | No such subscription
  1003  | NO_SUCH_QUENCH     | quench_id, id64  | No such quench
  1004  | BAD_KEY_SCHEME     | scheme_id, id32  | Bad keys scheme
  1005  | BAD_KEY_INDEX      | scheme_id, id32  | Bad keyset index
        |                    | index, int32     |
- 1006  |                    |                  | Reserved
+ 1006  | BAD_UTF8           | offset, int32    | Invalid UTF-8 string
+       |                    |                  | FIXME (libelvin 2301)
+       |                    |                  |
+ 1007  |                    |                  | Reserved
  -1499 |                    |                  |
  1500  |                    |                  | Implementation-specific
  -1999 |                    |                  | connection error
        |                    |                  |
- 2000  |                    |                  | Undefined request error
  2001  | NO_SUCH_KEY        | None             | No such key
  2002  | KEY_EXISTS         | None             | Key exists
  2003  | BAD_KEY            | None             | Bad key
  2004  | NOTHING_TO_DO      | None             | Nothing to do
  2005  | QOS_LIMIT          | property, string | Request exceeds QoS limit
+       |                    |                  | 
  2006  |                    |                  | Reserved
  -2100 |                    |                  |
+       |                    |                  | 
  2101  | PARSE_ERROR        | offset, int32    | Parse error at offset
        |                    | token, string    |
  2102  | INVALID_TOKEN      | offset, int32    | Invalid token
@@ -1360,28 +1379,26 @@ Receiving a reserved error code SHOULD be handled as a protocol error.
        |                    | regexp, string   |
  2110  | EXP_IS_TRIVIAL     |                  | FIXME (libelvin has args)
  2111  | REGEXP_TOO_COMPLEX | offset, int32    | FIXME (libelvin doesn't
-       |                    | regexp, string   |  have offset)
+       |                    | regexp, string   | have offset)
  2112  | NESTING_TOO_DEEP   | offset, int32    | Expression nesting too deep
+       |                    |                  | 
  2113  |                    |                  | Reserved
  -2200 |                    |                  | 
  2201  | EMPTY_QUENCH       | None             | Empty quench
  2202  | ATTR_EXISTS        | name, string     | Quench attribute exists
  2203  | NO_SUCH_ATTR       | name, string     | No such attribute
+       |                    |                  | 
  2110  |                    |                  | Reserved
  -2499 |                    |                  |
  2500  |                    |                  | Implementation-specific
  -2999 |                    |                  | request failure
-       |                    |                  |
- 3000  |                    |                  | Reserved
--65535 |                    |                  |
 .fi
-.KE
 
-The message field is a Unicode string template containing embedded
-tokens of the form %n, where n is an index into the args array.  When
-preparing the error message for presentation to the user, each %n
-should be replaced by the appropriately formatted value from the args
-array.
+The Nack message field is a Unicode string template containing
+embedded tokens of the form %n, where n is an index into the args
+array.  When preparing the error message for presentation to the user,
+each %n should be replaced by the appropriately formatted value from
+the args array.
 
 The language in which the Nack message is sent by a router MAY be
 negotiated during connection establishment.  Alternatively, clients
