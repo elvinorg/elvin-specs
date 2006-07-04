@@ -327,12 +327,12 @@ Notify Deliver packets until at least one subscription has been added
 by the client.
 
 A Consumer client describes the events it is interested in by sending
-a predicate in the Elvin subscripton language (and its associated
-security keys) to the Elvin router.  The predicate is sent in a
-Subscription Add Request (SubAddRqst).  On receipt of the request, the
-router checks the syntactic correctness of the predicate. If valid, a
-Subscription Reply (SubRply) is returned which includes a router
-allocated indentifier for the subscription.
+a predicate expression in the Elvin subscripton language (and its
+associated security keys) to the Elvin router.  The predicate is sent
+in a Subscription Add Request (SubAddRqst).  On receipt of the
+request, the router checks the syntactic correctness of the
+predicate. If valid, a Subscription Reply (SubRply) is returned which
+includes a router-allocated indentifier for the subscription.
 
 .KS
    +----------+ --SubAddRqst--> +--------+
@@ -340,20 +340,21 @@ allocated indentifier for the subscription.
    +----------+ <---SubRply---- +--------+
 .KE
 
-If the predicate fails to parse, the router MUST send Nack to the
-client with the error code set to indicate a parser error.  This is
-effectively an RPC-style interaction.  All operations that modify
-a clients session information at the router use this RPC-style.
+If the predicate fails to parse, the router MUST send a Negative
+Acknowledgement (Nack) to the client with the error code set to
+indicate a parser error.  This is effectively an RPC-style
+interaction.  All operations that modify a client's session
+information at the router use this RPC style.
 
 A client may alter its registered predicate using the Subscription
 Modify Request or remove it entirely by sending a Subscription Delete
-Request. Such requests use the subscription-ID returned from the
-SubAddRqst.  The router MAY allocate a new subscription-id when a
-subscription is changed.  An attempt to modify or delete a
-subscription-id that is not registered is a protocol error, and
-the router MUST send a Nack to the client (see Protocol Errors).
-m4_dnl
-m4_heading(3, Quenching)
+Request. Such requests use the subscription identifier returned from
+the SubAddRqst.  The router MAY allocate a new subscription identifier
+when a subscription is changed.  An attempt to modify or delete a
+subscription identifier that is not registered is a protocol error,
+and the router MUST send a Nack to the client (see Protocol Errors).
+.\"
+m4_dnl m4_heading(3, Quenching)
 
 Quenching is a facility named for its ability to reduce notification
 traffic by preventing the propagation of unwanted notifications.  It
@@ -512,7 +513,7 @@ operators, parentheses need not be separated from attribute
 identifiers or literal values by whitespace.
 
 An implementation MAY limit the depth of nesting able to be evaluated
-in subscription expressions; an expression which exceeds this limit
+in subscription expressions; an expression that exceeds this limit
 MUST generate a NESTING_TOO_DEEP error in response to registration
 with the router.
 m4_dnl
@@ -901,13 +902,14 @@ Elvin subscriptions are compiled by the router during registration.
 Various errors are possible; this section documents the basic error
 conditions.  
 
-When adding or modifying a subscription, the router can return a
-failure code, some additional parameters, and a default text message.
-Clients can use the error code to generate localized text including
-the parameter values, if desirable.
+Errors detected when adding or modifying a subscription are reported
+as protocol errors. The router returns a failure code, some additional
+parameters, and a default text message.  Clients can use the error
+code to generate localized text including the parameter values, if
+desirable.
 
-Router implementations MAY return additional error codes, but SHOULD
-use the standard codes where appropriate.
+Router implementations MAY return error codes not specified here, but
+SHOULD use the standard codes where appropriate.
 
 This section refers to names from the error table in section "Negative
 Acknowledgement", which defines the error codes, parameters and
@@ -1336,7 +1338,7 @@ Receiving a reserved error code SHOULD be handled as a protocol error.
  -999  |                    |                  | connection establishment
        |                    |                  | error
        |                    |                  |
- 1001  | PROT_ERROR         | None             | Protocol error
+ 1001  | PROT_ERROR         | None             | General error in protocol
  1002  | NO_SUCH_SUB        | subid, id64      | No such subscription
  1003  | NO_SUCH_QUENCH     | quench_id, id64  | No such quench
  1004  | BAD_KEY_SCHEME     | scheme_id, id32  | Bad keys scheme
@@ -1351,12 +1353,15 @@ Receiving a reserved error code SHOULD be handled as a protocol error.
  -1999 |                    |                  | connection error
        |                    |                  |
  2001  | NO_SUCH_KEY        | None             | No such key
- 2002  | KEY_EXISTS         | None             | Key exists
- 2003  | BAD_KEY            | None             | Bad key
- 2004  | NOTHING_TO_DO      | None             | Nothing to do
+ 2002  | KEY_EXISTS         | None             | Key already exists
+ 2003  | BAD_KEY            | None             | Invalid key
+ 2004  | NOTHING_TO_DO      | None             | Request required no
+       |                    |                  | action
  2005  | QOS_LIMIT          | property, string | Request exceeds QoS limit
+ 2006  | IMPL_LIMIT         | None             | Request exceeds
+       |                    |                  | implementation limit
        |                    |                  | 
- 2006  |                    |                  | Reserved
+ 2007  |                    |                  | Reserved
  -2100 |                    |                  |
        |                    |                  | 
  2101  | PARSE_ERROR        | offset, int32    | Parse error at offset
@@ -1707,13 +1712,16 @@ struct SubAddRqst {
 If successful, the router MUST respond with a SubRply.
 
 If the client has registered too many subscriptions, the router MUST
-return a Nack with error code X.
+return a Nack with the QOS_LIMIT error code.
 
-If the router has too many registered subscriptions, it MUST return a
-Nack with error code X.
+If the router has too many registered subscriptions, or exceeds some
+other internal limit, it MUST return a Nack with error code
+IMPL_LIMIT.
 
 If the subscription expression fails to parse, the router MUST return
-a Nack with errors codes 1, 2, 3 or 4.
+a Nack with an appropriate error code.  The standard codes are
+specified in "Subscription Errors" or an implementation specific code
+MAY be used.
 
 m4_heading(3, Subscription Modify Request)
 
@@ -1740,13 +1748,12 @@ empty, the modification SHALL be considered successful.
 A successful modification of the subscription MUST return a SubRply to
 the client.
 
-A Nack, with error code 5, MUST be returned if the subscription_id is
-not valid.
+A Nack, with error code BAD_KEY_INDEX, MUST be returned if the
+subscription_id is not valid.
 
 If the subscription expression fails to parse, the router MUST return
-a Nack describing the error.  Allowed error codes are 1, 2, 3 or 4.
-An invalid expression MUST NOT alter the current state of the
-specified subscription.
+a Nack describing the error.  An invalid expression MUST NOT alter the
+current state of the specified subscription.
 
 An attempt either to add a key already associated with the specified
 subscription or to remove a key not currently associated with the
@@ -1984,7 +1991,7 @@ clients SHOULD negotiate the maximum packet length during connection.
 An open TCP connection may be closed only between the last byte of
 packet data, and the following framing header.  If the connection is
 lost mid-packet, it MUST be reported to the abstract protocol layer as
-a protocol error.
+a communications error.
 
 m4_heading(4, Use of Proxies)
 
@@ -2557,7 +2564,7 @@ Email:  specs@elvin.org
 .KS
 m4_heading(1, FULL COPYRIGHT STATEMENT)
 
-Copyright (C) 2003-__yr Elvin.Org
+Copyright (C) 1999-__yr Elvin.Org
 All Rights Reserved.
 
 This specification may be reproduced or transmitted in any form or by
