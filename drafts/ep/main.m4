@@ -1046,28 +1046,73 @@ m4_remark(i'd like the ability to have quenching only clients. jb
 to do that, we'd have to separate the ConnRqst/Rply, SecRqst/Rply,
 Disconn*, DropWarn and Test/ConfConn packets from Notif/Sub packets.
 it's possible, and maybe nice? da)
-
+.\"
+.\"
 m4_heading(2, Protocol Errors)
 
-Two types of errors are recognised: protocol violations, and protocol
-errors.
+Several types of errors are recognised in the protocol specification.
+This section describes each type of error, and its required handling.
+.\"
+m4_heading(3, Communications Errors)
+.LP
+A communications error occurs when an abstract communcications channel
+closes at an unexpected point in the protocol sequence.  
 
-A protocol violation is behaviour contrary to that required by this
-specification.  Examples include marshalling errors, packet
-corruption, and protocol sequence constraint violations.
+The protocol does not support re-establishment of broken abstract
+communications channel.
 
-In all cases of protocol violation, a client or router MUST
-immediately terminate the connection, without performing a connection
+When a communications error is detected, a router implementation
+SHOULD clean up all state associated with the channel (and its
+client), including negotiated connection options, keys, subscriptions,
+quenches, and queued packets.
+
+A client implementation MAY attempt to open a new channel, and
+create a new connection with its current state.  However, such
+a reconnection might cause notification and quench deliveries to be
+lost, and therefore client applications MUST be notified if such an
+attempt is made.
+.\"
+m4_heading(3, Protocol Violations)
+.LP
+A protocol violation is defined to occur when a message is received
+that
+.IP
+cannot be unmarshalled, 
+.IP
+has a type that is not expected at the current point in the protocol
+sequence, or,
+.IP
+is a reply to an unknown request.
+.LP
+In all cases of protocol violation, an implementation MAY immediately
+terminate the communications channel, without performing a connection
 closure packet exchange.
 
-A protocol error is a fault in processing a request.  Protocol errors
-are detected by the router, and the client is informed of the error
-using the Negative Acknowledge (Nack) packet.
+However, a more robust implementation MAY attempt to ignore such
+messages and maintain the connection, relying on timeouts to initiate
+a suitable recovery process in its peer implementation.
+.\"
+m4_heading(3, Protocol Errors)
+.LP
+A protocol error occurs when a message is received whose values are
+inconsistent with the state of the receiving entity or otherwise
+incorrect, but is not a protocol violation.  Examples include attempts
+to modify or delete a non-existent subscription, or sending a
+notification whose attributes exceed the negotiated connection limits.
 
-A single protocol error MUST NOT cause the client/router connection to
-be closed.  Repeated protocol errors on a single connection MAY cause
-the router to close the client connection, giving suspected denial of
-service attack as a reason (see the Disconnect packet).
+In general, client implementations SHOULD and router implementations
+MUST, maintain a connection in the face of protocol errors.
+
+A router implementation that detects a protocol error in a NotifyEmit
+packet SHOULD ignore it, and in any other packet SHOULD respond using
+the Negative Acknowledge (Nack) packet.
+
+A client implementation that detects a protocol error in any packet
+received from the router MAY ignore it or MAY abort the connection.
+
+Repeated protocol errors on a channel MAY cause a router
+implementation to close the client's connection, giving suspected
+denial of service attack as a reason (see the Disconnect packet).
 
 m4_heading(2, Packet Details)
 
