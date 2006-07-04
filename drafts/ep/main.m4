@@ -1231,62 +1231,75 @@ Receiving a reserved error code SHOULD be handled as a protocol error.
 
 .KS
 .nf
-Error Code  |  Meaning / Action                    |  Arguments
-------------+--------------------------------------+------------
-   0        |  No error - Illegal value            |  None
-            |                                      |
-   1        |  ConnRqst version mismatch           |  None
-   2        |  Authorisation failure               |  None
-   3        |  Authentication failure              |  None
-   4-  499  |  ( Reserved )                        |  Undefined
- 500-  999  |  ( Implementation-specific           |  Undefined
-            |    connection establishment error )  |
-            |                                      |
-1000        |  Undefined protocol error. Requires  |  None
-            |  connection abort                    |
-1001        |  Protocol error                      |  None
-1002        |  No such subscription                |  sub_id, id64
-1003        |  No such quench                      |  quench_id, id64
-1004        |  Bad keys scheme                     |  scheme_id, id32
-1005        |  Bad keyset index                    |  scheme_id, id32
-            |                                      |  index, int32
-1006- 1499  |  ( Reserved )                        |  Undefined
-1500- 1999  |  ( Implementation-specific error     |  Undefined
-            |    requiring connection abort )      |
-            |                                      |
-2000        |  Undefined error with request        |  None
-2001        |  No such key                         |  None
-2002        |  Key exists                          |  None
-2003        |  Bad key                             |  None
-2004        |  Nothing to do                       |  None
-2005- 2100  |  ( Reserved )                        |  Undefined
-2101        |  Parse error                         |  offset, int32
-            |                                      |  token, string
-2102        |  Invalid token                       |  offset, int32
-            |                                      |  token, string
-2103        |  Unterminated string                 |  offset, int32
-2104        |  Unknown function                    |  offset, int32
-            |                                      |  name, string
-2105        |  Overflow                            |  offset, int32
-            |                                      |  token, string
-2106        |  Type mismatch                       |  offset, int32
-            |                                      |  expr, string
-            |                                      |  type, string
-2107        |  Too few arguments                   |  offset, int32
-            |                                      |  function, string
-2108        |  Too many arguments                  |  offset, int32
-            |                                      |  function, string
-2109        |  Invalid regular expression          |  offset, int32
-            |                                      |  regexp, string
-2110- 2200  |  ( Reserved )                        |  Undefined
-2201        |  Empty quench                        |  None
-2202        |  Attribute exists                    |  name, string
-2203        |  No such attribute                   |  name, string
-2110- 2499  |  ( Reserved )                        |  Undefined
-2500- 2999  |  ( Implementation-specific           |  Undefined
-            |    operation failure )               |
-            |                                      |
-3000-65535  |  ( Reserved )                        |  Undefined   
+ Code  |  Name              | Arguments        | Meaning / Action
+-------+--------------------+------------------+--------------------------
+ 0     | NO_ERROR           | None             | No error - Illegal value
+       |                    |                  |
+ 1     | PROT_INCOMPAT      | None             | ConnRqst rejected due to
+       |                    |                  | protocol incompatibility
+ 2     | AUTHZ_FAIL         | None             | Authorisation failure
+ 3     | AUTHN_FAIL         | None             | Authentication failure
+ 4     |                    |                  | Reserved
+ -499  |                    |                  |
+ 500   |                    |                  | Implementation-specific
+ -999  |                    |                  | connection establishment
+       |                    |                  | error
+       |                    |                  |
+ 1000  |                    |                  | Undefined protocol error
+       |                    |                  | Requires connection abort
+ 1001  | PROT_ERROR         | None             | Protocol error
+ 1002  | NO_SUCH_SUB        | subid, id64      | No such subscription
+ 1003  | NO_SUCH_QUENCH     | quench_id, id64  | No such quench
+ 1004  | BAD_KEY_SCHEME     | scheme_id, id32  | Bad keys scheme
+ 1005  | BAD_KEY_INDEX      | scheme_id, id32  | Bad keyset index
+       |                    | index, int32     |
+ 1006  |                    |                  | Reserved
+ -1499 |                    |                  |
+ 1500  |                    |                  | Implementation-specific
+ -1999 |                    |                  | connection error
+       |                    |                  |
+ 2000  |                    |                  | Undefined request error
+ 2001  | NO_SUCH_KEY        | None             | No such key
+ 2002  | KEY_EXISTS         | None             | Key exists
+ 2003  | BAD_KEY            | None             | Bad key
+ 2004  | NOTHING_TO_DO      | None             | Nothing to do
+ 2005  | QOS_LIMIT          | property, string | Request exceeds QoS limit
+ 2006  |                    |                  | Reserved
+ -2100 |                    |                  |
+ 2101  | PARSE_ERROR        | offset, int32    | Parse error at offset
+       |                    | token, string    |
+ 2102  | INVALID_TOKEN      | offset, int32    | Invalid token
+       |                    | token, string    |
+ 2103  | UNTERM_STRING      | offset, int32    | Unterminated string
+ 2104  | UNKNOWN_FUNC       | offset, int32    | Unknown function
+       |                    | name, string     |
+ 2105  | OVERFLOW           | offset, int32    | Numeric constant overflow
+       |                    | token, string    | 
+ 2106  | TYPE_MISMATCH      | offset, int32    | Type mismatch
+       |                    | expr, string     |
+       |                    | type, string     |
+ 2107  | TOO_FEW_ARGS       | offset, int32    | Too few arguments
+       |                    | function, string |
+ 2108  | TOO_MANY_ARGS      | offset, int32    | Too many arguments
+       |                    | function, string |
+ 2109  | INVALID_REGEXP     | offset, int32    | Invalid regular expression
+       |                    | regexp, string   |
+ 2110  | EXP_IS_TRIVIAL     |                  | FIXME (libelvin has args)
+ 2111  | REGEXP_TOO_COMPLEX | offset, int32    | FIXME (libelvin doesn't
+       |                    | regexp, string   |  have offset)
+ 2112  | NESTING_TOO_DEEP   | offset, int32    | Expression nesting too deep
+ 2113  |                    |                  | Reserved
+ -2200 |                    |                  | 
+ 2201  | EMPTY_QUENCH       | None             | Empty quench
+ 2202  | ATTR_EXISTS        | name, string     | Quench attribute exists
+ 2203  | NO_SUCH_ATTR       | name, string     | No such attribute
+ 2110  |                    |                  | Reserved
+ -2499 |                    |                  |
+ 2500  |                    |                  | Implementation-specific
+ -2999 |                    |                  | request failure
+       |                    |                  |
+ 3000  |                    |                  | Reserved
+-65535 |                    |                  |
 .fi
 .KE
 
