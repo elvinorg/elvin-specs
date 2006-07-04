@@ -341,11 +341,11 @@ allocated indentifier for the subscription.
 
 If the predicate fails to parse, the router MUST send Nack to the
 client with the error code set to indicate a parser error.  This is
-effectively and RPC-style interaction.  All operations that modify
+effectively an RPC-style interaction.  All operations that modify
 a clients session information at the router use this RPC-style.
 
 A client may alter its registered predicate using the Subscription
-Modify Request or remove it entirley by sending a Subscription Delete
+Modify Request or remove it entirely by sending a Subscription Delete
 Request. Such requests use the subscription-ID returned from the
 SubAddRqst.  The router MAY allocate a new subscription-id when a
 subscription is changed.  An attempt to modify or delete a
@@ -900,7 +900,7 @@ Various errors are possible; this section documents the error conditions.
 Errors are reported as numbers so that language-specific error
 messages may be used by the client. This section shows symbols from
 the C language binding; for the corresponding error numbers, please
-see <elvin4/errors.h> or documentation for your language binding.
+see <elvin/errors.h> or documentation for your language binding.
 
 m4_remark(do we need ANY language/API specific stuff here?  better to
 refer to a section on abstract errors independent of any particular
@@ -1018,7 +1018,7 @@ to do that, we'd have to separate the ConnRqst/Rply, SecRqst/Rply,
 Disconn*, DropWarn and Test/ConfConn packets from Notif/Sub packets.
 it's possible, and maybe nice? da)
 
-m4_heading(2, Protoccol Errors)
+m4_heading(2, Protocol Errors)
 
 Two types of errors are recognised: protocol violations, and protocol
 errors.
@@ -1053,7 +1053,7 @@ m4_pre(`
 typedef uint32 id32;
 typedef uint64 id64;
 ')m4_dnl
-These types are opaque n-bit identifiers.  No semantics is required
+These types are opaque n-bit identifiers.  No semantics are required
 other than bitwise comparison.  In all cases, an all zeros value is
 reserved.
 
