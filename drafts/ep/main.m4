@@ -1,3 +1,4 @@
+m4_dnl -*- nroff -*-
 m4_define(__title, `Elvin Client Protocol')m4_dnl
 m4_include(macros.m4)m4_dnl
 .pl 11.0i
@@ -870,7 +871,8 @@ Bitwise OR
 Bitwise XOR
 .IP "~" 4
 Bitwise inversion (unary)
-m4_dnl
+.\"
+.\"
 m4_heading(2, Numeric type promotion)
 
 The three numeric types (int32, int64 and real64) may be mixed freely
@@ -891,29 +893,56 @@ If either operand is real64, the promoted type is also real64.
 Otherwise, if either operand is int64, the promoted type is also int64.
 .IP "3." 3
 Otherwise, both operands must be int32, and no promotion is required.
-m4_dnl
+.\"
+.\"
 m4_heading(2, Subscription Errors)
 
-Elvin subscriptions are compiled by the router after submission at runtime.
-Various errors are possible; this section documents the error conditions.
+Elvin subscriptions are compiled by the router during registration.
+Various errors are possible; this section documents the basic error
+conditions.  
 
-Errors are reported as numbers so that language-specific error
-messages may be used by the client. This section shows symbols from
-the C language binding; for the corresponding error numbers, please
-see <elvin/errors.h> or documentation for your language binding.
+When adding or modifying a subscription, the router can return a
+failure code, some additional parameters, and a default text message.
+Clients can use the error code to generate localized text including
+the parameter values, if desirable.
 
-m4_remark(do we need ANY language/API specific stuff here?  better to
-refer to a section on abstract errors independent of any particular
-naming conventions.  ie like the different packet types are current
-defined. Is this the Failures section in abstract-protocol.m4? jb)
+Router implementations MAY return additional error codes, but SHOULD
+use the standard codes where appropriate.
 
-.IP SYNTAX_ERROR 4
-Non-specific syntactic problem.
-.IP IDENTIFIER_TOO_LONG 4
-the supplied element identifier exceeds the maximum allowed length.
-.IP BAD_IDENTIFIER 4
-the supplied element identifier contains illegal characters. Remember
-that the first character must be only a letter or underscore.
+This section refers to names from the error table in section "Negative
+Acknowledgement", which defines the error codes, parameters and
+required client action.
+
+.IP PARSE_ERROR 4
+A non-specific problem occured when parsing the expression.
+.IP INVALID_TOKEN 4
+An invalid token was parsed in the expression.
+.IP UNTERM_STRING 4
+A string literal in the expression is missing a terminating quote
+character.
+.IP OVERFLOW 4
+A numeric literal value in the expression is too large for its type.
+.IP TYPE_MISMATCH 4
+The type of a literal value in the expression does not match its
+usage.
+.IP UNKNOWN_FUNC 4
+An unrecognised predicate function is used in the expression.
+.IP TOO_FEW_ARGS 4
+A predicate function is called with too few arguments.
+.IP TOO_MANY_ARGS 4
+A predicate function is called with too many arguments.
+.IP EXP_IS_TRIVIAL 4
+When compiled, the expression reduced to a constant value.
+.IP INVALID_REGEXP 4
+A regular expression was invalid.
+.IP REGEXP_TOO_COMPLEX 4
+A regular expression was too complex.
+.LP
+Note also that a router implementation MAY reject a subscription
+expression that exceeds its internal limits on the length of attribute
+identifiers and strings.  Such errors SHOULD be reported using the
+QOS_LIMIT error code.
+.\"
 m4_dnl
 m4_heading(3, Runtime evaluation errors in numeric expressions)
 
@@ -922,7 +951,7 @@ any expressions that are the arguments to the predicate), the following
 classes of errors may occur:
 
 .IP 1. 3
-Errors that cause the predicate to return false:
+Errors that cause the predicate to return bottom:
 .IP
 o Use of an attribute that does not exist in the notification,
 .IP
@@ -930,7 +959,7 @@ o Use of an attribute, constant or expression that has an
   inappropriate type (for example, real64, string or opaque in a
   function that expects int32 or int64)
 .IP
-o int32 or int64 division by zero.
+o Integer division by zero.
 .IP 2. 3
 Integer overflow. This is silently ignored and the result is undefined,
 or do we define it to be wrapped to 32 or 64 bits?
