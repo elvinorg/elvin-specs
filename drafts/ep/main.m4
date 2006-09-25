@@ -1748,7 +1748,7 @@ empty, the modification SHALL be considered successful.
 A successful modification of the subscription MUST return a SubRply to
 the client.
 
-A Nack, with error code BAD_KEY_INDEX, MUST be returned if the
+A Nack, with error code NO_SUCH_SUB, MUST be returned if the
 subscription_id is not valid.
 
 If the subscription expression fails to parse, the router MUST return
