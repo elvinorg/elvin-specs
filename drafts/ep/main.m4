@@ -2415,7 +2415,7 @@ num-value		= num-literal /
 
 name			= id-literal
 
-bool-function-exp	= bool-pred "(" args ")"
+bool-function-exp	= bool-pred "(" name ")"
 
 function-exp		= function-pred "(" args ")"
 
