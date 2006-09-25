@@ -2424,7 +2424,7 @@ function-exp		= function-pred "(" args ")"
 ; predicates
 ;
 
-bool-pred		= "exists" / "int32" / "int64" /
+bool-pred		= "require" / "int32" / "int64" /
 			  "real64" / "string" / "opaque" /
 			  "nan"
 
