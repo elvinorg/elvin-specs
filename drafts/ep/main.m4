@@ -2419,6 +2419,9 @@ bool-function-exp	= bool-pred "(" args ")"
 
 function-exp		= function-pred "(" args ")"
 
+args                    = arg *( "," arg )
+
+arg                     = name / string-literal / num-literal
 
 ;
 ; predicates
