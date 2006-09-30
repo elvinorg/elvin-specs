@@ -26,13 +26,13 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/ep/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.8 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.9 $
 #
 ################################################################
 
 .PHONY: all outline ps
 
-FILENAME := draft-elvin-ecp-40
+FILENAME := draft-elvin-client-40
 VERSION := 04
 PUBLISHED := $(FILENAME)-$(VERSION).txt
 
