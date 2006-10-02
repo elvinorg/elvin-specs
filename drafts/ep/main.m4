@@ -478,7 +478,7 @@ that adds the value bottom (which represents "undecideable" or
  false    false  |  true      false     false     false
  ----------------+----------------------------------------
 .DE
-.ID 3
+.\".ID 3
 Any subscription expression that refers to a name that is not present in the
 notification being evaluated results in bottom.
 
@@ -502,15 +502,15 @@ implicit conversion from numeric values to truth values (zero means
 false, nonzero means true), the Elvin subscription language requires
 such a conversion to be made explicit, for example 
 .QP
-(i-have-been-notified != 0)
+(Example != 0)
 .ID 3
 m4_dnl
 m4_heading(3, Grouping)
 
-Clauses in an expression may be grouped to override precedence of
-evaluation using parentheses.  Unlike the logical or arithmetic
-operators, parentheses need not be separated from attribute
-identifiers or literal values by whitespace.
+Clauses in an expression may be grouped using parentheses to override
+precedence of evaluation.  Unlike the logical or arithmetic operators,
+parentheses need not be separated from attribute identifiers or
+literal values by whitespace.
 
 An implementation MAY limit the depth of nesting able to be evaluated
 in subscription expressions; an expression that exceeds this limit
@@ -544,15 +544,16 @@ A 32 bit, signed, 2's complement integer.
 A 64 bit, signed, 2's complement integer.
 .RE
 .LP
-Integer literals can be expressed in decimal (the default) or
-hexadecimal, using a 0x prefix.  In either case, an optional leading
-minus sign negates the value, and a trailing "l" or "L" indicates that
-the value should be of type int64.
+Integer literals can be expressed in decimal (the default),
+hexadecimal, using a 0x prefix, or octal, using a 0 prefix.  In all
+cases, an optional leading minus sign negates the value, and a
+trailing "l" or "L" indicates that the value should be of type int64.
 .KE
 
 Literal values too large to be converted to an int32, but without the
-suffix specifying an int64 type, are illegal.  Similarly, values with
-the suffix, too large to be converted to an int64, are illegal.
+suffix specifying an int64 type MUST cause an OVERFLOW error.
+Similarly, values with the suffix and too large to be converted to an
+int64, MUST cause an OVERFLOW error.
 .KS
 Real Numbers
 .RS
@@ -560,11 +561,14 @@ Real Numbers
 An IEEE 754 double precision floating point number.
 .RE
 .LP
-
 Real literals can be expressed only in decimal, and must include a
 decimal point and both whole and fractional parts.  An optional
 integer exponent may be added following an "e" or "E" after the
 fractional part.
+
+A real literal with an exponent too large for the IEEE 754 double
+precision format MUST cause an OVERFLOW error.  Superfluous precision
+in the mantissa SHOULD be discarded.
 .KE
 
 .KS
@@ -575,10 +579,11 @@ A UTF-8 encoded Unicode string of known length, with no NUL (0x00)
 bytes.
 .RE
 .LP
-String literals must be quoted using either the UTF-8 single or double
-quote characters.  Within the (un-escaped) quotes, a backslash
-character functions as an escape for the following character.  All
-escaped characters except the quotes represent themselves.
+String literals must be quoted using either double (Unicode QUOTATION
+MARK U+0022) or single (Unicode APOSTROPHE U+0027) quote characters.
+Within the (un-escaped) quotes, a backslash (Unicode REVERSE SOLIDUS
+U+005C) character functions as an escape for the following character.
+All escaped characters except the quotes represent themselves.
 .KE
 There is no mechanism for including special characters in string
 literals; each language mapping is expected to use its own mechanism
@@ -610,8 +615,8 @@ Predicates and function may also use values obtained from the message
 under evaluation.  Values are referred to using the name of the
 message attribute.
 
-Names must be separated from operators by whitespace.  What other
-rules here?
+m4_remark(Names must be separated from operators by whitespace.  What
+other rules here?)
 m4_dnl
 m4_heading(3, General predicates)
 .LP
@@ -658,19 +663,49 @@ Returns true if the type of the attribute is
 .B opaque.
 .KE
 m4_dnl
+m4_heading(3, Equality and Set Membership)
+
+The most common operation in typical subscription expressions is a
+test for equality.
+
+.IP "equals(attribute, attribute-or-literal+)" 4
+Returns true if the type and value of the first parameter match those
+of any of the subsequent parameters.
+.LP
+For convenience, two operators are defined using this basic predicate.
+.IP "==" 4
+Equal to.
+.LP
+Compares its two operands, each of which may be a literal value or an
+attribute name.  Comparing two attribute names is allowed, but
+comparing two literal values is pointless and SHOULD return an error.
+
+m4_remark(Mantara's implementation currently rejects any pair of
+operands without at least one attribute name, but the returned error
+is not defined in this specification.)
+
+.IP "!=" 4
+Not equal to. 
+.LP
+This operator is defined to be implemented as
+.QP
+!(A == B)
+.LP
+Note that this can lead to unexpected results when the attributes are
+not defined.
+
+m4_dnl
 m4_heading(3, String predicates)
 
 Some of the most used features of the subscription language are its
 string predicates.  The most general provides regular-expression
 ("regex") matching, but simpler predicates are also provided, ranging
-from wildcarding (or "globbing") down to straight-forward string
-equality.  While these could all be replaced by regular-expression
-operations, it is generally clearer to use and more efficient to
-implement the simpler forms when they suit.
+from wildcarding (or "globbing") to simple string comparision.  While
+these could all be replaced by regular-expression operations, it is
+generally clearer to use and more efficient to implement the simpler
+forms when they suit.
 .LP
 The string predicates are:
-.IP "equals(attr, stringconst+)" 4
-Returns true if any stringconst equals the value of attr.
 .IP "contains(attr, stringconst+)" 4
 Returns true if any stringconst is a substring of the value of attr.
 .IP "begins_with(attr, stringconst+)" 4
@@ -697,25 +732,7 @@ imply
 .B contains, 
 and 
 .B equals 
-implies all three of them.
-.LP
-For many subscriptions, string (in)equality is the most used
-predicate.  For simplicity, the following shorthand notations may also
-be used:
-.QP 
-string-expr-1 == string-expr-2
-.LP
-is equivalent to 
-.QP 
-equals(string-expr-1, string-expr-2)
-.LP
-and
-.QP 
-string-expr-1 != string-expr-2
-.LP
-is equivalent to 
-.QP
-!equals(string-expr-1, string-expr-2)
+(the general predicate) implies all three of them.
 .LP
 There are no predicates for string comparison, i.e. testing whether one
 string "is less than" another string.
@@ -744,11 +761,11 @@ canonical representation.
 
 For example,
 .QP
-LATIN SMALL LETTER A WITH GRAVE (\\u00e0)
+LATIN SMALL LETTER A WITH GRAVE (U+00E0)
 .LP
 decomposes to the two characters
 .QP
-LATIN SMALL LETTER A + COMBINING GRAVE ACCENT (\\u0061 + \\u0300)
+LATIN SMALL LETTER A + COMBINING GRAVE ACCENT (U+0061 + U+0300)
 .LP
 As an additional complication, there exist Unicode characters that
 have multiple pre-composed representations, and in performing
@@ -805,6 +822,8 @@ undefined attribute name.
 A reference to an undefined attribute sets the closest enclosing
 boolean expression to false.
 .LP
+m4_remark(false?  or bottom?)
+.LP
 This will normally mean that the numeric predicate will return false,
 leading to apparently anomalous cases:
 .KS
@@ -826,17 +845,6 @@ defined to be equal if their sign, mantissa and exponent are all
 equal.  More useful comparison of real64 numbers can be achieved using
 the less-than and greater-than predicates.
 
-In addition to these predicate, the following syntactic sugar is
-defined for convenience
-.IP "!=" 4
-Not equal to. 
-.LP
-While superficially similar to the predicates above, it is in fact
-implemented using other predicates, like
-.QP
-!(A == B)
-.LP
-which can again cause confusion when the attributes are not defined.
 m4_dnl
 m4_heading(3, Numeric functions)
 
