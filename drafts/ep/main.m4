@@ -593,7 +593,7 @@ An opaque octet string of known length.
 .LP
 The subscription language does not support opaque literals; reference
 to opaque attributes in a subscription expression is limited to use of
-the sizeof() function.
+the size() function.
 .KE
 
 There are no structured data types (C struct, enum or union), nor is
