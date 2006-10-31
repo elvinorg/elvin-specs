@@ -69,15 +69,15 @@ m4_dnl
 m4_dnl
 m4_heading(1, INTRODUCTION)
 
-Elvin is a content-based publish/subscribe messaging service.  An
-Elvin implementation is comprised of Elvin routers which forward and
-deliver messages after evaluating their contents against a body of
-registered subscriptions.
+Elvin is a content-based publish/subscribe notification service.  An
+Elvin implementation is comprised of Elvin routers that forward and
+deliver messages, called notifications, after evaluating their
+contents against a body of registered subscriptions.
 
-Elvin messages are collections of named, typed values.  Subscriptions
-are logical predicate expressions that the router evaluates for each
-received message.  Messages are delivered to the subscriber if the
-result of the predicate evaluation is true.
+Elvin notifications are collections of named, typed values.
+Subscriptions are logical predicate expressions that the router
+evaluates for each received notification.  Notifications are delivered
+to the subscriber if the result of the predicate evaluation is true.
 
 Elvin clients can be characterised as producers or publishers, which
 send notifications; and consumers or subscribers, which request
@@ -92,21 +92,21 @@ many applications, it is inherently channel-based: a particular
 address and port must be shared by the communicating applications.
 
 Elvin is a notification service that provides fast, simple, undirected
-messaging, using content-based selection of delivered messages.  It
-has been show to work on a wide-area scale and is designed to
+messaging, using content-based selection of delivered notifications.
+It has been show to work on a wide-area scale and is designed to
 complement the existing Internet protocols.
 
-Elvin messages are routed from their source to required destinations
-by Elvin router(s).  Delivery has best-effort, at-most-once semantics.
-Under no circumstances should an Elvin client receive duplicate
-messages.  Messages from a single source must be delivered in order,
-but interleaving of messages from different sources is allowed in any
-order.
+Elvin notifications are routed from their source to required
+destinations by Elvin router(s).  Delivery has best-effort,
+at-most-once semantics.  Under no circumstances should an Elvin client
+receive duplicate notifications.  Notifications from a single source
+must be delivered in order, but interleaving of notifications from
+different sources is allowed in any order.
 
 The inter-router protocol is not specified by this document.  It is
-noted, however, that messages are forwarded between routers, and that
-such journeys are subject to filtering and greater latency than
-messages between clients of a single router process.
+noted, however, that notifications are forwarded between routers, and
+that such journeys are subject to filtering and greater latency than
+notifications between clients of a single router process.
 m4_dnl
 m4_dnl
 m4_dnl  TERMINOLOGY
@@ -116,22 +116,24 @@ m4_dnl
 m4_heading(1, TERMINOLOGY)
 
 This document discusses clients, client libraries, routers, producers,
-consumers, quenchers, messages, and subscriptions.
+consumers, quenchers, notifications and subscriptions.
 
 An Elvin router is a daemon process that runs on a single machine.  It
-acts as a distribution mechanism for Elvin messages. An Elvin client is a
-program that uses the Elvin router, via a client library for a
-particular programming language.  A client library implements the
-Elvin protocol and manages clients' connections to an Elvin router.
+acts as a distribution mechanism for Elvin notifications. An Elvin
+client is a program that uses the Elvin router, via a client library
+for a particular programming language.  A client library implements
+the Elvin protocol and manages clients' connections to an Elvin
+router.
 
 Clients can have three roles: producer, consumer or quencher.
-Producer clients create structured messages and send them, using a
-client library, to an Elvin router.  Consumer clients establish a
-session with an Elvin router and register a request for delivery of
-messages matching a subscription expression.  Quenching clients also
-establish a session with an Elvin router, and register a request for
-notification of changes to the router's subscription database that
-match criteria supplied by the quencher.
+Producer clients create notifications: a form of structured message,
+and send them, using a client library, to an Elvin router.  Consumer
+clients establish a session with an Elvin router and register a
+request for delivery of notifications matching a subscription
+expression.  Quenching clients also establish a session with an Elvin
+router, and register a request to be informed of changes to the
+router's subscription database that match criteria supplied by the
+quencher.
 
 Clients MAY take any number of the producer, consumer and quencher
 roles concurrently.
@@ -175,40 +177,38 @@ m4_heading(2, Abstract Communications Channel)
 
 Elvin clients communicate with an Elvin router using a communications
 channel.  A client process MAY open multiple simultaneous channels to
-a one or more Elvin routers, but they remain distinct logical
-entities.
+a one or more Elvin routers (including multiple channels to the same
+router).  Each such channel is a distinct logical entity.
 
 Concrete implementations of this abstract channel MUST provide
-ordered, reliable bi-directional delivery of messages of known size;
+ordered, reliable, bi-directional delivery of messages of known size;
 there is no requirement for streaming data.
 
 Once created, a channel remains available for exchange of messages
 until it is closed by either the Elvin client or router.
 m4_dnl
-m4_heading(3, Endpoints)
+m4_heading(3, Offers)
 
-Elvin router endpoints are stable, advertised entities to which
+Elvin router offers are stable, advertised entities to which
 clients can connect, creating a channel.
 
-Endpoints are described using a Uniform Resource Identifier (URI).
-The format of this URI is completely defined in [EURI].  An endpoint's
-URI specifies the concrete channel implementation offered by the
-endpoint, and appropriate addressing and any other information
-required to establish a channel.
+Offers are described using a Uniform Resource Identifier (URI).  The
+format of this URI is completely defined in [EURI].  An offer's URI
+specifies the concrete channel implementation offered, and appropriate
+addressing and any other information required to establish a channel.
+
 m4_dnl
 m4_heading(3, Messages)
 
-An abstract Elvin message consists of a sequence of attributes.  Each
-attribute is comprised of a name and a typed value.
+An abstract Elvin message consists of an ordered sequence of values.
+Each value has a known type, being one of a set of basic data types
+with a minimum required range of possible values, or an ordered
+sequence of such basic values of known size.
 
-An attribute name is a string value from a subset of the printable
-ASCII character set.  The maximum length of an attribute name is 1024
-bytes.  An attribute name may have any value comprised of legal
-characters; there are no reserved values.
+Messages are transferred over the abstract channel.  They MUST be
+delivered completely or not at all, and MUST be received in the order
+they were sent.
 
-Attribute values may be any of a signed 32 bit integer, signed 64 bit
-integer, 64 bit IEEE-954 floating point number, Unicode string, or an
-ordered sequence of arbitrary octets of known length.
 m4_dnl
 m4_dnl  Concrete Communcations Channel
 m4_dnl
@@ -260,6 +260,53 @@ and maintain that session as long as required.
 This section provides a high level overview of the protocol and its
 basic operations.  The details of each specific packet and its
 semantics is convered later, in the Protocol Details section.
+
+m4_heading(3, Notification)
+
+Elvin notifications are structured messages comprised of a set of
+attributes.  Each attribute consists of a name and a typed value.
+
+An attribute name is a string value from a subset of the printable
+ASCII character set.  The maximum length of an attribute name is 1024
+bytes.  An attribute name may have any value comprised of legal
+characters; there are no reserved values.
+
+m4_remark(Hard limit of 1024 ASCII chars in names?!?)
+
+Attribute values may be any of a signed 32 bit integer, signed 64 bit
+integer, 64 bit IEEE-954 floating point number, Unicode UTF-8 string,
+or an ordered sequence of arbitrary octets of known length.
+
+Notifications are constructed by Elvin clients, and forwarded to an
+Elvin router for dissemination.
+
+m4_heading(3, Subscription)
+
+An Elvin subscription is a UTF-8 string forming an expression in the
+Elvin Subscription Language.  
+
+The expression is registered with an Elvin router, which determines
+whether to deliver notifications to the subscriber by evaluating the
+expression in the context of the notification's attributes.  If the
+result of this evaluation is a logical true, a copy of the
+notification is queued for delivery.
+
+m4_heading(3, Quenching)
+
+An Elvin client can also register a set of attribute names with the
+Elvin router, and is subsequently kept informed of active subscription
+expressions that refer to any of the registered names.
+
+The router sends a quenching client branches of the compiled syntax
+tree created when it compiles the subscriptions during their
+registration.
+
+Quenching clients can use this information for any purpose; the
+facility was named after its use enabling a producer client to emit
+only those notifications for which it has been informed a subscription
+exists, thus \fIquenching\fP the flow of published information.
+
+m4_heading(2, `Protocol Interactions')
 m4_dnl
 m4_heading(3, Session-less Notification)
 
@@ -290,8 +337,7 @@ Reply, containing the agreed parameters of the connection.
 
 .KS
   +-------------+ ---ConnRqst--> +---------+
-  | Producer or |                |  Elvin  |  
-  |  Consumer   |                |  Router |   SUCCESSFUL CONNECTION 
+  |   Client    |                |  Router |   SUCCESSFUL CONNECTION 
   +-------------+ <---ConnRply-- +---------+
 .KE
 m4_dnl
@@ -313,7 +359,7 @@ the event with out having to do any additional filtering.
 .KS
    +----------+                   +--------+
    | Producer | ---NotifyEmit---> |        |
-   +----------+                   | Elvin  |
+   +----------+                   |        |
                                   | Router |       NOTIFICATION PATH
    +----------+                   |        |
    | Consumer | <--NotifyDeliver- |        |
@@ -374,7 +420,7 @@ for the registered request.
 
 .KS
    +----------+ --QnchAddRqst--> +--------+
-   | Producer |                  | Router |          ADDING A QUENCH
+   | Quencher |                  | Router |          ADDING A QUENCH
    +----------+ <---QnchRply---- +--------+
 .KE
 
@@ -395,7 +441,7 @@ subscription is removed.
    +----------+ <----SubRply------ |        |
                                    | Router |
    +----------+                    |        |
-   | Producer | <--SubAddNotify--- |        |
+   | Quencher | <--SubAddNotify--- |        |
    +----------+                    +--------+
                                        SUBSCRIPTION ADD NOTIFICATION
 .KE
@@ -436,8 +482,7 @@ The router MUST NOT refuse to disconnect a client (ie. using a Nack).
 
 .KS
   +-------------+ ---DisconnRqst--> +---------+
-  | Producer or |                   |  Elvin  |  
-  |  Consumer   |                   |  Router |       DISCONNECTION 
+  |   Client    |                   |  Router |       DISCONNECTION 
   +-------------+ <--DisconnRply--- +---------+
 .KE
 m4_dnl
@@ -1897,27 +1942,113 @@ struct SubDelNotify {
 m4_heading(2, Connection Options)
 
 Connection options control the behaviour of the router for the
-specified connection.  Set during connection, they may also be
-modified during the life of the connection using QosRqst.
+specified connection.  They may be set during connection establishment
+and modified during the life of the connection.
 
-A router implementation MUST support the following options.  It MAY
-support additional, implementation-specific options.
+At the point of connection, the client may submit a set of requested
+option values in its ConnRqst packet.  The router evaluates the
+client's request, and returns a set of proposed option values in the
+ConnRply packet.  Once a connection is established, the client can
+request a modification of the connection options by sending a QosRqst
+packet.  The router's response is delivered in a QosReply packet.
+
+The router evaluates received connection options requests, and for
+each option requested, the router MUST either
+
+a) Understand and accept the requested value.  The ConnRply/QosRply
+   options table MUST contain an entry for this option, and its value
+   MUST be that requested.  Or,
+
+b) Understand but reject the requested value.  The ConnRply/QosRply
+   options table MUST contain an entry for this option.  Its value
+   MUST NOT match the request, but MUST be that which the router is
+   prepared to provide.  Or,
+
+c) Not recognise the requested option.  The ConnRply/QosRply options
+   table MUST NOT contain an entry for this option.
+
+A router implementation MAY add entries to the ConnRply/QosRply
+options tables that do not reflect options requested by the client.
+
+A client implementation, upon receiving a ConnRply, SHOULD enable the
+client application to examine the offered option values.  The
+application SHOULD be able to reject the connection if the offered
+options are unsatisfactory.
+
+On receiving a QosRply, a client implementation SHOULD enable the
+client application to examine the revised options.  If they are not
+satisfactory, the client SHOULD be able to close the connection.
+
+A router implementation MUST support the following options.
 
 .KS
 .nf
   Name                        |  Type    |  Min   Default      Max
   ----------------------------+----------+-------------------------
-  attribute_max               |  int32   |    64     256     2**31
-  attribute_name_len_max      |  int32   |    64    2048     2**31
-  byte_size_max               |  int32   |    1K      1M     2**31  
-  lang                        |  string  |   (router defined)
-  notif_buffer_drop_policy    |  string  | { "oldest", "newest",
-                                             "largest", "fail" }
-  notif_buffer_min            |  int32   |    1       1K     2**31
-  opaque_len_max              |  int32   |    1K      1M     2**31
-  string_len_max              |  int32   |    1K      1M     2**31
-  sub_len_max                 |  int32   |    1K      2K     2**31
-  sub_max                     |  int32   |    1K      8K     2**31
+  Attribute.Max-Count         |  int32   |    64     256     2**31
+  Attribute.Name.Max-Length   |  int32   |    64    2048     2**31
+  Attribute.Opaque.Max-Length |  int32   |    1K      1M     2**31
+  Attribute.String.Max-Length |  int32   |    1K      1M     2**31
+  Packet.Max-Length           |  int32   |
+  Receive-Queue.Drop-Policy   |  string  |
+  Receive-Queue.High-Water    |  int32   |
+  Receive-Queue.Low-Water     |  int32   |
+  Receive-Queue.Max-Length    |  int32   |
+  Send-Queue.Drop-Policy      |  string  |
+  Send-Queue.High-Water       |  int32   |
+  Send-Queue.Low-Water        |  int32   |
+  Send-Queue.Max-Length       |  int32   |
+  Subscription.Max-Count      |  int32   |
+  Subscription.Max-Length     |  int32   |
+  Supported-Key-Schemes       |  string  |
+  ----------------------------+----------+-------------------------
+.fi
+.KE
+
+A router implementation SHOULD return the following options.
+
+.KS
+.nf
+  Name                        |  Type    |  Min   Default      Max
+  ----------------------------+----------+-------------------------
+  Vendor-Identification       |  string  |  
+  ----------------------------+----------+-------------------------
+.fi
+.KE
+
+A router implementation MAY support additional,
+implementation-specific options.  The name and semantics of a
+non-standard option SHOULD be registered with elvin.org to enable
+other implementations to adopt or avoid it.
+
+m4_heading(3, Compatibility)
+
+One popular Elvin implementation uses non-standard names for its
+connection options.  In the interests of compatibility,
+implementations MAY provide special handling for these options.
+
+.KS
+.nf
+  Standard Name               | Compatibility Name
+  ----------------------------+------------------------------------
+  Attribute.Max-Count         | router.attribute.max-count
+  Attribute.Name.Max-Length   | router.attribute.name.max-length
+  Attribute.Opaque.Max-Length | router.attribute.opaque.max-length
+  Attribute.String.Max-Length | router.attribute.string.max-length
+  Packet.Max-Length           | router.packet.max-length
+  Receive-Queue.Drop-Policy   | router.recv-queue.drop-policy
+  Receive-Queue.High-Water    | router.recv-queue.high-water
+  Receive-Queue.Low-Water     | router.recv-queue.low-water
+  Receive-Queue.Max-Length    | router.recv-queue.max-length
+  Send-Queue.Drop-Policy      | router.send-queue.drop-policy
+  Send-Queue.High-Water       | router.send-queue.high-water
+  Send-Queue.Low-Water        | router.send-queue.low-water
+  Send-Queue.Max-Length       | router.send-queue.max-length
+  Subscription.Max-Count      | router.subscription.max-count
+  Subscription.Max-Length     | router.subscription.max-length
+  Supported-Key-Schemes       | router.supported-keyschemes
+  Vendor-Identification       | router.vendor-identification
+  ----------------------------+------------------------------------
 .fi
 .KE
 
