@@ -523,7 +523,6 @@ that adds the value bottom (which represents "undecideable" or
  false    false  |  true      false     false     false
  ----------------+----------------------------------------
 .DE
-.\".ID 3
 Any subscription expression that refers to a name that is not present in the
 notification being evaluated results in bottom.
 
@@ -537,7 +536,6 @@ Notifications are delivered only if the result of subscription evaluation is
 true.
 
 It should be emphasized that:
-.DE
 .QP
 There is neither an explicit boolean type nor are there boolean
 constants for true or false.
@@ -2001,7 +1999,6 @@ A router implementation MUST support the following options.
   Send-Queue.Max-Length       |  int32
   Subscription.Max-Count      |  int32
   Subscription.Max-Length     |  int32
-  Supported-Key-Schemes       |  string
   ----------------------------+--------
 .fi
 .KE
@@ -2012,6 +2009,7 @@ A router implementation SHOULD return the following options.
 .nf
   Name                        |  Type
   ----------------------------+--------
+  Supported-Key-Schemes       |  string
   Vendor-Identification       |  string
   ----------------------------+--------
 .fi
@@ -2071,15 +2069,6 @@ em4_unnumbered(Send-Queue.Max-Length)
 em4_unnumbered(Subscription.Max-Count)
 em4_unnumbered(Subscription.Max-Length)
 em4_unnumbered(Supported-Key-Schemes)
-
-A router implementation SHOULD return the following options.
-
-.KS
-.nf
-  Name                        |  Type
-  ----------------------------+--------
-  Vendor-Identification       |  string
-
 
 m4_heading(3, Additional Options)
 
@@ -2199,6 +2188,23 @@ packet data, and the following framing header.  If the connection is
 lost mid-packet, it MUST be reported to the abstract protocol layer as
 a communications error.
 
+m4_heading(4, Protocol Options)
+
+An implementation of the TCP protocol SHOULD support a connection
+option to control the use of Nagle's algorithm (normally implemented
+as the TCP_NODELAY socket option).
+
+.KS
+.nf
+  Name                        |  Type
+  ----------------------------+--------
+  TCP.Send-Immediately        |  int32
+.fi
+.KE
+
+The value should be set to zero to enable Nagle's algorithm, and
+non-zero to request that it be disabled.
+
 m4_heading(4, Use of Proxies)
 
 In some environments, it is necessary to use proxy services to
@@ -2234,7 +2240,6 @@ example,
    HTTP/1.0 200 Connection established
 
 is a successful response.
-
 
 m4_heading(3, Security)
 
@@ -2530,6 +2535,7 @@ int32.
 .fi
 .KE
 .KS
+.nf
    pkt id        (enum)   packet type for NotifyEmit
    len n         (int32)  number of name-type-value triples in the 
                           notification. n MUST be greater than zero.
@@ -2567,7 +2573,7 @@ m4_dnl sub-syntax
 m4_dnl
 .bp
 m4_heading(1, APPENDIX A - ELVIN SUBSCRIPTION LANGUAGE)
-.LP
+.\"
 The Elvin subscription language is used by clients to select
 notifications for delivery.  This section documents the formal syntax
 for the language.
@@ -2701,7 +2707,6 @@ id-char			= %x21 / %x23-26 / %x28 / %x2a-2b /
 owsp			= 0*swsp
 wsp			= 1*swsp
 swsp			=  SP / HTAB / CR / LF
-
 
 .DE
 
