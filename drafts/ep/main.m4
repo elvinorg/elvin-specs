@@ -1983,25 +1983,25 @@ A router implementation MUST support the following options.
 
 .KS
 .nf
-  Name                        |  Type    |  Min   Default      Max
-  ----------------------------+----------+-------------------------
-  Attribute.Max-Count         |  int32   |    64     256     2**31
-  Attribute.Name.Max-Length   |  int32   |    64    2048     2**31
-  Attribute.Opaque.Max-Length |  int32   |    1K      1M     2**31
-  Attribute.String.Max-Length |  int32   |    1K      1M     2**31
-  Packet.Max-Length           |  int32   |
-  Receive-Queue.Drop-Policy   |  string  |
-  Receive-Queue.High-Water    |  int32   |
-  Receive-Queue.Low-Water     |  int32   |
-  Receive-Queue.Max-Length    |  int32   |
-  Send-Queue.Drop-Policy      |  string  |
-  Send-Queue.High-Water       |  int32   |
-  Send-Queue.Low-Water        |  int32   |
-  Send-Queue.Max-Length       |  int32   |
-  Subscription.Max-Count      |  int32   |
-  Subscription.Max-Length     |  int32   |
-  Supported-Key-Schemes       |  string  |
-  ----------------------------+----------+-------------------------
+  Name                        |  Type
+  ----------------------------+--------
+  Attribute.Max-Count         |  int32
+  Attribute.Name.Max-Length   |  int32
+  Attribute.Opaque.Max-Length |  int32
+  Attribute.String.Max-Length |  int32
+  Packet.Max-Length           |  int32
+  Receive-Queue.Drop-Policy   |  string
+  Receive-Queue.High-Water    |  int32
+  Receive-Queue.Low-Water     |  int32
+  Receive-Queue.Max-Length    |  int32
+  Send-Queue.Drop-Policy      |  string
+  Send-Queue.High-Water       |  int32
+  Send-Queue.Low-Water        |  int32
+  Send-Queue.Max-Length       |  int32
+  Subscription.Max-Count      |  int32
+  Subscription.Max-Length     |  int32
+  Supported-Key-Schemes       |  string
+  ----------------------------+--------
 .fi
 .KE
 
@@ -2009,12 +2009,78 @@ A router implementation SHOULD return the following options.
 
 .KS
 .nf
-  Name                        |  Type    |  Min   Default      Max
-  ----------------------------+----------+-------------------------
-  Vendor-Identification       |  string  |  
-  ----------------------------+----------+-------------------------
+  Name                        |  Type
+  ----------------------------+--------
+  Vendor-Identification       |  string
+  ----------------------------+--------
 .fi
 .KE
+
+m4_heading(3, Option Semantics)
+
+em4_unnumbered(Attribute.Max-Count)
+Maximum number of attributes in a notification.  The minumum value
+supported by an implementation SHOULD be at least 16.
+
+em4_unnumbered(Attribute.Name.Max-Length)
+Maximum length, in bytes, of an attribute name.  The minimum value
+supported by an implementation SHOULD be at least 64.
+
+Attribute.Opaque.Max-Length Maximum length, in bytes, for opaque
+values. The minimum value supported by an implementation SHOULD be at
+least 1024.
+
+em4_unnumbered(Attribute.String.Max-Length)
+Maximum length, in bytes, for opaque values.  Note that this value
+is not the number of characters: some characters may take up to 5
+bytes to respresent using the require UTF-8 encoding. The minimum
+value supported by an implementation SHOULD be at least 1024.
+
+em4_unnumbered(Packet.Max-Length)
+Maximum length, in bytes, of a marshalled packet.  The minimum value
+SHOULD be at least 1024.
+
+em4_unnumbered(Receive-Queue.Drop-Policy)
+A string property describing the desired behaviour of the packet queue
+if it exceeds the negotitated maximum size.  
+
+A packet queue implementation SHOULD distinguish between packets that,
+if discarded, would cause a protocol error, and those that can be
+discarded without losing state synchronisation between the client and
+the router: NotifyDeliver, SubAddNotify, SubModNotify, and
+SubDelNotify.
+
+A router implementation SHOULD support the following drop policy
+values:
+.I oldest
+.I newest
+.I largest
+.I none
+
+em4_unnumbered(Receive-Queue.High-Water)
+
+em4_unnumbered(Receive-Queue.Low-Water)
+em4_unnumbered(Receive-Queue.Max-Length)
+
+em4_unnumbered(Send-Queue.Drop-Policy)
+See the description of the receive queue policy policy.
+em4_unnumbered(Send-Queue.High-Water)
+em4_unnumbered(Send-Queue.Low-Water)
+em4_unnumbered(Send-Queue.Max-Length)
+em4_unnumbered(Subscription.Max-Count)
+em4_unnumbered(Subscription.Max-Length)
+em4_unnumbered(Supported-Key-Schemes)
+
+A router implementation SHOULD return the following options.
+
+.KS
+.nf
+  Name                        |  Type
+  ----------------------------+--------
+  Vendor-Identification       |  string
+
+
+m4_heading(3, Additional Options)
 
 A router implementation MAY support additional,
 implementation-specific options.  The name and semantics of a
