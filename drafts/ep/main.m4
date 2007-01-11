@@ -1990,12 +1990,12 @@ A router implementation MUST support the following options.
   Attribute.String.Max-Length |  int32
   Packet.Max-Length           |  int32
   Receive-Queue.Drop-Policy   |  string
-  Receive-Queue.High-Water    |  int32
-  Receive-Queue.Low-Water     |  int32
+m4_dnl  Receive-Queue.High-Water    |  int32
+m4_dnl  Receive-Queue.Low-Water     |  int32
   Receive-Queue.Max-Length    |  int32
   Send-Queue.Drop-Policy      |  string
-  Send-Queue.High-Water       |  int32
-  Send-Queue.Low-Water        |  int32
+m4_dnl  Send-Queue.High-Water       |  int32
+m4_dnl  Send-Queue.Low-Water        |  int32
   Send-Queue.Max-Length       |  int32
   Subscription.Max-Count      |  int32
   Subscription.Max-Length     |  int32
@@ -2018,6 +2018,7 @@ A router implementation SHOULD return the following options.
 m4_heading(3, Option Semantics)
 
 em4_unnumbered(Attribute.Max-Count)
+.\"
 Maximum number of attributes in a notification.  The minumum value
 supported by an implementation SHOULD be at least 16.
 
@@ -2030,18 +2031,23 @@ values. The minimum value supported by an implementation SHOULD be at
 least 1024.
 
 em4_unnumbered(Attribute.String.Max-Length)
+.\"
 Maximum length, in bytes, for opaque values.  Note that this value
 is not the number of characters: some characters may take up to 5
 bytes to respresent using the require UTF-8 encoding. The minimum
 value supported by an implementation SHOULD be at least 1024.
 
 em4_unnumbered(Packet.Max-Length)
+.\"
 Maximum length, in bytes, of a marshalled packet.  The minimum value
 SHOULD be at least 1024.
 
 em4_unnumbered(Receive-Queue.Drop-Policy)
-A string property describing the desired behaviour of the packet queue
-if it exceeds the negotitated maximum size.  
+.\"
+It is expected that most router implementations will maintain a queue
+of packets received from a client prior to processing them.  This
+property describes the desired behaviour of this packet queue if it
+exceeds the negotitated maximum size.
 
 A packet queue implementation SHOULD distinguish between packets that,
 if discarded, would cause a protocol error, and those that can be
@@ -2056,19 +2062,57 @@ values:
 .I largest
 .I none
 
-em4_unnumbered(Receive-Queue.High-Water)
+If a router implementation does not use a queue for received packets,
+it MUST accept any legal value for this property.
 
-em4_unnumbered(Receive-Queue.Low-Water)
+m4_dnl em4_unnumbered(Receive-Queue.High-Water)
+m4_dnl em4_unnumbered(Receive-Queue.Low-Water)
+m4_dnl
 em4_unnumbered(Receive-Queue.Max-Length)
+.\"
+This property sets a maximum size of the router's per-client incoming
+packet queue, in bytes.  If the queue exceeds this size, the router
+SHOULD drop one or more packets, according to the queue's drop policy.
+
+If a router implementation does not use a queue for received packets,
+it MUST accept any legal value for this property.
 
 em4_unnumbered(Send-Queue.Drop-Policy)
-See the description of the receive queue policy policy.
-em4_unnumbered(Send-Queue.High-Water)
-em4_unnumbered(Send-Queue.Low-Water)
+.\"
+It is expected that most router implementations will maintain, for
+each connected client, a queue of packets for delivery.  This property
+describes the desired behaviour of this packet queue if it exceeds the
+negotitated maximum size.
+
+See the description of the receive queue drop policy.
+
+m4_dnl em4_unnumbered(Send-Queue.High-Water)
+m4_dnl em4_unnumbered(Send-Queue.Low-Water)
 em4_unnumbered(Send-Queue.Max-Length)
+.\"
+See the description of the receive queue maximum length.
+
 em4_unnumbered(Subscription.Max-Count)
+.\"
+This numeric option specifies the maximum number of subscriptions that
+may be registered by a client.
+
 em4_unnumbered(Subscription.Max-Length)
+.\"
+This numeric option specifies the maximum allowed length, in bytes, of
+a subscription expression registered with the router.
+
 em4_unnumbered(Supported-Key-Schemes)
+.\"
+A router implementation may support various key schemes for the
+control of Elvin message delivery.  This string property contains the
+list of key schemes names, separated by the ASCII space character,
+supported by the router.
+
+Clients MAY request their required schemes, but regardless, a router
+implementation SHOULD always include the set of supported schemes in
+its ConnRply options table.
+
 
 m4_heading(3, Additional Options)
 
@@ -2093,12 +2137,12 @@ implementations MAY provide special handling for these options.
   Attribute.String.Max-Length | router.attribute.string.max-length
   Packet.Max-Length           | router.packet.max-length
   Receive-Queue.Drop-Policy   | router.recv-queue.drop-policy
-  Receive-Queue.High-Water    | router.recv-queue.high-water
-  Receive-Queue.Low-Water     | router.recv-queue.low-water
+m4_dnl  Receive-Queue.High-Water    | router.recv-queue.high-water
+m4_dnl  Receive-Queue.Low-Water     | router.recv-queue.low-water
   Receive-Queue.Max-Length    | router.recv-queue.max-length
   Send-Queue.Drop-Policy      | router.send-queue.drop-policy
-  Send-Queue.High-Water       | router.send-queue.high-water
-  Send-Queue.Low-Water        | router.send-queue.low-water
+m4_dnl  Send-Queue.High-Water       | router.send-queue.high-water
+m4_dnl  Send-Queue.Low-Water        | router.send-queue.low-water
   Send-Queue.Max-Length       | router.send-queue.max-length
   Subscription.Max-Count      | router.subscription.max-count
   Subscription.Max-Length     | router.subscription.max-length
