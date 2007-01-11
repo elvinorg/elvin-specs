@@ -1363,8 +1363,7 @@ the defined error values.
              | This might imply corruption of the connection or
              | an implementation error.
              |
-2000 - 2999  | An error has been detected in a request.  This is
-             | likely a programming error in the client application.
+2000 - 2999  | An error has been detected in a request.
              |
 3000 - 65535 | Reserved values.
 .fi
@@ -1413,8 +1412,10 @@ Receiving a reserved error code SHOULD be handled as a protocol error.
  2005  | QOS_LIMIT          | property, string | Request exceeds QoS limit
  2006  | IMPL_LIMIT         | None             | Request exceeds
        |                    |                  | implementation limit
+ 2007  | NOT_IMPL           | None             | Requested feature is
+       |                    |                  | not implemented by router
        |                    |                  | 
- 2007  |                    |                  | Reserved
+ 2008  |                    |                  | Reserved
  -2100 |                    |                  |
        |                    |                  | 
  2101  | PARSE_ERROR        | offset, int32    | Parse error at offset
