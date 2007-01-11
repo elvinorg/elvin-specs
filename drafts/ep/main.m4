@@ -24,6 +24,7 @@ Expires: aa bbb cccc                                         _d __m __yr
 .DS C
 __title
 __file
+.DE
 m4_dnl
 m4_dnl Header macros end an indent, so make sure we have one operating here
 .RS
