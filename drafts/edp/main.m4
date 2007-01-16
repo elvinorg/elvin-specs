@@ -1,82 +1,78 @@
-m4_dnl -*- nroff -*-
-m4_dnl ########################################################################
-m4_dnl
-m4_dnl              Elvin Router Discovery Protocol
-m4_dnl
-m4_dnl File:        $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/edp/main.m4,v $
-m4_dnl Version:     $RCSfile: main.m4,v $ $Revision: 1.9 $
-m4_dnl Copyright:   (C) 2000-2001, DSTC Pty Ltd.
-m4_dnl
-m4_dnl This specification may be reproduced or transmitted in any form or by
-m4_dnl any means, electronic or mechanical, including photocopying,
-m4_dnl recording, or by any information storage or retrieval system,
-m4_dnl providing that the content remains unaltered, and that such
-m4_dnl distribution is under the terms of this licence.
-m4_dnl 
-m4_dnl While every precaution has been taken in the preparation of this
-m4_dnl specification, DSTC Pty Ltd assumes no responsibility for errors or
-m4_dnl omissions, or for damages resulting from the use of the information
-m4_dnl herein.
-m4_dnl 
-m4_dnl DSTC Pty Ltd welcomes comments on this specification.  Please address
-m4_dnl any queries, comments or fixes (please include the name and version of
-m4_dnl the specification) to the address below:
-m4_dnl 
-m4_dnl     DSTC Pty Ltd
-m4_dnl     Level 7, General Purpose South
-m4_dnl     University of Queensland
-m4_dnl     St Lucia, 4072
-m4_dnl     Tel: +61 7 3365 4310
-m4_dnl     Fax: +61 7 3365 4311
-m4_dnl     Email: elvin@dstc.com
-m4_dnl 
-m4_dnl Elvin is a trademark of DSTC Pty Ltd.  All other trademarks and
-m4_dnl registered marks belong to their respective owners.
-m4_dnl ########################################################################*
-m4_dnl
-m4_dnl    internal section references
-m4_dnl
-m4_dnl
-m4_dnl    general macros for I-D formatting
-m4_dnl
+.\" -*- nroff -*-
+.\" ################################################################
+.\" COPYRIGHT_BEGIN
+.\"
+.\" Copyright (C) 2000-2007 Elvin.Org
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\"
+.\" * Redistributions of source code must retain the above
+.\"   copyright notice, this list of conditions and the following
+.\"   disclaimer.
+.\"
+.\" * Redistributions in binary form must reproduce the above
+.\"   copyright notice, this list of conditions and the following
+.\"   disclaimer in the documentation and/or other materials
+.\"   provided with the distribution.
+.\"
+.\" * Neither the name of the Elvin.Org nor the names
+.\"   of its contributors may be used to endorse or promote
+.\"   products derived from this software without specific prior
+.\"   written permission. 
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+.\" "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+.\" LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+.\" FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+.\" REGENTS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+.\" INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+.\" BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+.\" LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+.\" CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+.\" ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+.\" POSSIBILITY OF SUCH DAMAGE.
+.\"
+.\" COPYRIGHT_END
+.\" ################################################################
+.\"
+.\" General macros for I-D formatting
+.\"
+m4_define(__title, `Elvin Router Discovery Protocol')m4_dnl
 m4_include(macros.m4)m4_dnl
-m4_dnl
-m4_dnl
-.\" page length 10 inches
-.pl 10.0i
-.\" page offset 0 lines
+.\"
+.\"
+.pl 11.0i
 .po 0
-.\" line length (inches)
 .ll 7.2i
-.\" title length (inches)
 .lt 7.2i
 .nr LL 7.2i
 .nr LT 7.2i
-.ds LF Arnold, et al
+.nr PI 3n
+.ds LF Arnold, ed.
 .ds RF PUTFFHERE[Page %]
 .ds CF Expires in 6 months
 .ds LH Internet Draft
-.ds RH dd mmm yyyy
-.ds CH Elvin Router Discovery Protocol
-.\" hyphenation mode 0
+.ds RH __date
+.ds CH __title
 .hy 0
-.\" adjust left
 .ad l
-.\" indent 0
-.in 0
-Elvin Project                                                  D. Arnold
-Preliminary INTERNET-DRAFT                                       J. Boot
-                                                               T. Phelps
-Expires: aa bbb cccc                                           B. Segall
-                                                                    DSTC
-                                                             dd mmm yyyy
+Elvin.Org                                              D. Arnold, Editor
+Preliminary INTERNET-DRAFT                                  Mantara, Inc
 
-.ce
-Elvin Router Discovery Protocol
-.ce
-draft-arnold-elvin-discovery-prelim-01.txt
+Expires: aa bbb cccc                                         _d __m __yr
 
-m4_heading(1, Status of this Memo)
+.DS C
+__title
+__file
+.DE
+.\"
+.\" Header macros close an indent, so make sure we having one open
+.RS
+m4_heading(1, STATUS OF THIS MEMO)
 
 This document is an Internet-Draft and is NOT offered in accordance
 with Section 10 of RFC2026, and the author does not provide the IETF
@@ -96,9 +92,9 @@ http://www.ietf.org/1id-abstracts.html
 
 The list of Internet-Draft Shadow Directories can be accessed at
 http://www.ietf.org/shadow.html
-m4_dnl
-m4_dnl
-m4_heading(1, Abstract)
+.\"
+.\"
+m4_heading(1, ABSTRACT)
 
 This document describes a mechanism for automatic discovery of Elvin
 routers by Elvin clients.
@@ -113,35 +109,45 @@ variation of a common problem.  The Elvin Router Discovery Protocol
 provides a means of locating a suitable point of attachment to an
 Elvin router that does not require external infrastructure support, in
 contrast to alternative protocols such as SLP and DHCP.
-m4_dnl
-m4_dnl
-m4_heading(1, Terminology)
+.\"
+.\"
+.\" TERMINOLOGY
+.\"
+.\" Terminology for both Elvin and the RFC series
+.\"
+m4_heading(1, TERMINOLOGY)
 
 This document discusses Elvin clients, client libraries, and routers.
 
-An Elvin router (or server) is a daemon process that runs on a single
-machine.  It acts as a distribution mechanism for Elvin messages. A
+An Elvin router is a daemon process that runs on a single machine.  It
+acts as a distribution mechanism for Elvin notifications. An Elvin
 client is a program that uses the Elvin router, via a client library
 for a particular programming language.  A client library implements
 the Elvin protocol and manages clients' connections to an Elvin
 router.
 
 Further detail of these entities and their roles is provided in [EP].
-m4_dnl
-m4_dnl
+
+Within this document, the term "router" should be interpreted to mean
+an Elvin router.  Any reference to an IP router will be explicitly
+identified as such.
+.\"
+.\"
 m4_heading(2, Notation Conventions)
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
 "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
 document are to be interpreted as described in [RFC2119].
-m4_dnl
-m4_dnl
-m4_heading(1, Introduction)
+.\"
+.\"
+.\" INTRODUCTION
+.\"
+m4_heading(1, INTRODUCTION)
 
 Elvin client programs require a connection to an Elvin router in order
-to send and receive messages.  Locating a suitable router requires
-some means of discovering what routers are available and communicating
-this to clients as they execute.
+to send and receive messages.  Locating a suitable Elvin router
+requires some means of discovering what Elvin routers are available
+and communicating this to clients as they execute.
 
 This problem is shared by many other systems, and common mechanisms
 have been implemented to resolve it in various ways suited to various
@@ -161,11 +167,18 @@ The Elvin Router Discovery Protocol (ERDP) is an extension of the base
 Elvin Protocol [EP].  It is OPTIONAL for Elvin clients, and
 RECOMMENDED for Elvin router implementations.
 
+The deployment of this protocol predates the development of DNS-SD
+[DNSSD], a general purpose service discovery protocol that can be
+deployed in conjunction with other protocols to provide
+infrastructure-less service discovery.  DNS-SD is available as Apple's
+Bonjour [BONJOUR], Avahi [AVAHI] and elsewhere.  ERDP is less general
+than DNS-SD, but also simpler to implement.
+
 Interactions between ERDP and the Elvin clustering protocol are not
 discussed in this specification, but are included in [ERCP].
-m4_dnl
-m4_dnl
-m4_heading(1, Protocol)
+.\"
+.\"
+m4_heading(1, PROTOCOL)
 
 The basic principle of the discovery protocol is that clients solicit
 advertisements from routers, and routers respond, advertising their
@@ -209,7 +222,7 @@ m4_changequote({,})m4_dnl
   +-------------+                                         WITHDRAWAL
 .KE
 m4_changequote(`,')m4_dnl
-m4_dnl
+.\"
 m4_heading(2, Selecting Router URI)
 
 Client libraries can expose the advertised URI to client applications,
@@ -220,16 +233,15 @@ But these properties pertain only to the specific endpoint, not the
 router.  Advertisement packets contain two properties of the router
 itself used by the client to select a URI: a scope name and a default
 flag.
-m4_dnl
+.\"
 m4_heading(3, Scope Names)
 
 Scope names provide a means of selecting specifically provisioned
 Elvin routers without knowledge of their location or identity.
 
 A router MUST advertise a ``scope name''.  A scope name is a UTF-8
-encoded character string.  It MUST NOT contain the colon character
-(UTF-8 0000 003a hexadecimal, from the US-ASCII repertoire).  Scope
-names MAY be zero-length.
+encoded character string.  It MUST NOT contain the Unicode colon
+(U+003a). Scope names MAY be zero-length.
 
 A client configured with an Elvin scope name MUST NOT connect to an
 endpoint of a discovered router not advertising itself as a provider
@@ -243,7 +255,7 @@ Note that while there are no explicit semantics associated with a
 scope name in the discovery protocol, the Elvin Router Clustering
 Protocol requires that all routers in a cluster provide the same named
 scope [ERCP].
-m4_dnl
+.\"
 m4_heading(3, Default Routers)
 
 In addition to the scope name, a router MAY advertise itself as a
@@ -254,7 +266,7 @@ without the ``default'' flag set.
 This mechanism is the simplest means for a client to find its local
 router.  The expanding search will search in an increasing radius from
 the client's network location, and return the discovered routers URI.
-m4_dnl
+.\"
 m4_heading(2, Abstract Protocol Definitions)
 
 The discovery protocol is specified at two levels: an abstract
@@ -494,10 +506,10 @@ be set to the highest value sent in a SvrAdvt during the lifetime of
 the router process.  This ensures that the withdrawal notice reaches
 all passive discovery clients that might have a cached copy of the
 router's advertisement.
-m4_dnl
-m4_dnl  UDP/XDR implementation
-m4_dnl
-m4_heading(1, Protocol Implementation)
+.\"
+.\"  UDP/XDR implementation
+.\"
+m4_heading(1, PROTOCOL IMPLEMENTATION)
 
 The router discovery protocol can be implemented using different
 lower-layer protocols.  These concrete protocol implementations map
@@ -598,7 +610,7 @@ defined in [RFC1832].
 .KE
 m4_heading(2, Use of IPv6)
 
-The protocol mapping to IPv6 is incomplete.
+m4_remark(The protocol mapping to IPv6 is incomplete)
 
 For IPv6 multicast, the client MUST use the following table to
 translate locality values to multicast scopes.
@@ -615,7 +627,7 @@ translate locality values to multicast scopes.
 .fi
 .KE
 
-m4_heading(1, Security Considerations)
+m4_heading(1, SECURITY CONSIDERATIONS)
 
 There are several possible attacks against the abstract discovery
 protocol.  Additional weaknesses might be introduced by a concrete
@@ -668,7 +680,7 @@ reduce the ability of an attacker to inject the false packets required
 for the above attacks.
 
 
-m4_heading(1, IANA Considerations)
+m4_heading(1, IANA CONSIDERATIONS)
 
 The abstract protocol requires no support from the IANA registry.
 
@@ -677,11 +689,23 @@ address.  An official address allocation is being pursued.  The UDP
 port number used is officially allocated for Elvin by the IANA.
 
 .bp
-m4_heading(1, References)
+m4_heading(1, REFERENCES)
+
+.IP [AVAHI] 12
+m4_remark(needs reference)
+
+.IP [BONJOUR] 12
+m4_remark(needs reference)
+
+.IP [DNSSD] 12
+S. Cheshire, M. Krochmal,
+"DNS-Based Service Discovery",
+Internet Draft, draft-cheshire-dnsext-dns-sd-04.txt,
+Work in progress
 
 .IP [EP] 12
-D. Arnold, J. Boot, T. Phelps, B. Segall,
-"Elvin Client Protocol",
+D. Arnold, editor,
+"Elvin Client Protocol 4.0",
 Work in progress
 
 .IP [ERCP] 12
@@ -740,34 +764,25 @@ IEEE,
 1990.
 
 .KS
-m4_heading(1, Contact)
+m4_heading(1, CONTACT)
 
-Author's Address
+Author's Addresses
 
 .nf
 David Arnold
 Julian Boot
+Ian Lister
 Ted Phelps
 Bill Segall
 
-Distributed Systems Technology Centre
-Level7, General Purpose South
-Staff House Road
-University of Queensland
-St Lucia QLD 4072
-Australia
-
-Phone:  +617 3365 4310
-Fax:    +617 3365 4311
-Email:  elvin@dstc.com
+Email: specs@elvin.org
 .fi
 .KE
 
 .KS
-m4_heading(1, Full Copyright Statement)
+m4_heading(1, FULL COPYRIGHT STATEMENT)
 
-Copyright (C) 2000-yyyy DSTC Pty Ltd, Brisbane, Australia.
-
+Copyright (C) 2000-__yr Elvin.Org
 All Rights Reserved.
 
 This specification may be reproduced or transmitted in any form or by
@@ -777,26 +792,17 @@ providing that the content remains unaltered, and that such
 distribution is under the terms of this licence.
 
 While every precaution has been taken in the preparation of this
-specification, DSTC Pty Ltd assumes no responsibility for errors or
+specification, Elvin.Org assumes no responsibility for errors or
 omissions, or for damages resulting from the use of the information
 herein.
 
-DSTC Pty Ltd welcomes comments on this specification.  Please address
+Elvin.Org welcomes comments on this specification.  Please address
 any queries, comments or fixes (please include the name and version of
 the specification) to the address below:
 
 .nf
-    DSTC Pty Ltd
-    Level 7, General Purpose South
-    University of Queensland
-    St Lucia, 4072
-    Tel: +61 7 3365 4310
-    Fax: +61 7 3365 4311
-    Email: elvin@dstc.com
+    Email: specs@elvin.org
 .fi
-
-Elvin is a trademark of DSTC Pty Ltd.  All other trademarks and
-registered marks belong to their respective owners.
 .KE
-m4_dnl
-m4_dnl ########################################################################
+.\"
+.\" ########################################################################

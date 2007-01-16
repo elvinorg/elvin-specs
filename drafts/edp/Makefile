@@ -1,47 +1,65 @@
 ################################################################
-# Copyright (C) DSTC Pty Ltd (ACN 052 372 577) 1998-2001.
-# All Rights Reserved.
+# COPYRIGHT_BEGIN
 #
-# The software contained on this media is the property of the
-# DSTC Pty Ltd.  Use of this software is strictly in accordance
-# with the license agreement in the accompanying LICENSE.DOC file.
-# If your distribution of this software does not contain a
-# LICENSE.DOC file then you have no rights to use this software
-# in any manner and should contact DSTC at the address below
-# to determine an appropriate licensing arrangement.
-# 
-#      DSTC Pty Ltd
-#      Level 7, Gehrmann Labs
-#      University of Queensland
-#      St Lucia, 4072
-#      Australia
-#      Tel: +61 7 3365 4310
-#      Fax: +61 7 3365 4311
-#      Email: enquiries@dstc.edu.au
-# 
-# This software is being provided "AS IS" without warranty of
-# any kind.  In no event shall DSTC Pty Ltd be liable for
-# damage of any kind arising out of or in connection with
-# the use or performance of this software.
+# Copyright (C) 2000-2007 Elvin.Org
+# All rights reserved.
 #
-# Project:  Elvin
-# File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/edp/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.6 $
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
 #
+# * Redistributions of source code must retain the above
+#   copyright notice, this list of conditions and the following
+#   disclaimer.
+#
+# * Redistributions in binary form must reproduce the above
+#   copyright notice, this list of conditions and the following
+#   disclaimer in the documentation and/or other materials
+#   provided with the distribution.
+#
+# * Neither the name of the Elvin.Org nor the names
+#   of its contributors may be used to endorse or promote
+#   products derived from this software without specific prior
+#   written permission. 
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# REGENTS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+# COPYRIGHT_END
 ################################################################
 
-.PHONY: all macros outline
+.PHONY: all outline publish
 
-#  create date string
-dd=$(shell date | cut -b9-10)
-mmm=$(shell date | cut -b5-7)
-yyyy=$(shell date +%Y)
-exp=$(shell date -d "6 months" "+%d %b %Y")
-
-FILENAME := draft-arnold-elvin-discovery
-VERSION := prelim-01
+FILENAME := draft-elvin-router-discovery
+VERSION := 00
 PUBLISHED := $(FILENAME)-$(VERSION).txt
 
+# Get current date
+DATE := $(shell date +"%B %Y")
+YEAR := $(shell date +"%Y")
+MTH := $(shell date +"%b")
+DAY := $(shell date +"%e")
+
+# Calulate expiry date 6 months in future
+EXP=$(shell date -d "6 months" "+%d %b %Y")
+
+# Set M4 macros for date substitution in the document
+M4FLAGS := \
+	-D__file="$(PUBLISHED)" \
+	-D__yr="$(YEAR)" \
+	-D__date="$(DATE)" \
+	-D__m="$(MTH)" \
+	-D_d="$(DAY)"
 
 all: main.txt
 
@@ -52,11 +70,14 @@ outline.txt: main.ms
 
 main.txt: main.ms
 
-main.ms: *.m4 Makefile
-	m4 -P main.m4 > $@
+main.ms: main.m4 Makefile
+	m4 -P -I ../ $(M4FLAGS) $< > $@
+
+ps: main.txt
+	a2ps -m main.txt --center-title="Elvin Router Discovery Protocol" -o main.ps
 
 clean:
-	rm -f main.txt main.ms
+	rm -f main.txt main.ms main.ps
 
 publish: $(PUBLISHED)
 
@@ -66,7 +87,8 @@ $(PUBLISHED): main.txt
 ################################################################
 
 %.txt : %.ms
-	nroff -ms $< | ./fix.pl | sed -e 's/_//g' -e 's/.//g' -e 's/dd mmm/${dd} ${mmm}/g' -e 's/yyyy/${yyyy}/g' -e 's/aa bbb cccc/${exp}/g' > $@
+#	nroff -ms $< | ./fix.pl | sed -e 's/_//g' -e 's/.//g' -e 's/dd mmm/${dd} ${mmm}/g' -e 's/yyyy/${yyyy}/g' -e 's/aa bbb cccc/${exp}/g' > $@
+	nroff -c -ms $< | ./fix.pl | sed -e 's/_//g' -e 's/.//g'  > $@
 
 %.ms : %.m4
 	m4 -P $< > $@
