@@ -58,9 +58,10 @@ architecture, and defines an access protocol in terms of operational
 semantics, an abstract protocol, and a default concrete implementation
 of the abstract protocol.
 m4_dnl
+m4_dnl FIXME: tdb (probably last ;-)
+m4_dnl
 m4_dnl .ti 0
 m4_dnl TABLE OF CONTENTS
-m4_dnl (tdb) (probably last ;-)
 m4_dnl
 m4_dnl .bp
 m4_dnl
@@ -2806,7 +2807,7 @@ IEEE,
 .KS
 m4_heading(1, CONTACT)
 
-Author's Address
+Author's Addresses
 
 .nf
 David Arnold
