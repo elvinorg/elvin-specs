@@ -811,10 +811,10 @@ forms when they suit.
 The string predicates are:
 .IP "contains(attr, stringconst+)" 4
 Returns true if any stringconst is a substring of the value of attr.
-.IP "begins_with(attr, stringconst+)" 4
+.IP "begins-with(attr, stringconst+)" 4
 Returns true if any stringconst is an initial substring (prefix) of
 the value of attr.
-.IP "ends_with(attr, stringconst+)" 4
+.IP "ends-with(attr, stringconst+)" 4
 Returns true if any stringconst is a final substring (suffix) of the
 value of attr.
 .IP "wildcard(attr, stringconst+)" 4
@@ -828,9 +828,9 @@ specified by the stringconst. Need pointer to (E?)RE semantics.
 In the definitions above, the empty (zero-length) substring is
 defined to be a substring of every string, and any string is a
 substring of itself. Thus
-.B begins_with 
+.B begins-with 
 and
-.B ends_with 
+.B ends-with 
 imply
 .B contains, 
 and 
@@ -892,7 +892,7 @@ strings prior to comparison:
 .IP "decompose(string)" 4
 Perform canonical decomposition of the supplied string and return the
 resulting string value.
-.IP "decompose_compat(string)" 4
+.IP "decompose-compat(string)" 4
 Perform compatible (and canonical) decomposition of the supplied string
 and return the resulting string value.
 m4_dnl
