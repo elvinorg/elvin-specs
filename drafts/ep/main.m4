@@ -327,7 +327,7 @@ m4_dnl
 m4_heading(3, Establishing a Session)
 
 A Elvin client-router session is a bi-directional communciations link.
-It is used by the client to set delivery criteria at the router. The
+It is used by the client to request deliveries from the router.  The
 router uses the same link to acknowledge client changes and to
 asynchronously deliver the messages selected by the client.
 
@@ -447,6 +447,22 @@ subscription is removed.
    +----------+                    +--------+
                                        SUBSCRIPTION ADD NOTIFICATION
 .KE
+m4_dnl
+m4_heading(3, Renegotiating Connection Options)
+
+A client can request alterations to the session's properties at any
+time during the life of the session.
+
+When a client requests the the connection options be renegotiated, the
+router will respond with either a QoS Reply or Negative
+Acknowledgement.
+
+.KS
+  +-------------+ ---QosRqst---> +---------+
+  |   Client    |                |  Router |   OPTION RENEGOTIATION
+  +-------------+ <---QosRply--- +---------+
+.KE
+
 m4_dnl
 m4_heading(3, Lost Packets)
 
@@ -1651,6 +1667,35 @@ All notifications and quench notifications delivered within the
 session after the SecRply MUST match the changes acknowledged by the
 SecRply.
 
+m4_heading(3, QoS Request)
+
+Sent by clients to the router to request renegotiation of the options
+for the current session.  Legal option names, their semantics, and
+allowed range of values are defined later in the Connection Options
+section.
+
+The router MAY respond with a Nack if renegotiation is not supported.
+Otherwise, it MUST respond with a QosRply specifying the active
+option values following its processing of the request.
+
+m4_pre(
+struct QosRqst {
+    id32 xid;
+    NameValue options[];
+};)m4_dnl
+
+m4_heading(3, QoS Reply)
+
+Sent by the router to inform a client of the active connection options
+after processing a QosRqst.  For a description of the contents of the
+returned options table, see the Connection Options section below.
+
+m4_pre(
+struct QosRply {
+    id32 xid;
+    NameValue options[];
+};)m4_dnl
+
 m4_heading(3, Drop Warning)
 
 Sent by routers to clients to indicate that notification packets have
@@ -2114,7 +2159,6 @@ supported by the router.
 Clients MAY request their required schemes, but regardless, a router
 implementation SHOULD always include the set of supported schemes in
 its ConnRply options table.
-
 
 m4_heading(3, Additional Options)
 
