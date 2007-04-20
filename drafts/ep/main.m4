@@ -840,6 +840,16 @@ and
 There are no predicates for string comparison, i.e. testing whether one
 string "is less than" another string.
 m4_dnl
+m4_heading(3, Size Function)
+.\"
+.IP size(attribute) 4
+Where \fIattribute\fP is the name of a string or opaque value, this
+function returns its size in bytes.  For all other value types, the
+enclosing expression is set to bottom.
+
+Note that the size in bytes of a UTF-8 string value does not
+necessarily reflect the number of characters.
+m4_dnl
 m4_heading(3, Implications of International Characters)
 
 Unicode characters introduce some complexity to the string
