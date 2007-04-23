@@ -41,7 +41,7 @@
 .PHONY: all outline ps publish
 
 FILENAME := draft-elvin-client-40
-VERSION := 06
+VERSION := 07
 PUBLISHED := $(FILENAME)-$(VERSION).txt
 
 # Get current date
