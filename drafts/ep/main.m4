@@ -2576,40 +2576,41 @@ m4_heading(4, Subscription Abstract Syntax Trees)
 
 m4_pre(
 `enum {
-    name_tc   = 0,
-    int32_tc  = 1,
-    int64_tc  = 2,
-    real64_tc = 3,
-    string_tc = 4,
-    regular_expression_tc = 5,
+    empty_tc  = 0,
+
+    name_tc   = 1,
+    int32_tc  = 2,
+    int64_tc  = 3,
+    real64_tc = 4,
+    string_tc = 5,
 
     equals_tc = 8,
     not_equals_tc = 9,
     less_than_tc = 10,
     less_than_equals_tc = 11,
     greater_than_tc = 12,
-    greater_than_equals = 13,
+    greater_than_equals_tc = 13,
 
     or_tc = 16,
     xor_tc = 17,
     and_tc = 18,
     not_tc = 19,
 
-    unary_plus_tc = 24,
-    unary_minus_tc = 25,
-    multiply_tc = 26,
-    divide_tc = 27,
-    modulo_tc = 28,
-    add_tc = 29,
-    subtract_tc = 30,
+    unary_plus_tc = 20,
+    unary_minus_tc = 21,
+    multiply_tc = 22,
+    divide_tc = 23,
+    modulo_tc = 24,
+    add_tc = 25,
+    subtract_tc = 26,
 
-    shift_left_tc = 32,
-    shift_right_tc = 33,
-    logical_shift_right_tc = 34,
-    bit_and_tc = 35,
-    bit_xor_tc = 36,
-    bit_or_tc = 37,
-    bit_negate_tc = 38,
+    shift_left_tc = 27,
+    shift_right_tc = 28,
+    logical_shift_right_tc = 29,
+    bit_and_tc = 30,
+    bit_xor_tc = 31,
+    bit_or_tc = 32,
+    bit_negate_tc = 33,
 
     is_int32_tc = 40,
     is_int64_tc = 41,
@@ -2624,9 +2625,13 @@ m4_pre(
     wildcard_tc = 51,
     regex_tc = 52,
 
-    exists_tc = 56,
-    equals_tc = 57,
-    size_tc = 58
+    fold_case_tc = 56,
+    decompose_tc = 57,
+    decompose_compat_tc = 58,
+
+    require_tc = 64,
+    equals_tc = 65,
+    size_tc = 66
 } subast_typecode;')
 
 m4_heading(4, Packet Encoding Example)
