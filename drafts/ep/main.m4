@@ -2498,11 +2498,11 @@ enumeration:
 
 m4_pre(
 `enum {
-    int32_tc  = 1,
-    int64_tc  = 2,
-    real64_tc = 3,
-    string_tc = 4,
-    opaque_tc = 5
+    xdr_int32  = 1,
+    xdr_int64  = 2,
+    xdr_real64 = 3,
+    xdr_string = 4,
+    xdr_opaque = 5
 } value_typecode;')
 
 Note that the above enumeration does not include all of the datatypes
@@ -2522,7 +2522,7 @@ code:
 .KE
 
 For illustration, if an int64 of value 1024L is preceded by its type
-for marshalling, it would be sent as four bytes for the type id of 1
+for marshalling, it would be sent as four bytes for the type id of 2
 and eight bytes for the value.
 
 .KS
@@ -2542,7 +2542,7 @@ objects are encoded by prepending the length of the array as an int32
 - the items are in the array are then each encoded in sequence
 starting at item 0.  The 32bit length places a theoretical limit of
 (2**32) - 1 items per list.  In practice, implementations are expected
-to have much lower maximums for the number of items in a list
+to have much lower maxima for the number of items in a list
 transmitted per packet.  For example, an implemenation may restrict
 the number of fields in a notification to 1024.  Such limitations
 SHOULD be documented for each implemenation.  Service offers and
@@ -2612,26 +2612,26 @@ m4_pre(
     bit_or_tc = 32,
     bit_negate_tc = 33,
 
-    is_int32_tc = 40,
-    is_int64_tc = 41,
-    is_real64_tc = 42,
-    is_string_tc = 43,
-    is_opaque_tc = 44,
-    is_nan_tc = 45,
+    func_int32_tc = 40,
+    func_int64_tc = 41,
+    func_real64_tc = 42,
+    func_string_tc = 43,
+    func_opaque_tc = 44,
+    func_nan_tc = 45,
 
-    begins_with_tc = 48,
-    contains_tc = 49,
-    ends_with_tc = 50,
-    wildcard_tc = 51,
-    regex_tc = 52,
+    func_begins_with_tc = 48,
+    func_contains_tc = 49,
+    func_ends_with_tc = 50,
+    func_wildcard_tc = 51,
+    func_regex_tc = 52,
 
-    fold_case_tc = 56,
-    decompose_tc = 57,
-    decompose_compat_tc = 58,
+    func_fold_case_tc = 56,
+    func_decompose_tc = 57,
+    func_decompose_compat_tc = 58,
 
-    require_tc = 64,
-    equals_tc = 65,
-    size_tc = 66
+    func_require_tc = 64,
+    func_equals_tc = 65,
+    func_size_tc = 66
 } subast_typecode;')
 
 m4_heading(4, Packet Encoding Example)
