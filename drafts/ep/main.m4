@@ -1137,6 +1137,8 @@ Subscription Reply            SubRply         S -> C     B
 Dropped Packet Warning        DropWarn        S -> C     B
 Test Connection               TestConn        C -> S     B
 Confirm Connection            ConfConn        S -> C     B
+QoS Request                   QosRqst         C -> S     C
+QoS Reply                     QosRply         S -> C     C
 Quench Add Request            QnchAddRqst     C -> S     C
 Quench Modify Request         QnchModRqst     C -> S     C
 Quench Delete Request         QnchDelRqst     C -> S     C
@@ -2432,7 +2434,7 @@ m4_pre(
     SubDelRqst     = 60,   SubRply        = 61,
     DropWarn       = 62,   TestConn       = 63,
     ConfConn       = 64,
-
+    QosRqst        = 70,   QosRply        = 71,
     QnchAddRqst    = 80,   QnchModRqst    = 81,
     QnchDelRqst    = 82,   QnchRply       = 83,
     SubAddNotify   = 84,   SubModNotify   = 85,
