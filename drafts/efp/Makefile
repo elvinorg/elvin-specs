@@ -26,19 +26,34 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/efp/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.2 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.3 $
 #
 ################################################################
 
-.PHONY: all macros outline
+.PHONY: all outline ps publish
 
-SOURCE_FILES:= $(wildcard *.ms)
-
-FILENAME := draft-arnold-elvin-federation
-VERSION := prelim-00
+FILENAME := draft-elvin-federation-10
+VERSION := 00
 PUBLISHED := $(FILENAME)-$(VERSION).txt
 
-all: main.txt
+# Get current date
+DATE := $(shell date +"%B %Y")
+YEAR := $(shell date +"%Y")
+MTH := $(shell date +"%b")
+DAY := $(shell date +"%e")
+
+# Calculate expiry date 6 months in future
+EXP=$(shell date -d "6 months" +"%d %b %Y")
+
+# Set M4 macros for date substitution in the document
+M4FLAGS := \
+	-D__file="$(PUBLISHED)" \
+	-D__yr="$(YEAR)" \
+	-D__date="$(DATE)" \
+	-D__m="$(MTH)" \
+	-D_d="$(DAY)"
+
+all: ps
 
 outline: outline.txt
 
@@ -47,11 +62,14 @@ outline.txt: main.tmp
 
 main.txt: main.tmp
 
-main.tmp: efp.ms
-	m4 -P $< > $@
+main.tmp: efp.ms Makefile
+	m4 -P -I ../ $(M4FLAGS) $< > $@
+
+ps: main.txt
+	a2ps -m main.txt --center-title="Elvin Federation Protocol" -o main.ps
 
 clean:
-	rm -f main.txt main.tmp
+	rm -f main.txt main.tmp main.ps
 
 publish: $(PUBLISHED)
 
@@ -61,7 +79,7 @@ $(PUBLISHED): main.txt
 ################################################################
 
 %.txt : %.tmp
-	nroff -ms $< | ./fix.pl | sed 's/_//g'  > $@
+	nroff -ms $< | ../fix.pl | sed 's/_//g'  > $@
 
 %.tmp : %.ms
 	m4 -P $< > $@
