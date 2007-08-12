@@ -26,7 +26,7 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/efp/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.3 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.4 $
 #
 ################################################################
 
@@ -79,7 +79,7 @@ $(PUBLISHED): main.txt
 ################################################################
 
 %.txt : %.tmp
-	nroff -ms $< | ../fix.pl | sed 's/_//g'  > $@
+	nroff -c -ms $< | ../fix.pl | sed -e 's/_//g' -e 's/.//g' > $@
 
 %.tmp : %.ms
 	m4 -P $< > $@
