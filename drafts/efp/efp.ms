@@ -1,29 +1,72 @@
-m4_include(macros.m4)
-.pl 10.0i
+.\" -*- nroff -*-
+.\" ################################################################
+.\" COPYRIGHT_BEGIN
+.\"
+.\" Copyright (C) 2000-2007 Elvin.Org
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\"
+.\" * Redistributions of source code must retain the above
+.\"   copyright notice, this list of conditions and the following
+.\"   disclaimer.
+.\"
+.\" * Redistributions in binary form must reproduce the above
+.\"   copyright notice, this list of conditions and the following
+.\"   disclaimer in the documentation and/or other materials
+.\"   provided with the distribution.
+.\"
+.\" * Neither the name of the Elvin.Org nor the names
+.\"   of its contributors may be used to endorse or promote
+.\"   products derived from this software without specific prior
+.\"   written permission. 
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+.\" "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+.\" LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+.\" FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+.\" REGENTS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+.\" INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+.\" BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+.\" LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+.\" CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+.\" ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+.\" POSSIBILITY OF SUCH DAMAGE.
+.\"
+.\" COPYRIGHT_END
+.\" ################################################################
+m4_define(__title,`Elvin Federation Protocol 1.0')m4_dnl
+m4_include(macros.m4)m4_dnl
+.pl 11.0i
 .po 0
 .ll 7.2i
 .lt 7.2i
 .nr LL 7.2i
 .nr LT 7.2i
-.ds LF Arnold
+.nr PI 3n
+.ds LF Arnold and Lister
 .ds RF PUTFFHERE[Page %]
 .ds CF Expires in 6 months
 .ds LH Internet Draft
-.ds RH _date_
-.ds CH Elvin
+.ds RH __date
+.ds CH __title
 .hy 0
 .ad l
-.in 0
-Elvin Project                                                  D. Arnold
+Elvin.Org                                                      D. Arnold
 Preliminary INTERNET-DRAFT                                     I. Lister
-                                                        Mantara Software
-Expires: aa bbb cccc                                         dd mmm yyyy
+                                                            Mantara, Inc
+Expires: aa bbb cccc                                         _d __m __yr
 
-.ce
-Elvin Router Federation Protocol
-.ce
-draft-arnold-elvin-federation-prelim-00.txt
-
+.DS C
+__title
+__file
+.DE
+m4_dnl Header macros end an indent, so start one here
+.RS
+m4_dnl
 m4_heading(1, Status of this Memo)
 
 This document is an Internet-Draft and is NOT offered in accordance
@@ -48,35 +91,35 @@ http://www.ietf.org/shadow.html
 m4_heading(1, Abstract)
 
 This document describes a protocol for forwarding message traffic
-between Elvin servers.  It provides administrative filtering of both
+between Elvin routers.  It provides administrative filtering of both
 incoming and outgoing traffic.
 
-It has no effect on the protocol used for Elvin client to server
-communications, or between server nodes in an Elvin cluster.
+It has no effect on the protocol used for Elvin client to router
+communications, or between router nodes in an Elvin cluster.
 
 m4_heading(1, Introduction)
 
 The Elvin protocol provides undirected, content-routed messaging
 between any number of clients connected to a single cluster of
-servers. The Elvin cluster protocol allows these clients to be
+routers. The Elvin cluster protocol allows these clients to be
 connected to any of a group of cooperating, typically co-located
-servers, by tightly joining these servers into a single logical
+routers, by tightly joining these routers into a single logical
 entity.
 
-The purpose of this document is to define a new protocol in the Elvin
-suite that allows loose joining of servers, each potentially located
+The purpose of this document is to define a protocol in the Elvin
+suite that allows loose joining of routers, each potentially located
 anywhere on the Internet, into a federated Elvin service.
 
 This protocol allows for administrative control over each autonomous
 system and its connections to other parts of the Elvin federation,
 including control over what notifications are permitted to travel in
-and out of each server.
+and out of each router.
 
 m4_heading(1, Terminology)
 
 This document discusses Elvin clients, client libraries and routers.
 
-An Elvin router is a daemon process that runs on a single machine.  It
+An Elvin router is a server process that runs on a single machine.  It
 acts as a distribution mechanism for Elvin messages. A client is a
 program that uses an Elvin router, via a client library for a
 particular programming language.  A client library implements the
@@ -93,16 +136,15 @@ document are to be interpreted as described in RFC 2119.
 
 m4_heading(1, Basic Operation)
 
-Elvin servers, in addition to whatever client/server protocols they
-support, use a separate server federation protocol.  This protocol has
-several purposes:
+Elvin routers, in addition to whatever client connection protocols
+they support, use a separate router federation protocol.  This
+protocol has several purposes:
 .IP 1. 3
-management of the server(s)
+management of the router(s)
 .IP 3. 3
-clustering of local servers for scaling or reliability
+clustering of local routers for scaling or reliability
 .IP 3. 3
-linking servers to form wide-area routing networks
-
+linking routers to form wide-area routing networks
 
 m4_heading(2, Wide-area Federation)
 
@@ -114,7 +156,7 @@ m4_heading(1, Abstract Protocol)
 
 m4_heading(2, Protocol Overview)
 
-An Elvin server may be statically configured with an initial state.
+An Elvin router may be statically configured with an initial state.
 This state may include directions to initiate federation relationships
 with other routers or to accept federation relationships with other
 routers.
@@ -173,13 +215,16 @@ client protocol, so the same identifiers are used.
   ----------------------------------------------------------------
   Federation Connection Request   FedConnRqst             192
   Federation Connection Reply     FedConnRply             193
-  Federation Subscription Modify  FedModify               194
+  Federation Subscription Replace FedSubReplace           194
   Federation Notify               FedNotify               195
 
   Disconnect                      Disconn                  53
   Acknowledge                     Ack                      65
   Negative Acknowledge            Nack                     48
-  
+  Drop Warn                       DropWarn                 62
+  Test Connection                 TestConn                 63
+  Confirm Connection              ConfConn                 64
+
   ----------------------------------------------------------------
 .fi
 .KE
@@ -187,15 +232,15 @@ client protocol, so the same identifiers are used.
 
 m4_heading(3, Federation Connection Request)
 
-A server, configured with filters and addressing information for a
-remote server, initiates a connection using this request.
+A router, configured with filters and addressing information for a
+remote router, initiates a connection using this request.
 
 m4_pre(
 struct FedConnRqst {
   id32 xid;  
   uint32 major_version;
   uint32 minor_version;
-  string server_domain;
+  string router_domain;
 };)m4_dnl
 
 The xid field is a number identifying this request.  It must be unique
@@ -203,58 +248,59 @@ among all outstanding requests on any one connection at any one time.
 Successive requests SHOULD use an xid that increments by one for each
 request.
 
-The server_domain parameter is a unique UTF-8 string identifying the
-local server or cluster.  It is used to prevent importation of traffic
+The router_domain parameter is a unique UTF-8 string identifying the
+local router or cluster.  It is used to prevent importation of traffic
 which has previously been exported from the local domain.  This means
-that it MUST be globally unique for each single server or cluster, but
-it MUST be identical for each server within a single cluster.  It is
-RECOMMENDED that this name be based on the DNS domain name or IP address
-of the server's host machine(s).
+that it MUST be globally unique for each single router or cluster, and
+it MUST be identical for each router within a single cluster.  It is
+RECOMMENDED that this name be based on the DNS domain name or IP
+address of the router's host machine(s).
 
-A server receiving a FedConnRqst MUST check that it is compatible with
+A router receiving a FedConnRqst MUST check that it is compatible with
 the protocol version specified in the packet. To be compatible, the
-server must be able to use a version of the protocol with the major
+router must be able to use a version of the protocol with the major
 component being equal to the version requested, and the minor
 component being greater than or equal to the version requested. If a
-server cannot meet this requirement it MUST immediately close the
+router cannot meet this requirement it MUST immediately close the
 connection, as for a protocol violation.
 
 The version of the protocol specified in this document has a major
-component of one (1) and a minor component of zero (0). This can be
+component of one (1) and a minor component of zero (0).  This can be
 represented in text form as 1.0.
 
 m4_heading(3, Federation Connection Reply)
 
-A server, having received a FedConnRqst, responds with either a Nack
+A router, having received a FedConnRqst, responds with either a Nack
 (if the request was unsuccessful) or a FedConnRply (if the request was
-successful).  If the local_domain in the received FedConnRqst is the
-same as the local_domain of any other known directly connected server
-or the same as the receiving server's own local_domain, the server
-must respond with a Nack.
+successful).  If the router_domain in the received FedConnRqst is the
+same as the router_domain of any other known directly connected router
+or the same as the receiving router's own router_domain, the router
+MUST respond with a Nack.
 
 m4_pre(
 struct FedConnRply {
   id32 xid;
-  string server_domain;
+  string router_domain;
 };)m4_dnl
 
 The xid field MUST be set to the same value as that in the FedConnRqst
 being responded to.  A FedConnRply MUST NOT be sent other than in
 response to a FedConnRqst.
 
-The server_domain field contains a unique identifier for the local
-server or cluster, equivalent to the local_domain sent in a FedConnRqst.
+The router_domain field contains a unique identifier for the sending
+router or cluster, in the same way as the router_domain sent in a
+FedConnRqst.
 
-m4_heading(3, Federation Subscription Modify)
+m4_heading(3, Federation Subscription Replace)
 
-Each of the linked servers may optionally provide a compiled Elvin
+Each of the linked routers may optionally provide a compiled Elvin
 subscription expression, known as the pull_filter, describing the
-traffic requested by clients of the local server. Either of the linked
-servers may request a modification of their registered pull_filter at
-any time during the life of the connection, by sending a FedModify.
+traffic requested by clients of the local router. Either of the linked
+routers may request a replacement of their registered pull_filter at
+any time during the life of the connection, by sending a FedSubReplace.
 
 m4_pre(
-struct FedModify {
+struct FedSubReplace {
   id32 xid;
   SubAST pull_filter;
 };)m4_dnl
@@ -265,13 +311,13 @@ by minor changes to the local subscription database, and/or it MAY be made
 more specific to prevent importation of notifications known to be unwanted
 (despite matching local subscriptions).
 
-The receiving server MUST process the request, and return either an
+The receiving router MUST process the request, and return either an
 Ack or a Nack, depending on the validity of the SubAST.
 
 
 m4_heading(3, Federation Notify)
 
-Notification traffic is sent between the servers using the FedNotify
+Notification traffic is sent between the routers using the FedNotify
 packet.  
 
 m4_pre(
@@ -283,38 +329,37 @@ struct FedNotify {
 };)m4_dnl
 
 The routing list consists of the unique signatures of domains
-that have previously seen this packet.  For those servers with
+that have previously seen this packet.  For those routers with
 multiple federation links, packets MUST NOT be forwarded through links whose
-registered signature is already present in the routing hash.
+registered signature is already present in the routing list.
 
-Before forwarding a FedNotify, a server MUST insert its own signature
+Before forwarding a FedNotify, a router MUST insert its own signature
 into the routing list to prevent it being delivered again.  However,
 if a notification is received where the routing list contains the
-signature of the receiving server, it MUST be silently dropped.
+signature of the receiving router, it MUST be silently dropped.
 
-A server SHOULD NOT forward a FedNotify to a server that has not
-requested it i.e. a notification that does not match the server's most
+A router SHOULD NOT forward a FedNotify to a router that has not
+requested it i.e. a notification that does not match the router's most
 recently positively acknowledged pull_filter.
 
-A server MAY choose to not forward a FedNotify to a server that has
-requested it (i.e. a notification that matches the server's most
+A router MAY choose to not forward a FedNotify to a router that has
+requested it (i.e. a notification that matches the router's most
 recently positively acknowledged pull_filter). Some cases in which a
-server might choose to do this are if the server or its network
+router might choose to do this are if the router or its network
 connections are overloaded, or if it has been configured not to send
 this type of notification.
-
 
 m4_heading(2, Configuration)
 
 It is beyond the scope of this document to describe how implementations
-may be configured to control the flow of notifications between servers,
+may be configured to control the flow of notifications between routers,
 but there are some important points for implementers and administrators
 to consider.
 
 The Elvin federation protocol assumes a that federation links are
 configured to form a spanning tree. This means that for any given pair
-of servers there is only one possible route for any given notification
-to travel from one server to the other.
+of routers there is only one possible route for any given notification
+to travel from one router to the other.
 
 Future revisions of the protocol may provide for automatic detection
 or configuration.
@@ -346,20 +391,13 @@ Author's Address
 David Arnold
 Ian Lister
 
-Mantara Software
-PO Box 1820
-Toowong QLD 4066
-Australia
-
-Phone:  +61 7 3876 8844
-Fax:    +61 7 3876 8843
-Email:  support@mantara.com
+Email: specs@elvin.org
 .fi
 .KE
 .bp
 m4_heading(1, `Full Copyright Statement')
 
-Copyright (C) 2000, __yr Mantara Software
+Copyright (C) 2000-__yr Elvin.Org
 All Rights Reserved.
 
 This specification may be reproduced or transmitted in any form or by
@@ -373,19 +411,12 @@ specification, Mantara Software assumes no responsibility for errors
 or omissions, or for damages resulting from the use of the information
 herein.
 
-Mantara Software welcomes comments on this specification.  Please
-address any queries, comments or fixes (please include the name and
-version of the specification) to the address below:
+Elvin.Org welcomes comments on this specification.  Please address any
+queries, comments or fixes (please include the name and version of the
+specification) to the address below:
 
 .nf
-    Mantara Software
-    PO Box 1820
-    Toowong QLD 4066
-    Australia
-    Tel: +61 7 3876 8844
-    Fax: +61 7 3876 8843
-    Email: support@mantara.com
+    Email: specs@elvin.org
 .fi
 
-Elvin is a trademark of Mantara Software.  All other trademarks and
-registered marks belong to their respective owners.
+All trademarks and registered marks belong to their respective owners.
