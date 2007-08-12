@@ -1,5 +1,7 @@
 *~
+*.ps
 *.tmp
 *.txt
 .nfs*
 draft-*.txt
+
