@@ -26,14 +26,14 @@
 #
 # Project:  Elvin
 # File:     $Source: /Users/d/work/elvin/CVS/elvin-specs/drafts/efp/Makefile,v $
-# Version:  $RCSfile: Makefile,v $ $Revision: 1.4 $
+# Version:  $RCSfile: Makefile,v $ $Revision: 1.5 $
 #
 ################################################################
 
 .PHONY: all outline ps publish
 
 FILENAME := draft-elvin-federation-10
-VERSION := 00
+VERSION := 01
 PUBLISHED := $(FILENAME)-$(VERSION).txt
 
 # Get current date
