@@ -391,14 +391,20 @@ respond with a Negative Acknowledgement.
 
 .KS
   +-------------+ ---ConnRqst--> +---------+
-  |   Client    |                |  Router |                REDIRECT
-  +-------------+ <---Disconn--- +---------+
+  |   Client    |                |  Router |     REJECTED CONNECTION
+  +-------------+ <----Nack----- +---------+
 .KE
 
 If the router is not currently accepting connections, it SHOULD
 send a Disconn packet.  If it has been configured to redirect clients
 to an alternative router, the Disconn MAY contain the URI of the other
 router.
+
+.KS
+  +-------------+ ---ConnRqst--> +---------+
+  |   Client    |                |  Router |                REDIRECT
+  +-------------+ <---Disconn--- +---------+
+.KE
 
 m4_dnl
 m4_heading(3, Sending Notifications)
