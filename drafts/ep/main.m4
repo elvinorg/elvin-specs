@@ -370,11 +370,12 @@ m4_heading(3, Establishing a Session)
 
 A Elvin client-router session is a bi-directional communciations link.
 It is used by the client to request deliveries from the router.  The
-router uses the same link to acknowledge client changes and to
+router uses the same link to acknowledge client requests and to
 asynchronously deliver the messages selected by the client.
 
-When a client requests a connection, the router will respond with
-either a Connection Reply, a Disconnect or a Negative Acknowledgement.
+When a client requests a connection, the router MUST react by
+sending either a Connection Reply, a Negative Acknowledgement, or a
+Disconnect.
 
 If the router accepts the request, it will respond with a Connection
 Reply, containing the agreed parameters of the connection.
@@ -384,6 +385,27 @@ Reply, containing the agreed parameters of the connection.
   |   Client    |                |  Router |   SUCCESSFUL CONNECTION 
   +-------------+ <---ConnRply-- +---------+
 .KE
+
+If the request is rejected due to an error, the router SHOULD
+respond with a Negative Acknowledgement.
+
+.KS
+  +-------------+ ---ConnRqst--> +---------+
+  |   Client    |                |  Router |     REJECTED CONNECTION
+  +-------------+ <----Nack----- +---------+
+.KE
+
+If the router is not currently accepting connections, it SHOULD
+send a Disconn packet.  If it has been configured to redirect clients
+to an alternative router, the Disconn MAY contain the URI of the other
+router.
+
+.KS
+  +-------------+ ---ConnRqst--> +---------+
+  |   Client    |                |  Router |                REDIRECT
+  +-------------+ <---Disconn--- +---------+
+.KE
+
 m4_dnl
 m4_heading(3, Sending Notifications)
 
@@ -522,10 +544,10 @@ notification packets were dropped.
 m4_dnl
 m4_heading(3, Ending a Session)
 
-At any time after a receiving a Connection Reply, the router can
-inform the client that it is to be disconnected.  The Disconn packet
-includes an explanation for the disconnection, and optionally, directs
-the client to reconnect to an alternative router.
+At any time after a establishing a concrete communications channel, 
+the router MAY inform the client that it is to be disconnected.  The
+Disconn packet includes an explanation for the disconnection, and 
+optionally, directs the client to reconnect to an alternative router.
 
 .KS
   +-------------+                  +---------+
