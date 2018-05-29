@@ -2,7 +2,7 @@
 .\" ################################################################
 .\" COPYRIGHT_BEGIN
 .\"
-.\" Copyright (C) 2000-2007 Elvin.Org
+.\" Copyright (C) 2000-2007,2018 Elvin.Org
 .\" All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
@@ -21,7 +21,7 @@
 .\" * Neither the name of the Elvin.Org nor the names
 .\"   of its contributors may be used to endorse or promote
 .\"   products derived from this software without specific prior
-.\"   written permission. 
+.\"   written permission.
 .\"
 .\" THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 .\" "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -59,7 +59,7 @@ m4_include(macros.m4)m4_dnl
 .hy 0
 .ad l
 Elvin.Org                                              D. Arnold, Editor
-Preliminary INTERNET-DRAFT                                  Mantara, Inc
+Preliminary INTERNET-DRAFT                           ZeroXOne Consulting
 
 Expires: aa bbb cccc                                         _d __m __yr
 
@@ -327,7 +327,7 @@ Elvin router for dissemination.
 m4_heading(3, Subscription)
 
 An Elvin subscription is a UTF-8 string forming an expression in the
-Elvin Subscription Language.  
+Elvin Subscription Language.
 
 The expression is registered with an Elvin router, which determines
 whether to deliver notifications to the subscriber by evaluating the
@@ -382,7 +382,7 @@ Reply, containing the agreed parameters of the connection.
 
 .KS
   +-------------+ ---ConnRqst--> +---------+
-  |   Client    |                |  Router |   SUCCESSFUL CONNECTION 
+  |   Client    |                |  Router |   SUCCESSFUL CONNECTION
   +-------------+ <---ConnRply-- +---------+
 .KE
 
@@ -551,20 +551,20 @@ optionally, directs the client to reconnect to an alternative router.
 
 .KS
   +-------------+                  +---------+
-  |   Client    | <----Disconn---- |  Router |        DISCONNECTION 
+  |   Client    | <----Disconn---- |  Router |        DISCONNECTION
   +-------------+                  +---------+
 .KE
 
 To disconnect from the router, the client sends a Disconnect Request.
 It SHOULD then wait for the router's response Disconnect Reply, which
 ensures that both directions of the communication channel have been
-flushed. 
+flushed.
 
 The router MUST NOT refuse to disconnect a client (ie. using a Nack).
 
 .KS
   +-------------+ ---DisconnRqst--> +---------+
-  |   Client    |                   |  Router |       DISCONNECTION 
+  |   Client    |                   |  Router |       DISCONNECTION
   +-------------+ <--DisconnRply--- +---------+
 .KE
 m4_dnl
@@ -594,14 +594,14 @@ that adds the value bottom (which represents "undecideable" or
  ---------------------------------------------------------
     A       B    |  ! A       A && B    A || B    A ^^ B
  ----------------+----------------------------------------
- true     true   |  false     true      true      false 
- true     bottom |  false     bottom    true      bottom 
- true     false  |  false     false     true      true  
- bottom   true   |  bottom    bottom    true      bottom 
- bottom   bottom |  bottom    bottom    bottom    bottom 
- bottom   false  |  bottom    false     bottom    bottom 
- false    true   |  true      false     true      true  
- false    bottom |  true      false     bottom    bottom 
+ true     true   |  false     true      true      false
+ true     bottom |  false     bottom    true      bottom
+ true     false  |  false     false     true      true
+ bottom   true   |  bottom    bottom    true      bottom
+ bottom   bottom |  bottom    bottom    bottom    bottom
+ bottom   false  |  bottom    false     bottom    bottom
+ false    true   |  true      false     true      true
+ false    bottom |  true      false     bottom    bottom
  false    false  |  true      false     false     false
  ----------------+----------------------------------------
 .DE
@@ -625,7 +625,7 @@ constants for true or false.
 Whereas some programming languages, such as C and C++, provide an
 implicit conversion from numeric values to truth values (zero means
 false, nonzero means true), the Elvin subscription language requires
-such a conversion to be made explicit, for example 
+such a conversion to be made explicit, for example
 .QP
 (Example != 0)
 .ID 3
@@ -756,16 +756,16 @@ Returns true if the notification contains an attribute whose name
 exactly matches that specified (even if the attribute's value is, say,
 an empty string or a zero-length opaque value).
 .IP int32(attribute) 4
-Returns true if the type of the attribute is 
+Returns true if the type of the attribute is
 .B int32.
 .KS
 .IP int64(attribute) 4
-Returns true if the type of the attribute is 
+Returns true if the type of the attribute is
 .B int64.
 .KE
 .KS
 .IP real64(attribute) 4
-Returns true if the type of the attribute is 
+Returns true if the type of the attribute is
 .B real64.
 .KE
 .KS
@@ -779,12 +779,12 @@ using this predicate.
 .KE
 .KS
 .IP string(attribute) 4
-Returns true if the type of the attribute is 
+Returns true if the type of the attribute is
 .B string.
 .KE
 .KS
 .IP opaque(attribute) 4
-Returns true if the type of the attribute is 
+Returns true if the type of the attribute is
 .B opaque.
 .KE
 m4_dnl
@@ -810,7 +810,7 @@ operands without at least one attribute name, but the returned error
 is not defined in this specification.)
 
 .IP "!=" 4
-Not equal to. 
+Not equal to.
 .LP
 This operator is defined to be implemented as
 .QP
@@ -850,13 +850,13 @@ specified by the stringconst. Need pointer to (E?)RE semantics.
 In the definitions above, the empty (zero-length) substring is
 defined to be a substring of every string, and any string is a
 substring of itself. Thus
-.B begins-with 
+.B begins-with
 and
-.B ends-with 
+.B ends-with
 imply
-.B contains, 
-and 
-.B equals 
+.B contains,
+and
+.B equals
 (the general predicate) implies all three of them.
 .LP
 There are no predicates for string comparison, i.e. testing whether one
@@ -994,7 +994,7 @@ Multiplication
 Division
 .LP
 The following operators are defined only on the two integer types, int32 and
-int64: 
+int64:
 .QP
 m4_remark(Need to pin down 5- and 6-bit shifts (and different promotion
 rules?), as Java does.  Also modulus could be done for real64 too
@@ -1043,7 +1043,7 @@ m4_heading(2, Subscription Errors)
 
 Elvin subscriptions are compiled by the router during registration.
 Various errors are possible; this section documents the basic error
-conditions.  
+conditions.
 
 Errors detected when adding or modifying a subscription are reported
 as protocol errors. The router returns a failure code, some additional
@@ -1137,7 +1137,7 @@ m4_heading(2, Packet Types)
 The Elvin abstract protocol specifies a number of packets used in
 interactions between clients and the router.
 
-.nf 
+.nf
 -------------------------------------------------------------
 Packet Type                   Abbreviation    Usage    Subset
 -------------------------------------------------------------
@@ -1203,7 +1203,7 @@ This section describes each type of error, and its required handling.
 m4_heading(3, Communications Errors)
 .LP
 A communications error occurs when an abstract communcications channel
-closes at an unexpected point in the protocol sequence.  
+closes at an unexpected point in the protocol sequence.
 
 The protocol does not support re-establishment of broken abstract
 communications channel.
@@ -1224,7 +1224,7 @@ m4_heading(3, Protocol Violations)
 A protocol violation is defined to occur when a message is received
 that
 .IP
-cannot be unmarshalled, 
+cannot be unmarshalled,
 .IP
 has a type that is not expected at the current point in the protocol
 sequence, or,
@@ -1320,7 +1320,7 @@ struct Keys {
 Keys and keysets are explained more fully in a later section.
 .KE
 
-.KS 
+.KS
 m4_pre(`
 struct SubASTNode {
     SubAST[] children;
@@ -1448,9 +1448,9 @@ the defined error values.
  Range       | Category
 -------------+------------------------------------------------------------
        0     | Reserved value.
-             | 
+             |
    1 - 999   | A connection establishment error.
-             | 
+             |
 1000 - 1999  | An error has been detected in a protocol message.
              | This might imply corruption of the connection or
              | an implementation error.
@@ -1475,7 +1475,7 @@ Receiving a reserved error code SHOULD be handled as a protocol error.
        |                    |                  | protocol incompatibility
  2     | AUTHZ_FAIL         | None             | Authorisation failure
  3     | AUTHN_FAIL         | None             | Authentication failure
-       |                    |                  | 
+       |                    |                  |
  4     |                    |                  | Reserved
  -499  |                    |                  |
  500   |                    |                  | Implementation-specific
@@ -1506,10 +1506,10 @@ Receiving a reserved error code SHOULD be handled as a protocol error.
        |                    |                  | implementation limit
  2007  | NOT_IMPL           | None             | Requested feature is
        |                    |                  | not implemented by router
-       |                    |                  | 
+       |                    |                  |
  2008  |                    |                  | Reserved
  -2100 |                    |                  |
-       |                    |                  | 
+       |                    |                  |
  2101  | PARSE_ERROR        | offset, int32    | Parse error at offset
        |                    | token, string    |
  2102  | INVALID_TOKEN      | offset, int32    | Invalid token
@@ -1518,7 +1518,7 @@ Receiving a reserved error code SHOULD be handled as a protocol error.
  2104  | UNKNOWN_FUNC       | offset, int32    | Unknown function
        |                    | name, string     |
  2105  | OVERFLOW           | offset, int32    | Numeric constant overflow
-       |                    | token, string    | 
+       |                    | token, string    |
  2106  | TYPE_MISMATCH      | offset, int32    | Type mismatch
        |                    | expr, string     |
        |                    | type, string     |
@@ -1532,13 +1532,13 @@ Receiving a reserved error code SHOULD be handled as a protocol error.
  2111  | REGEXP_TOO_COMPLEX | offset, int32    | FIXME (libelvin doesn't
        |                    | regexp, string   | have offset)
  2112  | NESTING_TOO_DEEP   | offset, int32    | Expression nesting too deep
-       |                    |                  | 
+       |                    |                  |
  2113  |                    |                  | Reserved
- -2200 |                    |                  | 
+ -2200 |                    |                  |
  2201  | EMPTY_QUENCH       | None             | Empty quench
  2202  | ATTR_EXISTS        | name, string     | Quench attribute exists
  2203  | NO_SUCH_ATTR       | name, string     | No such attribute
-       |                    |                  | 
+       |                    |                  |
  2110  |                    |                  | Reserved
  -2499 |                    |                  |
  2500  |                    |                  | Implementation-specific
@@ -1562,7 +1562,7 @@ Using the protocol and endpoint information obtained either directly
 or via router discovery, a client can establish a channel to a router,
 via an endpoint.  It MAY then send a ConnRqst to establish protocol
 options to be used for the session, and MUST send either a ConnRqst or
-UNotify.  
+UNotify.
 
 A router SHOULD close a channel from which it has received neither a
 ConnRqst or a UNotify within a reasonable time period.
@@ -1634,7 +1634,7 @@ then flushed before being closed.
 It is a protocol violation for a client to close its channel without
 sending a DisconnRqst (see protocol violations below).
 
-m4_dnl 
+m4_dnl
 m4_heading(3, Disconnect Reply)
 
 Sent by the Elvin router to a client.  This packet is sent in response
@@ -1649,7 +1649,7 @@ This MUST be the last packet sent by a router in a session.  The
 underlying channel MUST be closed immediately after this packet has
 been successfully delivered to the client.
 
-m4_dnl 
+m4_dnl
 m4_heading(3, Disconnect)
 
 Sent by the Elvin router to a client.  This packet is sent in two
@@ -1671,8 +1671,8 @@ where the defined values for "reason" are
      0    |  Reserved.
      1    |  Router is closing down.
      2    |  Router is closing this connection, and directs the
-          |  client to connect to the router address in "args".  
-     4    |  Router is closing this connection for repeated 
+          |  client to connect to the router address in "args".
+     4    |  Router is closing this connection for repeated
           |  protocol errors.
 .fi
 .KE
@@ -1809,7 +1809,7 @@ struct TestConn {
 
 A Test Connection packet MAY be sent by either client or router to
 verify that the channel remains active after a period during which no
-packets have been received.  
+packets have been received.
 
 If, after a TestConn has been sent, no traffic has been received on
 the channel within a timeout period, the channel is assumed to have
@@ -1862,7 +1862,7 @@ struct NotifyEmit {
 
 m4_heading(3, Notification Deliver)
 
-Sent by the Elvin router to a client. 
+Sent by the Elvin router to a client.
 
 m4_pre(
 struct NotifyDeliver {
@@ -2468,7 +2468,7 @@ Elvin, each packet marshalled using XDR starts with a value from
 the above pkt_id enumeration.  The format for the remainder of the
 packet is then specific to the value of the packet identifer.
 
-       0   1   2   3    
+       0   1   2   3
      +---+---+---+---+---+---+---+...+---+---+---+
      |     pkt_id    |         remainder         |    ENCODED PACKET
      +---+---+---+---+---+---+---+...+---+---+---+
@@ -2504,7 +2504,7 @@ packets has a mapping to a corresponsing XDR data type as defined in
 
   real64      double         64-bit double precision float
 
-  string      string         4 byte length, UTF8 encoded string, zero 
+  string      string         4 byte length, UTF8 encoded string, zero
                              padded to next four byte boundary
 
   byte[]      variable-      4 byte length, data, zero padded to next
@@ -2534,10 +2534,10 @@ used in the protocol.  It only describes data which can be contained
 in the abstract Value segment of a packet.  A Value in an encoded
 packet is thus typed by prepending four bytes which encode the type
 code:
-    
+
 .KS
 .nf
-       0  1  2  3 
+       0  1  2  3
      +--+--+--+--+--+--+--+--+...+--+--+--+--+
      | typecode  |          value            |        TYPED VALUE
      +--+--+--+--+--+--+--+--+...+--+--+--+--+
@@ -2551,7 +2551,7 @@ and eight bytes for the value.
 
 .KS
 .nf
-       0  1  2  3  4  5  6  7  8  9 10 11  
+       0  1  2  3  4  5  6  7  8  9 10 11
      +--+--+--+--+--+--+--+--+--+--+--+--+
      |    0x02   |        0x0400         |           INT64 EXAMPLE
      +--+--+--+--+--+--+--+--+--+----+---+
@@ -2575,12 +2575,12 @@ section X on Connection Establishment.
 
 .KS
 .nf
-       0  1  2  3  
+       0  1  2  3
      +--+--+--+--+--+--+--+--+--+--+--+--+...+--+--+--+--+
      |     n     |  item 0   |  item 1   |...| item n-1  |  ARRAY
      +--+--+--+--+--+--+--+--+--+--+--+--+...+--+--+--+--+
      |<--int32-->|<----------------n items-------------->|
-                                                          
+
 .fi
 .KE
 
@@ -2688,7 +2688,7 @@ On the wire, a name-value is laid out as follows:
 .KE
 
 Notifications begin with the number of attributes as an
-int32.  
+int32.
 
 .KS
 .nf
@@ -2708,10 +2708,10 @@ int32.
 .KS
 .nf
    pkt id        (enum)   packet type for NotifyEmit
-   len n         (int32)  number of name-type-value triples in the 
+   len n         (int32)  number of name-type-value triples in the
                           notification. n MUST be greater than zero.
-   ntv x         [block]  encoded as a name-type-value triple, 
-                          described above. There MUST be n 
+   ntv x         [block]  encoded as a name-type-value triple,
+                          described above. There MUST be n
                           name-type-value blocks where n > 0.
    len m         (int32)  number of security keys in the notification
    key x         (opaque) uninterpreted bytes of a security key. There
@@ -2814,7 +2814,7 @@ bool-pred		= "require" / "int32" / "int64" /
 			  "real64" / "string" / "opaque" /
 			  "nan"
 
-function-pred		= "begins-with" / "ends-with" / 
+function-pred		= "begins-with" / "ends-with" /
 			  "contains" / "wildcard" / "regex" /
 			  "equals" / "size" /
 			  "fold-case" /
@@ -2911,8 +2911,8 @@ Srinivasan, R.,
 RFC 1832, August 1995.
 
 .IP [RFC2234] 12
-Crocker, D., Overell, P., 
-"Augmented BNF for Syntax Specifications: ABNF", 
+Crocker, D., Overell, P.,
+"Augmented BNF for Syntax Specifications: ABNF",
 RFC 2234, November 1997.
 
 .IP [RFC2279] 12
